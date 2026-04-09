@@ -8,9 +8,8 @@ use App\Http\Controllers\Admin\CreditController;
 use App\Http\Controllers\Admin\OrderController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [\App\Http\Controllers\StoreController::class, 'index'])->name('home');
+Route::get('/search', [\App\Http\Controllers\StoreController::class, 'search'])->name('store.search');
 
 Route::get('/dashboard', function () {
     return view('dashboard');

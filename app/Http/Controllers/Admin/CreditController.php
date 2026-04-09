@@ -12,54 +12,38 @@ class CreditController extends Controller
      */
     public function index()
     {
-        return view('admin.credits.index');
+        $credits = \App\Models\CreditCycle::with('user')->latest()->get();
+        $users = \App\Models\User::whereIn('role', ['customer', 'vip'])->get();
+        return view('admin.credits.index', compact('credits', 'users'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'month' => 'required|integer|min:1|max:12',
+            'year' => 'required|integer',
+            'credit_limit' => 'nullable|numeric|min:0'
+        ]);
+
+        \App\Models\CreditCycle::updateOrCreate(
+            ['user_id' => $request->user_id, 'month' => $request->month, 'year' => $request->year],
+            ['credit_limit' => $request->credit_limit]
+        );
+
+        return back()->with('success', 'กำหนดโควตาเครดิตสำเร็จ');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function update(Request $request, \App\Models\CreditCycle $credit)
     {
-        //
+        $request->validate(['status' => 'required']);
+        $credit->update(['status' => $request->status]);
+        return back()->with('success', 'เปลี่ยนสถานะบิลเครดิตสำเร็จ');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function destroy(\App\Models\CreditCycle $credit)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $credit->delete();
+        return back()->with('success', 'ลบรอบบิลเครดิตสำเร็จ');
     }
 }

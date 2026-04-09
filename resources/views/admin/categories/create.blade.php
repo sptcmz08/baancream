@@ -1,0 +1,17 @@
+@extends('layouts.admin')
+@section('content')
+<div class="header-actions">
+    <h2>เพิ่มหมวดหมู่ใหม่</h2>
+    <a href="{{ route('admin.categories.index') }}" class="btn" style="background:var(--border-color); text-decoration:none;">กลับ</a>
+</div>
+<div class="card" style="max-width: 600px;">
+    <form action="{{ route('admin.categories.store') }}" method="POST">
+        @csrf
+        <div style="margin-bottom: 20px;">
+            <label style="display:block; margin-bottom:10px; font-weight:500;">ชื่อหมวดหมู่ <span style="color:red;">*</span></label>
+            <input type="text" name="name" required style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;" placeholder="เช่น สกินแคร์ลดสิว">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;">บันทึกข้อมูล</button>
+    </form>
+</div>
+@endsection

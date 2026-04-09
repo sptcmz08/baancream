@@ -12,54 +12,26 @@ class OrderController extends Controller
      */
     public function index()
     {
-        return view('admin.orders.index');
+        $orders = \App\Models\Order::with('user')->latest()->get();
+        return view('admin.orders.index', compact('orders'));
+    }
+    
+    public function show(\App\Models\Order $order)
+    {
+        // Load items later
+        return view('admin.orders.show', compact('order'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function update(Request $request, \App\Models\Order $order)
     {
-        //
+        $request->validate(['status' => 'required']);
+        $order->update(['status' => $request->status]);
+        return back()->with('success', 'เปลี่ยนสถานะออเดอร์สำเร็จ');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function destroy(\App\Models\Order $order)
     {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $order->delete();
+        return back()->with('success', 'ลบออเดอร์สำเร็จ');
     }
 }

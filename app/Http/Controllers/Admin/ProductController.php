@@ -16,51 +16,67 @@ class ProductController extends Controller
         return view('admin.products.index', compact('products'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $categories = \App\Models\Category::all();
+        return view('admin.products.create', compact('categories'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'sku' => 'required|unique:products,sku',
+            'name' => 'required|string',
+            'retail_price' => 'required|numeric|min:0',
+            'wholesale_price' => 'required|numeric|min:0',
+            'image' => 'nullable|image',
+            'category_id' => 'required|exists:categories,id'
+        ]);
+
+        $data = $request->except('image');
+        if($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('products', 'public');
+        }
+
+        \App\Models\Product::create($data);
+        return redirect()->route('admin.products.index')->with('success', 'เพิ่มสินค้าสำเร็จ');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit(\App\Models\Product $product)
     {
-        //
+        $categories = \App\Models\Category::all();
+        return view('admin.products.edit', compact('product', 'categories'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, \App\Models\Product $product)
     {
-        //
+        $request->validate([
+            'sku' => 'required|unique:products,sku,'.$product->id,
+            'name' => 'required|string',
+            'retail_price' => 'required|numeric|min:0',
+            'wholesale_price' => 'required|numeric|min:0',
+            'image' => 'nullable|image',
+            'category_id' => 'required|exists:categories,id'
+        ]);
+
+        $data = $request->except('image');
+        if($request->hasFile('image')) {
+            if($product->image) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($product->image);
+            }
+            $data['image'] = $request->file('image')->store('products', 'public');
+        }
+
+        $product->update($data);
+        return redirect()->route('admin.products.index')->with('success', 'อัปเดตสินค้าสำเร็จ');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy(\App\Models\Product $product)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        if($product->image) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($product->image);
+        }
+        $product->delete();
+        return redirect()->route('admin.products.index')->with('success', 'ลบสินค้าสำเร็จ');
     }
 }
