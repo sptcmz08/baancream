@@ -7,94 +7,178 @@
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --green: #22c55e;
-            --green-soft: #e9faef;
-            --pink: #ef4f8b;
-            --ink: #152034;
-            --muted: #708198;
-            --border: #e7edf3;
-            --page: #f7fafc;
+            --primary-color: #ff4f87;
+            --primary-dark: #e93574;
+            --accent-color: #1fbad6;
+            --gold-color: #f8c64f;
+            --text-dark: #1a2233;
+            --text-soft: #62708a;
+            --border-color: #e7ebf3;
+            --surface-color: #ffffff;
+            --page-color: #f6f8fc;
+            --success-soft: #e9fff5;
+            --success-text: #117a4d;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Prompt', sans-serif; background: var(--page); color: var(--ink); }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Prompt', sans-serif; background: var(--page-color); color: var(--text-dark); }
         a { color: inherit; text-decoration: none; }
         img { display: block; max-width: 100%; }
-        .shell { max-width: 1280px; margin: 0 auto; padding: 24px 24px 72px; }
-        .topbar {
+        button, input { font: inherit; }
+
+        .top-strip {
+            background: linear-gradient(90deg, #8b5cf6 0%, #ff2d76 35%, #ff5f6d 68%, #35c98b 100%);
+            color: white;
+            padding: 10px 24px;
+            font-size: 0.95rem;
+        }
+        .top-strip-inner {
+            max-width: 1440px;
+            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 16px;
-            margin-bottom: 22px;
+            gap: 20px;
+            flex-wrap: wrap;
         }
-        .brand {
-            display: inline-flex;
+        .top-strip-badges {
+            display: flex;
+            gap: 22px;
+            flex-wrap: wrap;
+        }
+
+        .header-shell {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 12px 30px rgba(40, 58, 100, 0.06);
+        }
+        .header-main {
+            max-width: 1440px;
+            min-height: 82px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
             align-items: center;
-            gap: 12px;
-            font-size: 1.9rem;
+            gap: 24px;
+        }
+        .brand-logo {
+            font-size: 2.35rem;
             font-weight: 700;
-            color: #62bda2;
+            color: var(--primary-color);
+            letter-spacing: -0.04em;
         }
-        .brand-badge {
-            width: 44px;
-            height: 44px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #59bb9a, #8dd2bc);
-            color: white;
-            display: inline-flex;
+        .brand-logo span:nth-child(2) { color: #6a67ff; }
+        .brand-logo span:nth-child(3) { color: #22c1dc; }
+        .brand-logo span:nth-child(4) { color: #f8c64f; }
+        .brand-logo span:nth-child(5) { color: #35c98b; }
+        .main-links {
+            display: flex;
+            gap: 28px;
             align-items: center;
-            justify-content: center;
+            font-weight: 500;
+            overflow-x: auto;
+            white-space: nowrap;
         }
-        .top-actions {
+        .main-links a:hover { color: var(--primary-color); }
+        .header-tools {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
-        .nav-pill {
-            padding: 12px 18px;
-            border: 1px solid var(--border);
+        .search-box {
+            width: min(340px, 36vw);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f7f8fb;
+            border: 1px solid var(--border-color);
             border-radius: 999px;
-            background: white;
-            font-weight: 600;
+            padding: 12px 18px;
+            color: var(--text-soft);
         }
-        .panel {
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 36px;
-            box-shadow: 0 24px 50px rgba(21, 32, 52, 0.08);
-            overflow: hidden;
+        .search-box input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            outline: none;
+            color: var(--text-dark);
         }
-        .product-layout {
+        .user-action,
+        .pill-link {
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-weight: 500;
+            background: white;
+        }
+        .user-action:hover,
+        .pill-link:hover {
+            border-color: rgba(255, 79, 135, 0.35);
+            color: var(--primary-color);
+        }
+
+        .notice {
+            max-width: 1440px;
+            margin: 24px auto 0;
+            padding: 0 24px;
+        }
+        .notice-box {
+            background: var(--success-soft);
+            color: var(--success-text);
+            border: 1px solid #b8f0d6;
+            padding: 14px 18px;
+            border-radius: 18px;
+        }
+
+        .page-section {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 28px 24px 56px;
+        }
+        .product-shell {
             display: grid;
-            grid-template-columns: minmax(360px, 540px) 1fr;
+            grid-template-columns: minmax(360px, 620px) minmax(340px, 1fr);
+            gap: 28px;
+            align-items: start;
         }
-        .gallery {
-            background: linear-gradient(180deg, #fef0f6 0%, #f7fbff 100%);
-            padding: 28px;
+        .surface-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 32px;
+            box-shadow: 0 18px 50px rgba(29, 41, 76, 0.08);
+        }
+        .gallery-card {
+            padding: 22px;
+            background: linear-gradient(135deg, #fff2f6 0%, #f2f9ff 100%);
         }
         .gallery-main {
             background: white;
-            border-radius: 30px;
+            border-radius: 28px;
             overflow: hidden;
-            box-shadow: 0 14px 35px rgba(33, 57, 90, 0.1);
-        }
-        .gallery-main img {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            object-fit: cover;
-        }
-        .gallery-main .placeholder {
-            width: 100%;
             aspect-ratio: 1 / 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #9ba7b7;
+            box-shadow: 0 16px 44px rgba(29, 41, 76, 0.08);
+        }
+        .gallery-main img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .gallery-main .placeholder {
+            color: #9aa7bd;
+            font-size: 1rem;
         }
         .thumb-row {
             margin-top: 16px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
             gap: 12px;
         }
         .thumb {
@@ -102,268 +186,522 @@
             overflow: hidden;
             border: 2px solid transparent;
             background: white;
-            cursor: pointer;
             padding: 0;
+            cursor: pointer;
+            box-shadow: 0 10px 26px rgba(29, 41, 76, 0.06);
         }
-        .thumb.active { border-color: var(--pink); }
-        .thumb img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; }
-        .details { padding: 36px 34px; }
-        .tag {
-            display: inline-flex;
-            padding: 7px 12px;
-            border-radius: 999px;
-            background: #edf9f4;
-            color: #1f9d68;
-            font-size: 0.8rem;
-            font-weight: 700;
-            margin-bottom: 12px;
+        .thumb.active { border-color: var(--primary-color); }
+        .thumb img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
         }
-        h1 {
-            font-size: clamp(2rem, 4vw, 3.5rem);
-            line-height: 1.08;
-            margin-bottom: 10px;
+
+        .detail-card {
+            padding: 30px;
         }
-        .sub-meta {
+        .breadcrumb {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
-            color: var(--muted);
+            color: var(--text-soft);
+            font-size: 0.92rem;
+            margin-bottom: 18px;
+        }
+        .breadcrumb a:hover { color: var(--primary-color); }
+        .product-meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
             margin-bottom: 14px;
         }
-        .primary-price {
-            font-size: 3rem;
-            font-weight: 800;
-            line-height: 1;
+        .product-badge {
+            background: #fff4f8;
+            color: var(--primary-color);
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+        .product-badge.brand {
+            background: #eef8ff;
+            color: var(--accent-color);
+        }
+        .product-badge.success {
+            background: #edf9f4;
+            color: #1f9d68;
+        }
+        .product-title {
+            font-size: clamp(2.2rem, 4.5vw, 4rem);
+            line-height: 1.05;
             margin-bottom: 12px;
         }
-        .wholesale-box {
+        .product-subtitle {
+            color: var(--text-soft);
+            line-height: 1.7;
+            margin-bottom: 22px;
+        }
+        .price-panel {
+            display: grid;
+            gap: 14px;
+            padding: 20px 22px;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            background: linear-gradient(135deg, #fff8ee 0%, #ffffff 55%);
+            margin-bottom: 22px;
+        }
+        .price-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .price-label {
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+        .price-retail {
+            font-size: 3rem;
+            line-height: 1;
+            font-weight: 800;
+            color: var(--text-dark);
+        }
+        .price-wholesale {
             display: inline-flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             flex-wrap: wrap;
-            padding: 16px 18px;
-            border-radius: 20px;
-            background: var(--green-soft);
-            color: #11804d;
+            color: #1f9d68;
+            background: #edf9f4;
+            border-radius: 999px;
+            padding: 10px 16px;
             font-weight: 700;
+        }
+        .variant-panel-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 14px;
         }
         .variant-list {
             display: grid;
-            gap: 10px;
-            margin: 24px 0;
+            gap: 12px;
+            margin-bottom: 22px;
         }
         .variant-option {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 12px;
-            border: 1px solid var(--border);
-            border-radius: 18px;
+            gap: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 22px;
             background: white;
             padding: 16px 18px;
             cursor: pointer;
             transition: 0.2s ease;
         }
+        .variant-option:hover {
+            border-color: rgba(255, 79, 135, 0.24);
+            transform: translateY(-1px);
+        }
         .variant-option.active {
-            border-color: #f4a2c4;
-            background: #fff5fa;
-            box-shadow: 0 10px 24px rgba(239, 79, 139, 0.08);
+            border-color: rgba(255, 79, 135, 0.35);
+            background: #fff7fb;
+            box-shadow: 0 14px 30px rgba(233, 53, 116, 0.08);
         }
-        .variant-name { font-weight: 700; margin-bottom: 4px; }
-        .variant-meta { color: var(--muted); font-size: 0.9rem; }
-        .variant-price { text-align: right; font-weight: 700; }
-        .description {
-            color: var(--muted);
-            line-height: 1.8;
-            margin: 14px 0 26px;
+        .variant-name {
+            font-weight: 700;
+            margin-bottom: 4px;
         }
-        .cta-stack { display: grid; gap: 12px; }
+        .variant-meta {
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+        .variant-price {
+            text-align: right;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .variant-price small {
+            display: block;
+            color: #1f9d68;
+            margin-top: 4px;
+            font-size: 0.86rem;
+        }
+        .description-card {
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 20px 22px;
+            background: #fbfcff;
+            color: var(--text-soft);
+            line-height: 1.9;
+            margin-bottom: 22px;
+        }
+        .cta-stack {
+            display: grid;
+            gap: 12px;
+        }
         .cta-button {
             width: 100%;
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 18px 20px;
-            font-family: inherit;
-            font-size: 1.08rem;
-            font-weight: 700;
+            border: 1px solid var(--border-color);
             background: white;
-            color: var(--pink);
+            color: var(--primary-color);
+            border-radius: 999px;
+            padding: 16px 20px;
+            font-weight: 700;
             cursor: pointer;
+            transition: 0.2s ease;
+        }
+        .cta-button:hover {
+            border-color: rgba(255, 79, 135, 0.35);
+            transform: translateY(-1px);
         }
         .cta-button.primary {
-            background: linear-gradient(135deg, #12c758, #10b34e);
-            color: white;
-            border-color: transparent;
+            border: none;
+            background: linear-gradient(135deg, var(--gold-color), #ffb340);
+            color: #46260a;
         }
-        .related { margin-top: 52px; }
-        .related h2 { font-size: 2rem; margin-bottom: 18px; }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        .section-title {
+            font-size: 2rem;
+            line-height: 1.15;
+        }
+        .section-subtitle {
+            color: var(--text-soft);
+            margin-top: 8px;
+        }
+        .section-pill {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 10px 18px;
+            color: var(--text-soft);
+        }
+        .section-pill:hover {
+            color: var(--primary-color);
+            border-color: rgba(255, 79, 135, 0.3);
+        }
         .related-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 22px;
         }
-        .related-card {
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 24px;
+        .product-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 26px;
             overflow: hidden;
+            box-shadow: 0 18px 50px rgba(29, 41, 76, 0.08);
         }
-        .related-card img {
-            width: 100%;
+        .product-image {
             aspect-ratio: 1 / 1;
+            background: linear-gradient(135deg, #f8f0f3 0%, #eef7ff 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .product-image img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
-            background: #f4f7fb;
         }
-        .related-card-body { padding: 16px; }
-        .related-card-title {
-            font-size: 1rem;
+        .product-image span {
+            color: #9aa7bd;
+            font-size: 0.95rem;
+        }
+        .product-body {
+            padding: 18px;
+        }
+        .product-name {
+            font-size: 1.06rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            min-height: 3.2em;
+        }
+        .product-desc {
+            color: var(--text-soft);
+            font-size: 0.92rem;
+            min-height: 3.9em;
+            margin-bottom: 16px;
+        }
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 12px;
+        }
+        .buy-button {
+            border: none;
+            background: linear-gradient(135deg, var(--gold-color), #ffb340);
+            color: #46260a;
+            border-radius: 999px;
+            padding: 10px 16px;
+            font-family: inherit;
             font-weight: 700;
-            margin-bottom: 6px;
-            min-height: 2.8em;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
-        .related-card-price { font-weight: 700; }
-        @media (max-width: 920px) {
-            .shell { padding: 16px 16px 72px; }
-            .product-layout { grid-template-columns: 1fr; }
-            .topbar { flex-direction: column; align-items: stretch; }
-            .top-actions { justify-content: flex-start; flex-wrap: wrap; }
+
+        @media (max-width: 1080px) {
+            .header-main {
+                grid-template-columns: 1fr;
+                padding-top: 16px;
+                padding-bottom: 16px;
+            }
+            .header-tools {
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
+            .search-box { width: 100%; }
+            .product-shell {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .top-strip { padding: 10px 16px; }
+            .header-main,
+            .notice,
+            .page-section { padding-left: 16px; padding-right: 16px; }
+            .brand-logo { font-size: 2rem; }
+            .detail-card,
+            .gallery-card { padding: 18px; }
+            .product-title { font-size: 2.3rem; }
+            .section-title { font-size: 1.6rem; }
+            .variant-option,
+            .price-main,
+            .product-footer,
+            .section-head { flex-direction: column; align-items: stretch; }
+            .variant-price { text-align: left; }
         }
     </style>
 </head>
 <body>
-    <div class="shell">
-        <div class="topbar">
-            <a href="{{ route('home') }}" class="brand">
-                <span class="brand-badge">บ</span>
-                <span>บ้านครีม</span>
+    <div class="top-strip">
+        <div class="top-strip-inner">
+            <div class="top-strip-badges">
+                <span>เลือกสูตรสินค้าได้จากหน้ารายละเอียด</span>
+                <span>รูปและราคาจะเปลี่ยนตามสูตรที่เลือก</span>
+                <span>เพิ่มลงตะกร้าได้ทันทีจากหน้านี้</span>
+            </div>
+            <span>บ้านครีม สิงห์บุรี</span>
+        </div>
+    </div>
+
+    <header class="header-shell">
+        <div class="header-main">
+            <a href="{{ route('home') }}" class="brand-logo" aria-label="บ้านครีม สิงห์บุรี">
+                <span>b</span><span>a</span><span>a</span><span>n</span><span>cream</span>
             </a>
-            <div class="top-actions">
-                <a href="{{ route('home') }}" class="nav-pill">กลับไปหน้าสินค้า</a>
+
+            <nav class="main-links" aria-label="เมนูหลัก">
+                <a href="{{ route('home') }}#categories">หมวดหมู่</a>
+                <a href="{{ route('home') }}#brands">แบรนด์</a>
+                <a href="{{ route('home') }}#new-arrivals">สินค้าใหม่</a>
+                <a href="{{ route('home') }}#all-products">สินค้าทั้งหมด</a>
+            </nav>
+
+            <div class="header-tools">
+                <label class="search-box" for="searchDisplay">
+                    <span>🔍</span>
+                    <input type="text" id="searchDisplay" value="{{ $product->name }}" readonly>
+                </label>
+                <a href="{{ route('home') }}" class="pill-link">กลับไปหน้าสินค้า</a>
                 @auth
-                    <a href="{{ auth()->user()->role === 'admin' ? route('admin.dashboard') : route('dashboard') }}" class="nav-pill">บัญชีของฉัน</a>
+                    <a href="{{ auth()->user()->role === 'admin' ? route('admin.dashboard') : route('dashboard') }}" class="user-action">บัญชีของฉัน</a>
                 @else
-                    <a href="{{ route('login') }}" class="nav-pill">เข้าสู่ระบบ</a>
+                    <a href="{{ route('login') }}" class="user-action">เข้าสู่ระบบ</a>
                 @endauth
             </div>
         </div>
+    </header>
 
-        <section class="panel">
-            <div class="product-layout">
-                <div class="gallery">
-                    <div class="gallery-main" id="galleryMain">
-                        @php $mainImage = $selectedVariant?->image ?: $product->image; @endphp
-                        @if($mainImage)
-                            <img id="mainImage" src="{{ asset('storage/' . $mainImage) }}" alt="{{ $product->name }}">
-                        @else
-                            <div class="placeholder" id="mainImage">No Image</div>
-                        @endif
-                    </div>
+    @if(session('success'))
+        <div class="notice">
+            <div class="notice-box">{{ session('success') }}</div>
+        </div>
+    @endif
 
-                    @if($product->variants->isNotEmpty())
-                        <div class="thumb-row">
-                            @foreach($product->variants as $variant)
-                                @php $imagePath = $variant->image ?: $product->image; @endphp
-                                <button type="button" class="thumb {{ $selectedVariant && $selectedVariant->id === $variant->id ? 'active' : '' }}"
-                                    data-variant-thumb
-                                    data-variant-id="{{ $variant->id }}"
-                                    data-variant-image="{{ $imagePath ? asset('storage/' . $imagePath) : '' }}"
-                                    data-variant-retail="{{ number_format($variant->retail_price, 2, '.', '') }}"
-                                    data-variant-wholesale="{{ number_format($variant->wholesale_price, 2, '.', '') }}"
-                                    data-variant-stock="{{ $variant->stock }}">
-                                    @if($imagePath)
-                                        <img src="{{ asset('storage/' . $imagePath) }}" alt="{{ $variant->name }}">
-                                    @else
-                                        <img src="https://placehold.co/400x400/f4f7fb/99a4b5?text=No+Image" alt="No Image">
-                                    @endif
-                                </button>
-                            @endforeach
-                        </div>
+    <section class="page-section">
+        <div class="product-shell">
+            <div class="surface-card gallery-card">
+                <div class="gallery-main" id="galleryMain">
+                    @php $mainImage = $selectedVariant?->image ?: $product->image; @endphp
+                    @if($mainImage)
+                        <img id="mainImage" src="{{ asset('storage/' . $mainImage) }}" alt="{{ $product->name }}">
+                    @else
+                        <div class="placeholder" id="mainImage">No Image</div>
                     @endif
                 </div>
 
-                <div class="details">
+                @if($product->variants->isNotEmpty())
+                    <div class="thumb-row">
+                        @foreach($product->variants as $variant)
+                            @php $imagePath = $variant->image ?: $product->image; @endphp
+                            <button type="button" class="thumb {{ $selectedVariant && $selectedVariant->id === $variant->id ? 'active' : '' }}"
+                                data-variant-thumb
+                                data-variant-id="{{ $variant->id }}"
+                                data-variant-image="{{ $imagePath ? asset('storage/' . $imagePath) : '' }}"
+                                data-variant-retail="{{ number_format($variant->retail_price, 2, '.', '') }}"
+                                data-variant-wholesale="{{ number_format($variant->wholesale_price, 2, '.', '') }}"
+                                data-variant-stock="{{ $variant->stock }}"
+                                data-variant-name="{{ $variant->name }}">
+                                @if($imagePath)
+                                    <img src="{{ asset('storage/' . $imagePath) }}" alt="{{ $variant->name }}">
+                                @else
+                                    <img src="https://placehold.co/400x400/f4f7fb/99a4b5?text=No+Image" alt="No Image">
+                                @endif
+                            </button>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
+            <div class="surface-card detail-card">
+                <div class="breadcrumb">
+                    <a href="{{ route('home') }}">หน้าแรก</a>
+                    <span>/</span>
                     @if($product->category)
-                        <div class="tag">{{ $product->category->name }}</div>
+                        <a href="{{ route('home') }}#category-{{ $product->category->slug }}">{{ $product->category->name }}</a>
+                        <span>/</span>
                     @endif
-                    <h1>{{ $product->name }}</h1>
-                    <div class="sub-meta">
-                        @if($product->brand)<span>แบรนด์ {{ $product->brand->name }}</span>@endif
-                        @if($product->hasVariants())<span>มี {{ $product->variants->count() }} สูตร</span>@endif
-                    </div>
+                    <span>{{ $product->name }}</span>
+                </div>
 
-                    <div class="primary-price" id="retailPrice">฿{{ number_format($selectedVariant?->retail_price ?? $product->retail_price, 2) }}</div>
-                    <div class="wholesale-box">
-                        <span>ส่ง 10 ชิ้น</span>
-                        <strong id="wholesalePrice">฿{{ number_format($selectedVariant?->wholesale_price ?? $product->wholesale_price, 2) }}</strong>
-                        <span id="stockText">มีสินค้า {{ $selectedVariant?->stock ?? 'พร้อมขาย' }} ชิ้น</span>
-                    </div>
+                <div class="product-meta">
+                    @if($product->category)
+                        <span class="product-badge">{{ $product->category->name }}</span>
+                    @endif
+                    @if($product->brand)
+                        <span class="product-badge brand">{{ $product->brand->name }}</span>
+                    @endif
+                    @if($product->hasVariants())
+                        <span class="product-badge">{{ $product->variants->count() }} สูตร</span>
+                    @endif
+                    <span class="product-badge success" id="stockText">มีสินค้า {{ $selectedVariant?->stock ?? 'พร้อมขาย' }} ชิ้น</span>
+                </div>
 
-                    @if($product->variants->isNotEmpty())
-                        <div class="variant-list">
-                            @foreach($product->variants as $variant)
-                                @php $imagePath = $variant->image ?: $product->image; @endphp
-                                <button type="button" class="variant-option {{ $selectedVariant && $selectedVariant->id === $variant->id ? 'active' : '' }}"
-                                    data-variant-option
-                                    data-variant-id="{{ $variant->id }}"
-                                    data-variant-image="{{ $imagePath ? asset('storage/' . $imagePath) : '' }}"
-                                    data-variant-retail="{{ number_format($variant->retail_price, 2, '.', '') }}"
-                                    data-variant-wholesale="{{ number_format($variant->wholesale_price, 2, '.', '') }}"
-                                    data-variant-stock="{{ $variant->stock }}">
-                                    <div>
-                                        <div class="variant-name">{{ $variant->name }}</div>
-                                        <div class="variant-meta">{{ $variant->sku ?: 'สูตรสินค้า' }} · คงเหลือ {{ $variant->stock }} ชิ้น</div>
-                                    </div>
-                                    <div class="variant-price">
-                                        <div>ปลีก ฿{{ number_format($variant->retail_price, 2) }}</div>
-                                        <div style="color:#16a34a;">ส่ง ฿{{ number_format($variant->wholesale_price, 2) }}</div>
-                                    </div>
-                                </button>
-                            @endforeach
+                <h1 class="product-title">{{ $product->name }}</h1>
+                <p class="product-subtitle">{{ $product->description ?: 'เลือกรายละเอียดสูตรที่ต้องการ แล้วเพิ่มลงตะกร้าได้ทันทีจากหน้านี้' }}</p>
+
+                <div class="price-panel">
+                    <div class="price-main">
+                        <div>
+                            <div class="price-label">ราคาปลีก</div>
+                            <div class="price-retail" id="retailPrice">฿{{ number_format($selectedVariant?->retail_price ?? $product->retail_price, 2) }}</div>
                         </div>
-                    @endif
-
-                    <p class="description">{{ $product->description ?: 'ไม่มีรายละเอียดสินค้าเพิ่มเติมสำหรับรายการนี้' }}</p>
-
-                    <div class="cta-stack">
-                        <form method="POST" action="{{ route('cart.add') }}">
-                            @csrf
-                            <input type="hidden" name="product_id" value="{{ $product->id }}">
-                            <input type="hidden" name="variant_id" id="singleVariantId" value="{{ $selectedVariant?->id }}">
-                            <input type="hidden" name="quantity" value="1">
-                            <button type="submit" class="cta-button">เพิ่ม (สั่ง 1 ชิ้น) <span id="singlePriceText">฿{{ number_format($selectedVariant?->retail_price ?? $product->retail_price, 2) }}</span></button>
-                        </form>
-
-                        <form method="POST" action="{{ route('cart.add') }}">
-                            @csrf
-                            <input type="hidden" name="product_id" value="{{ $product->id }}">
-                            <input type="hidden" name="variant_id" id="bulkVariantId" value="{{ $selectedVariant?->id }}">
-                            <input type="hidden" name="quantity" value="10">
-                            <button type="submit" class="cta-button primary">เพิ่ม (สั่ง 10 ชิ้น) <span id="bulkPriceText">฿{{ number_format(($selectedVariant?->wholesale_price ?? $product->wholesale_price) * 10, 2) }}</span></button>
-                        </form>
+                        <div class="price-wholesale">
+                            <span>ส่ง 10 ชิ้น</span>
+                            <strong id="wholesalePrice">฿{{ number_format($selectedVariant?->wholesale_price ?? $product->wholesale_price, 2) }}</strong>
+                        </div>
                     </div>
+                </div>
+
+                @if($product->variants->isNotEmpty())
+                    <div class="variant-panel-title">เลือกสูตรสินค้า</div>
+                    <div class="variant-list">
+                        @foreach($product->variants as $variant)
+                            @php $imagePath = $variant->image ?: $product->image; @endphp
+                            <button type="button" class="variant-option {{ $selectedVariant && $selectedVariant->id === $variant->id ? 'active' : '' }}"
+                                data-variant-option
+                                data-variant-id="{{ $variant->id }}"
+                                data-variant-image="{{ $imagePath ? asset('storage/' . $imagePath) : '' }}"
+                                data-variant-retail="{{ number_format($variant->retail_price, 2, '.', '') }}"
+                                data-variant-wholesale="{{ number_format($variant->wholesale_price, 2, '.', '') }}"
+                                data-variant-stock="{{ $variant->stock }}"
+                                data-variant-name="{{ $variant->name }}">
+                                <div>
+                                    <div class="variant-name">{{ $variant->name }}</div>
+                                    <div class="variant-meta">{{ $variant->sku ?: 'สูตรสินค้า' }} · คงเหลือ {{ $variant->stock }} ชิ้น</div>
+                                </div>
+                                <div class="variant-price">
+                                    <div>฿{{ number_format($variant->retail_price, 2) }}</div>
+                                    <small>ส่ง ฿{{ number_format($variant->wholesale_price, 2) }}</small>
+                                </div>
+                            </button>
+                        @endforeach
+                    </div>
+                @endif
+
+                <div class="description-card">
+                    หน้านี้ใช้สำหรับเลือกสูตร รูป และราคาที่ตรงกับสินค้าที่ต้องการ โดยเมื่อเปลี่ยนสูตร ภาพสินค้าและราคาจะอัปเดตตามทันที
+                </div>
+
+                <div class="cta-stack">
+                    <form method="POST" action="{{ route('cart.add') }}">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <input type="hidden" name="variant_id" id="singleVariantId" value="{{ $selectedVariant?->id }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="cta-button">เพิ่มลงตะกร้า 1 ชิ้น <span id="singlePriceText">฿{{ number_format($selectedVariant?->retail_price ?? $product->retail_price, 2) }}</span></button>
+                    </form>
+
+                    <form method="POST" action="{{ route('cart.add') }}">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <input type="hidden" name="variant_id" id="bulkVariantId" value="{{ $selectedVariant?->id }}">
+                        <input type="hidden" name="quantity" value="10">
+                        <button type="submit" class="cta-button primary">เพิ่มลงตะกร้า 10 ชิ้น <span id="bulkPriceText">฿{{ number_format(($selectedVariant?->wholesale_price ?? $product->wholesale_price) * 10, 2) }}</span></button>
+                    </form>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section class="related">
-            <h2>สินค้าที่คุณอาจชอบ</h2>
-            <div class="related-grid">
-                @foreach($relatedProducts as $item)
-                    <a href="{{ route('products.show', $item) }}" class="related-card">
+    <section class="page-section">
+        <div class="section-head">
+            <div>
+                <h2 class="section-title">สินค้าที่คุณอาจชอบ</h2>
+                <p class="section-subtitle">เลือกต่อในโทนเดียวกับหน้าแรก โดยยังคง flow เข้าดูรายละเอียดสินค้าแบบเดิม</p>
+            </div>
+            <a href="{{ route('home') }}#all-products" class="section-pill">ดูสินค้าทั้งหมด</a>
+        </div>
+
+        <div class="related-grid">
+            @foreach($relatedProducts as $item)
+                <article class="product-card">
+                    <a href="{{ route('products.show', $item) }}" class="product-image">
                         @if($item->displayImage())
                             <img src="{{ asset('storage/' . $item->displayImage()) }}" alt="{{ $item->name }}">
                         @else
-                            <img src="https://placehold.co/500x500/f4f7fb/99a4b5?text=No+Image" alt="No Image">
+                            <span>No Image</span>
                         @endif
-                        <div class="related-card-body">
-                            <div class="related-card-title">{{ $item->name }}</div>
-                            <div class="related-card-price">เริ่มต้น ฿{{ number_format($item->displayRetailPrice(), 2) }}</div>
-                        </div>
                     </a>
-                @endforeach
-            </div>
-        </section>
-    </div>
+                    <div class="product-body">
+                        <div class="product-meta">
+                            @if($item->category)
+                                <span class="product-badge">{{ $item->category->name }}</span>
+                            @endif
+                            @if($item->brand)
+                                <span class="product-badge brand">{{ $item->brand->name }}</span>
+                            @endif
+                            @if($item->hasVariants())
+                                <span class="product-badge">{{ $item->variants->count() }} สูตร</span>
+                            @endif
+                        </div>
+                        <a href="{{ route('products.show', $item) }}"><h3 class="product-name">{{ $item->name }}</h3></a>
+                        <p class="product-desc">{{ Str::limit($item->description ?: 'เลือกดูรายละเอียดสินค้าเพิ่มเติมได้จากหน้ารายการนี้', 90) }}</p>
+                        <div class="product-footer">
+                            <div>
+                                <div class="price-retail" style="font-size:1.15rem;">฿{{ number_format($item->displayRetailPrice(), 2) }}</div>
+                                <div class="price-wholesale">ราคาส่ง ฿{{ number_format($item->displayWholesalePrice(), 2) }}</div>
+                            </div>
+                            <a href="{{ route('products.show', $item) }}" class="buy-button">เลือกสูตร</a>
+                        </div>
+                    </div>
+                </article>
+            @endforeach
+        </div>
+    </section>
 
     @include('store.partials.floating-cart', [
         'cartCount' => $cartCount,
@@ -386,6 +724,8 @@
         function activateVariant(dataset) {
             if (!dataset) return;
             const currentMainImage = document.getElementById('mainImage');
+            const stockLabel = dataset.variantStock ? `${dataset.variantStock} ชิ้น` : 'พร้อมขาย';
+
             if (dataset.variantImage && galleryMain) {
                 if (currentMainImage && currentMainImage.tagName === 'IMG') {
                     currentMainImage.src = dataset.variantImage;
@@ -393,13 +733,16 @@
                     galleryMain.innerHTML = `<img id="mainImage" src="${dataset.variantImage}" alt="{{ addslashes($product->name) }}">`;
                 }
             }
+
             retailPrice.textContent = `฿${Number(dataset.variantRetail).toFixed(2)}`;
             wholesalePrice.textContent = `฿${Number(dataset.variantWholesale).toFixed(2)}`;
-            stockText.textContent = `มีสินค้า ${dataset.variantStock} ชิ้น`;
+            stockText.textContent = `มีสินค้า ${stockLabel}`;
             singlePriceText.textContent = `฿${Number(dataset.variantRetail).toFixed(2)}`;
             bulkPriceText.textContent = `฿${(Number(dataset.variantWholesale) * 10).toFixed(2)}`;
+
             if (singleVariantId) singleVariantId.value = dataset.variantId;
             if (bulkVariantId) bulkVariantId.value = dataset.variantId;
+
             variantOptions.forEach((option) => option.classList.toggle('active', option.dataset.variantId === dataset.variantId));
             variantThumbs.forEach((thumb) => thumb.classList.toggle('active', thumb.dataset.variantId === dataset.variantId));
         }
