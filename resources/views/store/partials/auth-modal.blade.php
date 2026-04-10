@@ -51,6 +51,12 @@
         color: var(--primary-color);
         line-height: 1;
     }
+    .auth-logo-image {
+        max-width: min(100%, 240px);
+        max-height: 72px;
+        width: auto;
+        object-fit: contain;
+    }
     .auth-logo span:nth-child(2) { color: #6a67ff; }
     .auth-logo span:nth-child(3) { color: #22c1dc; }
     .auth-logo span:nth-child(4) { color: #f8c64f; }
@@ -234,7 +240,7 @@
         <div class="auth-panel">
             <div>
                 <a href="{{ route('home') }}" class="auth-logo" aria-label="บ้านครีม สิงห์บุรี">
-                    <span>b</span><span>a</span><span>a</span><span>n</span><span>cream</span>
+                    @include('store.partials.site-logo-markup', ['variant' => 'auth'])
                 </a>
                 <h2 class="auth-panel-title">ยินดีต้อนรับ<br>กลับมาช้อปต่อ</h2>
                 <p class="auth-panel-copy">เข้าสู่ระบบหรือสมัครสมาชิกจาก popup เดียวกันได้เลย โดยยังคงอยู่บนหน้าเว็บเดิมของคุณ</p>

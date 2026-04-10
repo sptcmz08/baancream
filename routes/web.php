@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\CreditController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\SiteSettingController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [\App\Http\Controllers\StoreController::class, 'index'])->name('home');
@@ -36,11 +37,13 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('categories', CategoryController::class);
     Route::resource('brands', BrandController::class);
     Route::resource('products', ProductController::class);
     Route::resource('credits', CreditController::class);
     Route::resource('orders', OrderController::class);
+    Route::get('settings/branding', [SiteSettingController::class, 'edit'])->name('settings.edit');
+    Route::put('settings/branding', [SiteSettingController::class, 'update'])->name('settings.update');
 });

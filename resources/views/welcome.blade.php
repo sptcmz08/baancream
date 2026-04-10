@@ -66,10 +66,17 @@
             gap: 24px;
         }
         .brand-logo {
+            display: inline-flex;
+            align-items: center;
             font-size: 2.35rem;
             font-weight: 700;
             color: var(--primary-color);
             letter-spacing: -0.04em;
+        }
+        .brand-logo-image {
+            height: 56px;
+            width: auto;
+            object-fit: contain;
         }
         .brand-logo span:nth-child(2) { color: #6a67ff; }
         .brand-logo span:nth-child(3) { color: #22c1dc; }
@@ -375,7 +382,7 @@
     <header class="header-shell">
         <div class="header-main">
             <a href="{{ route('home') }}" class="brand-logo" aria-label="บ้านครีม สิงห์บุรี">
-                <span>b</span><span>a</span><span>a</span><span>n</span><span>cream</span>
+                @include('store.partials.site-logo-markup')
             </a>
 
             <nav class="main-links" aria-label="เมนูหลัก">
