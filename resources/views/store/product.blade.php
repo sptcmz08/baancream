@@ -593,6 +593,7 @@
         $mainImage = $selectedVariant?->displayImage() ?: $product->displayImage();
         $mainImageUrl = $selectedGalleryUrls[0] ?? $mediaUrl($mainImage);
         $selectedVariantName = (string) data_get($selectedVariant, 'name', $productName);
+        $selectedDescription = (string) data_get($selectedVariant, 'description', $productDescription);
         $selectedOptionKey = $selectedVariant ? 'variant:' . $selectedVariant->id : 'main';
     @endphp
     <div class="top-strip">
@@ -665,10 +666,8 @@
             </div>
 
             <div class="surface-card detail-card">
-                <h1 class="product-title">{{ $productName }}</h1>
-                @if($productDescription !== '')
-                    <p class="product-subtitle">{{ $productDescription }}</p>
-                @endif
+                <h1 class="product-title" id="productTitleText">{{ $selectedVariantName }}</h1>
+                <p class="product-subtitle" id="productSubtitleText" style="{{ trim($selectedDescription) === '' ? 'display:none;' : '' }}">{{ $selectedDescription }}</p>
 
                 <div class="price-panel">
                     <div class="price-main">
@@ -708,7 +707,8 @@
                                 data-variant-retail="{{ number_format($product->retail_price, 2, '.', '') }}"
                                 data-variant-wholesale="{{ number_format($product->wholesale_price, 2, '.', '') }}"
                                 data-variant-min-qty="{{ $product->wholesale_min_qty ?: 1 }}"
-                                data-variant-name="{{ $productName }}">
+                                data-variant-name="{{ $productName }}"
+                                data-variant-description="{{ $productDescription }}">
                                 @if($product->displayImage())
                                     <img src="{{ route('media.show', ['path' => $product->displayImage()]) }}" alt="{{ $productName }}">
                                 @else
@@ -734,7 +734,8 @@
                                     data-variant-retail="{{ number_format($variant->retail_price, 2, '.', '') }}"
                                     data-variant-wholesale="{{ number_format($variant->wholesale_price, 2, '.', '') }}"
                                     data-variant-min-qty="{{ $variant->wholesale_min_qty ?: ($product->wholesale_min_qty ?: 1) }}"
-                                    data-variant-name="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
+                                    data-variant-name="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}"
+                                    data-variant-description="{{ (string) data_get($variant, 'description', $productDescription) }}">
                                     @if($imageUrl)
                                         <img src="{{ $imageUrl }}" alt="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
                                     @else
@@ -846,6 +847,8 @@
         const variantSelect = document.getElementById('variantSelect');
         const galleryMain = document.getElementById('galleryMain');
         const galleryThumbRow = document.getElementById('galleryThumbRow');
+        const productTitleText = document.getElementById('productTitleText');
+        const productSubtitleText = document.getElementById('productSubtitleText');
         const retailPrice = document.getElementById('retailPrice');
         const wholesalePrice = document.getElementById('wholesalePrice');
         const variantNameText = document.getElementById('variantNameText');
@@ -955,6 +958,14 @@
 
             retailPrice.textContent = `฿${Number(dataset.variantRetail).toFixed(2)}`;
             wholesalePrice.textContent = `฿${Number(dataset.variantWholesale).toFixed(2)}`;
+            if (productTitleText) {
+                productTitleText.textContent = dataset.variantName || @json($productName);
+            }
+            if (productSubtitleText) {
+                const description = (dataset.variantDescription || '').trim();
+                productSubtitleText.textContent = description;
+                productSubtitleText.style.display = description ? '' : 'none';
+            }
             if (variantNameText) {
                 variantNameText.textContent = dataset.variantName || 'สูตรสินค้า';
             }
