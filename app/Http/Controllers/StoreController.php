@@ -20,7 +20,6 @@ class StoreController extends Controller
     public function index(Request $request): View
     {
         $categories = Category::query()
-            ->whereHas('products')
             ->withCount('products')
             ->orderBy('name')
             ->get(['id', 'name', 'slug']);
