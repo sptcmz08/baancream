@@ -11,7 +11,7 @@
         <thead>
             <tr>
                 <th width="45%">ชื่อแบรนด์</th>
-                <th width="25%">Slug</th>
+
                 <th width="10%">สินค้า</th>
                 <th width="20%">จัดการ</th>
             </tr>
@@ -20,7 +20,7 @@
             @forelse($brands as $brand)
             <tr>
                 <td style="font-size: 1.05rem; font-weight: 500;">{{ $brand->name }}</td>
-                <td style="color: var(--text-muted);">/{{ $brand->slug }}</td>
+
                 <td>{{ $brand->products_count }}</td>
                 <td style="display: flex; gap: 8px;">
                     <a href="{{ route('admin.brands.edit', $brand) }}" class="btn" style="background:#f3f4f6; padding: 6px 12px; font-size:0.8rem; text-decoration:none;">แก้ไข</a>
@@ -32,7 +32,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="4" style="text-align:center; padding: 30px; color:var(--text-muted);">ไม่มีรายการแบรนด์</td>
+                <td colspan="3" style="text-align:center; padding: 30px; color:var(--text-muted);">ไม่มีรายการแบรนด์</td>
             </tr>
             @endforelse
         </tbody>

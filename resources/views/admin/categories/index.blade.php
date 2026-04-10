@@ -15,7 +15,7 @@
         <tbody>
             @forelse($categories as $cat)
             <tr>
-                <td style="font-size: 1.1rem;">{{ $cat->name }} <span style="font-size:0.8rem; color:var(--text-muted);">/{{ $cat->slug }}</span></td>
+                <td style="font-size: 1.1rem;">{{ $cat->name }}</td>
                 <td style="display: flex; gap: 8px;">
                     <a href="{{ route('admin.categories.edit', $cat) }}" class="btn" style="background:#f3f4f6; padding: 6px 12px; font-size:0.8rem; text-decoration:none;">แก้ไข</a>
                     <form action="{{ route('admin.categories.destroy', $cat) }}" method="POST" onsubmit="return confirm('ยืนยันลบหมวดหมู่: {{ $cat->name }} ?');">
