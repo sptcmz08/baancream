@@ -371,50 +371,71 @@
             font-weight: 700;
             margin-bottom: 14px;
         }
-        .variant-list {
+        .variant-select-shell {
             display: grid;
-            gap: 12px;
+            gap: 14px;
             margin-bottom: 22px;
         }
-        .variant-option {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
+        .variant-current {
             border: 1px solid var(--border-color);
             border-radius: 22px;
-            background: white;
             padding: 16px 18px;
-            cursor: pointer;
-            transition: 0.2s ease;
+            background: #fbfcff;
         }
-        .variant-option:hover {
-            border-color: rgba(255, 79, 135, 0.24);
-            transform: translateY(-1px);
+        .variant-current-label {
+            color: var(--text-soft);
+            font-size: 0.88rem;
+            margin-bottom: 6px;
         }
-        .variant-option.active {
-            border-color: rgba(255, 79, 135, 0.35);
-            background: #fff7fb;
-            box-shadow: 0 14px 30px rgba(233, 53, 116, 0.08);
-        }
-        .variant-name {
+        .variant-current-name {
+            font-size: 1.02rem;
             font-weight: 700;
+            color: var(--text-dark);
             margin-bottom: 4px;
         }
-        .variant-meta {
+        .variant-current-meta {
             color: var(--text-soft);
             font-size: 0.92rem;
         }
-        .variant-price {
-            text-align: right;
-            font-weight: 700;
-            white-space: nowrap;
+        .variant-picker {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 4px;
         }
-        .variant-price small {
+        .variant-option {
+            width: 76px;
+            min-width: 76px;
+            border: 2px solid transparent;
+            border-radius: 18px;
+            background: white;
+            padding: 0;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 10px 24px rgba(29, 41, 76, 0.08);
+            transition: 0.2s ease;
+        }
+        .variant-option:hover {
+            transform: translateY(-1px);
+        }
+        .variant-option.active {
+            border-color: var(--primary-color);
+            box-shadow: 0 14px 28px rgba(233, 53, 116, 0.12);
+        }
+        .variant-option img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            background: #f8fafc;
+        }
+        .variant-option span {
             display: block;
-            color: #1f9d68;
-            margin-top: 4px;
-            font-size: 0.86rem;
+            padding: 8px 6px;
+            font-size: 0.72rem;
+            line-height: 1.3;
+            font-weight: 600;
+            color: var(--text-soft);
+            text-align: center;
         }
         .description-card {
             border: 1px solid var(--border-color);
@@ -575,11 +596,9 @@
             .gallery-card { padding: 18px; }
             .product-title { font-size: 2.3rem; }
             .section-title { font-size: 1.6rem; }
-            .variant-option,
             .price-main,
             .product-footer,
             .section-head { flex-direction: column; align-items: stretch; }
-            .variant-price { text-align: left; }
         }
     </style>
 </head>
@@ -594,6 +613,8 @@
         $selectedWholesalePrice = (float) (data_get($selectedVariant, 'wholesale_price') ?? data_get($product, 'wholesale_price', 0));
         $selectedStock = data_get($selectedVariant, 'stock');
         $mainImage = data_get($selectedVariant, 'image') ?: data_get($product, 'image');
+        $selectedVariantName = (string) data_get($selectedVariant, 'name', 'สูตรเริ่มต้น');
+        $selectedVariantSku = (string) (data_get($selectedVariant, 'sku') ?: 'สูตรสินค้า');
     @endphp
     <div class="top-strip">
         <div class="top-strip-inner">
@@ -662,6 +683,7 @@
                                 data-variant-retail="{{ number_format($variant->retail_price, 2, '.', '') }}"
                                 data-variant-wholesale="{{ number_format($variant->wholesale_price, 2, '.', '') }}"
                                 data-variant-stock="{{ $variant->stock }}"
+                                data-variant-sku="{{ data_get($variant, 'sku') ?: 'สูตรสินค้า' }}"
                                 data-variant-name="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
                                 @if($imagePath)
                                     <img src="{{ asset('storage/' . $imagePath) }}" alt="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
@@ -718,27 +740,33 @@
 
                 @if($product->variants->isNotEmpty())
                     <div class="variant-panel-title">เลือกสูตรสินค้า</div>
-                    <div class="variant-list">
-                        @foreach($product->variants as $variant)
-                            @php $imagePath = $variant->image ?: $product->image; @endphp
-                            <button type="button" class="variant-option {{ $selectedVariant && $selectedVariant->id === $variant->id ? 'active' : '' }}"
-                                data-variant-option
-                                data-variant-id="{{ $variant->id }}"
-                                data-variant-image="{{ $imagePath ? asset('storage/' . $imagePath) : '' }}"
-                                data-variant-retail="{{ number_format($variant->retail_price, 2, '.', '') }}"
-                                data-variant-wholesale="{{ number_format($variant->wholesale_price, 2, '.', '') }}"
-                                data-variant-stock="{{ $variant->stock }}"
-                                data-variant-name="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
-                                <div>
-                                    <div class="variant-name">{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}</div>
-                                    <div class="variant-meta">{{ data_get($variant, 'sku') ?: 'สูตรสินค้า' }} · คงเหลือ {{ data_get($variant, 'stock', 0) }} ชิ้น</div>
-                                </div>
-                                <div class="variant-price">
-                                    <div>฿{{ number_format((float) data_get($variant, 'retail_price', 0), 2) }}</div>
-                                    <small>ส่ง ฿{{ number_format((float) data_get($variant, 'wholesale_price', 0), 2) }}</small>
-                                </div>
-                            </button>
-                        @endforeach
+                    <div class="variant-select-shell">
+                        <div class="variant-current">
+                            <div class="variant-current-label">สูตรที่เลือก</div>
+                            <div class="variant-current-name" id="variantNameText">{{ $selectedVariantName }}</div>
+                            <div class="variant-current-meta" id="variantMetaText">{{ $selectedVariantSku }} · คงเหลือ {{ $selectedStock ?? 0 }} ชิ้น</div>
+                        </div>
+                        <div class="variant-picker">
+                            @foreach($product->variants as $variant)
+                                @php $imagePath = $variant->image ?: $product->image; @endphp
+                                <button type="button" class="variant-option {{ $selectedVariant && $selectedVariant->id === $variant->id ? 'active' : '' }}"
+                                    data-variant-option
+                                    data-variant-id="{{ $variant->id }}"
+                                    data-variant-image="{{ $imagePath ? asset('storage/' . $imagePath) : '' }}"
+                                    data-variant-retail="{{ number_format($variant->retail_price, 2, '.', '') }}"
+                                    data-variant-wholesale="{{ number_format($variant->wholesale_price, 2, '.', '') }}"
+                                    data-variant-stock="{{ $variant->stock }}"
+                                    data-variant-sku="{{ data_get($variant, 'sku') ?: 'สูตรสินค้า' }}"
+                                    data-variant-name="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
+                                    @if($imagePath)
+                                        <img src="{{ asset('storage/' . $imagePath) }}" alt="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
+                                    @else
+                                        <img src="https://placehold.co/200x200/f4f7fb/99a4b5?text=No+Image" alt="No Image">
+                                    @endif
+                                    <span>{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}</span>
+                                </button>
+                            @endforeach
+                        </div>
                     </div>
                 @endif
 
@@ -867,6 +895,8 @@
         const retailPrice = document.getElementById('retailPrice');
         const wholesalePrice = document.getElementById('wholesalePrice');
         const stockText = document.getElementById('stockText');
+        const variantNameText = document.getElementById('variantNameText');
+        const variantMetaText = document.getElementById('variantMetaText');
         const singleVariantId = document.getElementById('singleVariantId');
         const bulkVariantId = document.getElementById('bulkVariantId');
         const singlePriceText = document.getElementById('singlePriceText');
@@ -897,6 +927,12 @@
             retailPrice.textContent = `฿${Number(dataset.variantRetail).toFixed(2)}`;
             wholesalePrice.textContent = `฿${Number(dataset.variantWholesale).toFixed(2)}`;
             stockText.textContent = `มีสินค้า ${stockLabel}`;
+            if (variantNameText) {
+                variantNameText.textContent = dataset.variantName || 'สูตรสินค้า';
+            }
+            if (variantMetaText) {
+                variantMetaText.textContent = `${dataset.variantSku || 'สูตรสินค้า'} · คงเหลือ ${dataset.variantStock || 0} ชิ้น`;
+            }
             singlePriceText.textContent = `฿${Number(dataset.variantRetail).toFixed(2)}`;
             bulkPriceText.textContent = `฿${(Number(dataset.variantWholesale) * 10).toFixed(2)}`;
 
