@@ -601,7 +601,9 @@
                 </div>
 
                 <h1 class="product-title">{{ $productName }}</h1>
-                <p class="product-subtitle">{{ $productDescription !== '' ? $productDescription : 'เลือกรายละเอียดสูตรที่ต้องการ แล้วเพิ่มลงตะกร้าได้ทันทีจากหน้านี้' }}</p>
+                @if($productDescription !== '')
+                    <p class="product-subtitle">{{ $productDescription }}</p>
+                @endif
 
                 <div class="price-panel">
                     <div class="price-main">
@@ -642,10 +644,6 @@
                     </div>
                 @endif
 
-                <div class="description-card">
-                    หน้านี้ใช้สำหรับเลือกสูตร รูป และราคาที่ตรงกับสินค้าที่ต้องการ โดยเมื่อเปลี่ยนสูตร ภาพสินค้าและราคาจะอัปเดตตามทันที
-                </div>
-
                 <div class="cta-stack">
                     <form method="POST" action="{{ route('cart.add') }}">
                         @csrf
@@ -671,7 +669,6 @@
         <div class="section-head">
             <div>
                 <h2 class="section-title">สินค้าที่คุณอาจชอบ</h2>
-                <p class="section-subtitle">เลือกต่อในโทนเดียวกับหน้าแรก โดยยังคง flow เข้าดูรายละเอียดสินค้าแบบเดิม</p>
             </div>
             <a href="{{ route('home') }}#all-products" class="section-pill">ดูสินค้าทั้งหมด</a>
         </div>
@@ -700,7 +697,7 @@
                                 @endif
                             </div>
                             <a href="{{ route('products.show', $item) }}"><h3 class="product-name">{{ (string) data_get($item, 'name', 'สินค้า') }}</h3></a>
-                            <p class="product-desc">{{ \Illuminate\Support\Str::limit((string) (data_get($item, 'description') ?: 'เลือกดูรายละเอียดสินค้าเพิ่มเติมได้จากหน้ารายการนี้'), 90) }}</p>
+                            <p class="product-desc">{{ \Illuminate\Support\Str::limit((string) data_get($item, 'description', ''), 90) }}</p>
                             <div class="product-footer">
                                 <div>
                                     <div class="price-retail" style="font-size:1.15rem;">฿{{ number_format((float) $item->displayRetailPrice(), 2) }}</div>
