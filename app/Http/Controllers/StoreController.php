@@ -48,6 +48,10 @@ class StoreController extends Controller
             ->take(12)
             ->get();
 
+        $catalogProducts = Product::with(['category', 'brand', 'variants'])
+            ->latest()
+            ->get();
+
         $cartSummary = $this->cartWithTotals();
         $cartCount = $cartSummary['count'];
 
@@ -57,6 +61,7 @@ class StoreController extends Controller
             'brandCollections',
             'newArrivals',
             'featuredProducts',
+            'catalogProducts',
             'cartCount',
             'cartSummary'
         ));

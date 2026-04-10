@@ -168,15 +168,22 @@
             border-radius: 999px;
             padding: 10px 18px;
             color: var(--text-soft);
+            cursor: pointer;
         }
         .section-pill:hover {
             color: var(--primary-color);
             border-color: rgba(255, 79, 135, 0.3);
         }
+        .section-pill.active {
+            color: var(--text-dark);
+            background: #fff4f8;
+            border-color: rgba(255, 79, 135, 0.3);
+            box-shadow: 0 10px 24px rgba(233, 53, 116, 0.08);
+        }
 
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            grid-template-columns: repeat(5, minmax(0, 1fr));
             gap: 22px;
         }
         .product-card {
@@ -264,49 +271,30 @@
         }
         .buy-button:hover { transform: translateY(-1px); }
 
-        .brand-showcase {
+        .catalog-toolbar {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 20px;
+            gap: 18px;
+            margin-bottom: 26px;
         }
-        .brand-block {
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 28px;
-            padding: 24px;
-            box-shadow: 0 18px 50px rgba(29, 41, 76, 0.08);
+        .catalog-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
         }
-        .brand-block h3 {
-            font-size: 1.4rem;
-            margin-bottom: 6px;
-        }
-        .brand-block p {
+        .catalog-count {
             color: var(--text-soft);
-            margin-bottom: 18px;
-        }
-        .brand-mini-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 14px;
-        }
-        .brand-mini-card {
-            background: #f8fafe;
-            border: 1px solid var(--border-color);
-            border-radius: 18px;
-            overflow: hidden;
-        }
-        .brand-mini-card div {
-            padding: 12px;
-            font-size: 0.88rem;
             font-weight: 500;
         }
-        .brand-mini-card img {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            object-fit: cover;
-            background: #eef3fb;
+        .catalog-empty {
+            background: white;
+            border: 1px dashed #c9d2e3;
+            border-radius: 24px;
+            padding: 44px 24px;
+            text-align: center;
+            color: var(--text-soft);
         }
-
         .notice {
             max-width: 1440px;
             margin: 24px auto 0;
@@ -341,6 +329,9 @@
             }
             .search-box { width: 100%; }
             .hero { min-height: 56vh; }
+            .product-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
         }
 
         @media (max-width: 720px) {
@@ -350,11 +341,23 @@
             .notice { padding-left: 16px; padding-right: 16px; }
             .brand-logo { font-size: 2rem; }
             .section-title { font-size: 1.6rem; }
-            .brand-showcase { grid-template-columns: 1fr; }
+            .product-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 520px) {
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
+    @php
+        $newArrivalIds = $newArrivals->pluck('id')->all();
+        $featuredIds = $featuredProducts->pluck('id')->all();
+    @endphp
     <div class="top-strip">
         <div class="top-strip-inner">
             <div class="top-strip-badges">
@@ -373,10 +376,10 @@
             </a>
 
             <nav class="main-links" aria-label="เมนูหลัก">
-                <a href="#categories">หมวดหมู่</a>
-                <a href="#brands">แบรนด์</a>
-                <a href="#new-arrivals">สินค้าใหม่</a>
-                <a href="#all-products">สินค้าทั้งหมด</a>
+                <a href="#catalog">หมวดหมู่</a>
+                <a href="#catalog">สินค้าใหม่</a>
+                <a href="#catalog">สินค้าแนะนำ</a>
+                <a href="#catalog">สินค้าทั้งหมด</a>
             </nav>
 
             <div class="header-tools">
@@ -403,48 +406,53 @@
 
     <section class="hero" aria-label="แบนเนอร์หลัก"></section>
 
-    <section class="page-section" id="categories" style="padding-top: 26px;">
+    <section class="page-section" id="catalog" style="padding-top: 26px;">
         <div class="section-head">
             <div>
                 <h2 class="section-title">เลือกช้อปตามหมวดหมู่</h2>
-                <p class="section-subtitle">หมวดหมู่ทั้งหมดดึงจากหลังบ้าน admin และอัปเดตขึ้นหน้าแรกอัตโนมัติ</p>
+                <p class="section-subtitle">เลือกจากหัวข้อด้านล่างได้เลย โดยมีทั้งหมด สินค้ามาใหม่ สินค้าแนะนำ และหมวดหมู่จากหลังบ้าน admin</p>
             </div>
         </div>
-        <div class="section-scroll">
-            @foreach($categories as $category)
-                <a href="#category-{{ $category->slug }}" class="section-pill">{{ $category->name }} ({{ $category->products->count() }})</a>
-            @endforeach
-        </div>
-    </section>
-
-    <section class="page-section" id="brands">
-        <div class="section-head">
-            <div>
-                <h2 class="section-title">แบรนด์เด่นในร้าน</h2>
-                <p class="section-subtitle">สร้างแบรนด์จากหลังบ้านได้เลย แล้วสินค้าในแบรนด์นั้นจะถูกรวมขึ้นมาแสดงอัตโนมัติ</p>
+        <div class="catalog-toolbar">
+            <div class="section-scroll" id="catalogFilters">
+                <button type="button" class="section-pill active" data-filter="all">ทั้งหมด ({{ $catalogProducts->count() }})</button>
+                <button type="button" class="section-pill" data-filter="new">สินค้ามาใหม่ ({{ count($newArrivalIds) }})</button>
+                <button type="button" class="section-pill" data-filter="featured">สินค้าแนะนำ ({{ count($featuredIds) }})</button>
+                @foreach($categories as $category)
+                    <button type="button" class="section-pill" data-filter="category:{{ $category->slug }}">{{ $category->name }} ({{ $category->products->count() }})</button>
+                @endforeach
             </div>
-        </div>
-        <div class="section-scroll">
-            @foreach($brands as $brand)
-                <a href="#brand-{{ $brand->slug }}" class="section-pill">{{ $brand->name }} ({{ $brand->products_count }})</a>
-            @endforeach
-        </div>
-    </section>
-
-    <section class="page-section" id="new-arrivals">
-        <div class="section-head">
-            <div>
-                <h2 class="section-title">สินค้ามาใหม่</h2>
-                <p class="section-subtitle">ติ๊กสถานะสินค้าใหม่จากหลังบ้านเพื่อดันขึ้น section นี้ได้ทันที</p>
+            <div class="catalog-summary">
+                <div>
+                    <h3 class="section-title" style="font-size:1.55rem;" id="catalogTitle">ทั้งหมด</h3>
+                    <p class="section-subtitle" style="margin-top:6px;">รายการสินค้าจะเรียงยาวต่อเนื่อง และบนจอใหญ่แสดง 5 ชิ้นต่อแถว</p>
+                </div>
+                <div class="catalog-count" id="catalogCount">ทั้งหมด {{ $catalogProducts->count() }} รายการ</div>
             </div>
         </div>
 
-        @if($newArrivals->isEmpty())
-            <div class="empty-state">ยังไม่มีสินค้าใหม่ในระบบ</div>
+        @if($catalogProducts->isEmpty())
+            <div class="catalog-empty">ยังไม่มีสินค้าในระบบ</div>
         @else
-            <div class="product-grid">
-                @foreach($newArrivals as $product)
-                    <article class="product-card" data-search="{{ strtolower($product->name . ' ' . ($product->category->name ?? '') . ' ' . ($product->brand->name ?? '') . ' ' . $product->variants->pluck('name')->implode(' ')) }}">
+            <div class="product-grid" id="catalogGrid">
+                @foreach($catalogProducts as $product)
+                    @php
+                        $filterTags = ['all'];
+                        if (in_array($product->id, $newArrivalIds, true)) {
+                            $filterTags[] = 'new';
+                        }
+                        if (in_array($product->id, $featuredIds, true)) {
+                            $filterTags[] = 'featured';
+                        }
+                        if ($product->category?->slug) {
+                            $filterTags[] = 'category:' . $product->category->slug;
+                        }
+                    @endphp
+                    <article
+                        class="product-card"
+                        data-card
+                        data-filter-tags="{{ implode('|', $filterTags) }}"
+                        data-search="{{ strtolower($product->name . ' ' . ($product->category->name ?? '') . ' ' . ($product->brand->name ?? '') . ' ' . $product->variants->pluck('name')->implode(' ')) }}">
                         <a href="{{ route('products.show', $product) }}" class="product-image">
                             @if($product->displayImage())
                                 <img src="{{ asset('storage/' . $product->displayImage()) }}" alt="{{ $product->name }}">
@@ -480,91 +488,6 @@
         @endif
     </section>
 
-    <section class="page-section" id="all-products">
-        @foreach($categories as $category)
-            <div id="category-{{ $category->slug }}" style="margin-bottom: 56px;">
-                <div class="section-head">
-                    <div>
-                        <h2 class="section-title">{{ $category->name }}</h2>
-                        <p class="section-subtitle">สินค้าในหมวดนี้ถูกดึงจากหลังบ้านตามหมวดหมู่ที่เลือกไว้</p>
-                    </div>
-                    <a href="#categories" class="section-pill">กลับไปดูหมวดหมู่</a>
-                </div>
-
-                <div class="product-grid">
-                    @foreach($category->products->take(8) as $product)
-                        <article class="product-card" data-search="{{ strtolower($product->name . ' ' . $category->name . ' ' . ($product->brand->name ?? '') . ' ' . $product->variants->pluck('name')->implode(' ')) }}">
-                            <a href="{{ route('products.show', $product) }}" class="product-image">
-                                @if($product->displayImage())
-                                    <img src="{{ asset('storage/' . $product->displayImage()) }}" alt="{{ $product->name }}">
-                                @else
-                                    <span>No Image</span>
-                                @endif
-                            </a>
-                            <div class="product-body">
-                                <div class="product-meta">
-                                    <span class="product-badge">{{ $category->name }}</span>
-                                    @if($product->brand)
-                                        <span class="product-badge brand">{{ $product->brand->name }}</span>
-                                    @endif
-                                    @if($product->is_new_arrival)
-                                        <span class="product-badge">มาใหม่</span>
-                                    @endif
-                                    @if($product->hasVariants())
-                                        <span class="product-badge">{{ $product->variants->count() }} สูตร</span>
-                                    @endif
-                                </div>
-                                <a href="{{ route('products.show', $product) }}"><h3 class="product-name">{{ $product->name }}</h3></a>
-                                <p class="product-desc">{{ Str::limit($product->description ?: 'อัปเดตรายละเอียดสินค้าเพิ่มเติมได้จากหลังบ้าน', 90) }}</p>
-                                <div class="product-footer">
-                                    <div>
-                                        <div class="price-retail">฿{{ number_format($product->displayRetailPrice(), 2) }}</div>
-                                        <div class="price-wholesale">ราคาส่ง ฿{{ number_format($product->displayWholesalePrice(), 2) }}</div>
-                                    </div>
-                                    <a href="{{ route('products.show', $product) }}" class="buy-button">เลือกสูตร</a>
-                                </div>
-                            </div>
-                        </article>
-                    @endforeach
-                </div>
-            </div>
-        @endforeach
-    </section>
-
-    <section class="page-section">
-        <div class="section-head">
-            <div>
-                <h2 class="section-title">แยกดูตามแบรนด์</h2>
-                <p class="section-subtitle">เหมาะกับหน้าแบบตัวอย่างที่ต้องการให้ลูกค้าเลือกต่อจากแบรนด์ก่อนลงไปดูสินค้า</p>
-            </div>
-        </div>
-
-        @if($brandCollections->isEmpty())
-            <div class="empty-state">ยังไม่มีแบรนด์ที่ผูกสินค้าไว้</div>
-        @else
-            <div class="brand-showcase">
-                @foreach($brandCollections as $brand)
-                    <section class="brand-block" id="brand-{{ $brand->slug }}">
-                        <h3>{{ $brand->name }}</h3>
-                        <p>รวมสินค้าของแบรนด์ {{ $brand->name }} ที่ดึงจากหลังบ้านโดยตรง</p>
-                        <div class="brand-mini-grid">
-                            @foreach($brand->products as $product)
-                                <a href="{{ route('products.show', $product) }}" class="brand-mini-card" data-search="{{ strtolower($product->name . ' ' . ($product->category->name ?? '') . ' ' . $brand->name . ' ' . $product->variants->pluck('name')->implode(' ')) }}">
-                                    @if($product->displayImage())
-                                        <img src="{{ asset('storage/' . $product->displayImage()) }}" alt="{{ $product->name }}">
-                                    @else
-                                        <img src="https://placehold.co/600x600/f4f7fb/9aa7bd?text=No+Image" alt="No Image">
-                                    @endif
-                                    <div>{{ Str::limit($product->name, 40) }}</div>
-                                </a>
-                            @endforeach
-                        </div>
-                    </section>
-                @endforeach
-            </div>
-        @endif
-    </section>
-
     @include('store.partials.floating-cart', [
         'cartCount' => $cartCount,
         'cartItems' => $cartSummary['items'],
@@ -573,17 +496,55 @@
 
     <script>
         const searchInput = document.getElementById('searchInput');
-        const productCards = Array.from(document.querySelectorAll('[data-search]'));
+        const productCards = Array.from(document.querySelectorAll('[data-card]'));
+        const filterButtons = Array.from(document.querySelectorAll('#catalogFilters [data-filter]'));
+        const catalogTitle = document.getElementById('catalogTitle');
+        const catalogCount = document.getElementById('catalogCount');
+        let activeFilter = 'all';
 
-        searchInput?.addEventListener('input', (event) => {
-            const query = event.target.value.trim().toLowerCase();
+        function currentFilterLabel() {
+            return filterButtons.find((button) => button.dataset.filter === activeFilter)?.textContent?.replace(/\s*\(\d+\)\s*$/, '') || 'ทั้งหมด';
+        }
+
+        function applyCatalogFilters() {
+            const query = searchInput?.value.trim().toLowerCase() || '';
+            let visibleCount = 0;
 
             productCards.forEach((card) => {
                 const haystack = card.dataset.search || '';
-                const visible = !query || haystack.includes(query);
+                const tags = (card.dataset.filterTags || '').split('|');
+                const matchesFilter = activeFilter === 'all' || tags.includes(activeFilter);
+                const matchesSearch = !query || haystack.includes(query);
+                const visible = matchesFilter && matchesSearch;
+
                 card.style.display = visible ? '' : 'none';
+                if (visible) {
+                    visibleCount += 1;
+                }
+            });
+
+            if (catalogTitle) {
+                catalogTitle.textContent = currentFilterLabel();
+            }
+
+            if (catalogCount) {
+                catalogCount.textContent = `${currentFilterLabel()} ${visibleCount} รายการ`;
+            }
+        }
+
+        filterButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                activeFilter = button.dataset.filter || 'all';
+                filterButtons.forEach((item) => item.classList.toggle('active', item === button));
+                applyCatalogFilters();
             });
         });
+
+        searchInput?.addEventListener('input', (event) => {
+            applyCatalogFilters();
+        });
+
+        applyCatalogFilters();
     </script>
 </body>
 </html>
