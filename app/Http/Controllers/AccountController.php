@@ -12,13 +12,11 @@ class AccountController extends Controller
     {
         $user   = Auth::user();
         $orders = Order::where('user_id', $user->id)
-            ->with(['items.product'])
+            ->with(['items.product', 'items.variant'])
             ->latest()
             ->get();
 
-        $recentOrders = $orders->take(5);
-
-        return view('store.account.index', compact('user', 'orders', 'recentOrders'));
+        return view('store.account.index', compact('user', 'orders'));
     }
 
     public function orders()
