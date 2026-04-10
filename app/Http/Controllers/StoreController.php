@@ -48,7 +48,8 @@ class StoreController extends Controller
             ->take(12)
             ->get();
 
-        $cartCount = $this->cartCount();
+        $cartSummary = $this->cartWithTotals();
+        $cartCount = $cartSummary['count'];
 
         return view('welcome', compact(
             'categories',
@@ -56,7 +57,8 @@ class StoreController extends Controller
             'brandCollections',
             'newArrivals',
             'featuredProducts',
-            'cartCount'
+            'cartCount',
+            'cartSummary'
         ));
     }
 
@@ -80,9 +82,10 @@ class StoreController extends Controller
                 ->get();
         }
 
-        $cartCount = $this->cartCount();
+        $cartSummary = $this->cartWithTotals();
+        $cartCount = $cartSummary['count'];
 
-        return view('store.product', compact('product', 'selectedVariant', 'relatedProducts', 'cartCount'));
+        return view('store.product', compact('product', 'selectedVariant', 'relatedProducts', 'cartCount', 'cartSummary'));
     }
 
     public function search(Request $request): JsonResponse

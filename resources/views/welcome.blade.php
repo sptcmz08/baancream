@@ -53,8 +53,7 @@
             backdrop-filter: blur(16px);
             box-shadow: 0 12px 30px rgba(40, 58, 100, 0.06);
         }
-        .header-main,
-        .header-tabs {
+        .header-main {
             max-width: 1440px;
             margin: 0 auto;
             padding: 0 24px;
@@ -121,28 +120,6 @@
             border-color: rgba(255, 79, 135, 0.35);
             color: var(--primary-color);
         }
-        .header-tabs {
-            display: flex;
-            gap: 14px;
-            align-items: center;
-            overflow-x: auto;
-            padding-top: 14px;
-            padding-bottom: 16px;
-            border-top: 1px solid var(--border-color);
-            white-space: nowrap;
-        }
-        .tab-link {
-            color: var(--text-soft);
-            padding: 8px 0;
-            border-bottom: 2px solid transparent;
-            font-weight: 500;
-        }
-        .tab-link:hover,
-        .tab-link.active {
-            color: var(--text-dark);
-            border-bottom-color: var(--primary-color);
-        }
-
         .hero {
             width: 100%;
             min-height: 74vh;
@@ -158,35 +135,6 @@
             height: 160px;
             background: linear-gradient(180deg, rgba(246, 248, 252, 0) 0%, rgba(246, 248, 252, 1) 100%);
         }
-        .hero-floating-tabs {
-            position: absolute;
-            left: 50%;
-            bottom: 28px;
-            transform: translateX(-50%);
-            width: min(1120px, calc(100% - 32px));
-            background: rgba(255, 255, 255, 0.92);
-            border: 1px solid rgba(255, 255, 255, 0.65);
-            border-radius: 28px;
-            box-shadow: 0 24px 70px rgba(25, 38, 74, 0.18);
-            padding: 18px 24px;
-            display: flex;
-            gap: 14px;
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-        .hero-chip {
-            background: #f7f9ff;
-            border: 1px solid var(--border-color);
-            border-radius: 999px;
-            padding: 10px 16px;
-            font-weight: 500;
-            color: var(--text-soft);
-        }
-        .hero-chip:hover {
-            color: var(--primary-color);
-            border-color: rgba(255, 79, 135, 0.35);
-        }
-
         .page-section {
             max-width: 1440px;
             margin: 0 auto;
@@ -398,16 +346,10 @@
         @media (max-width: 720px) {
             .top-strip { padding: 10px 16px; }
             .header-main,
-            .header-tabs,
             .page-section,
             .notice { padding-left: 16px; padding-right: 16px; }
             .brand-logo { font-size: 2rem; }
             .section-title { font-size: 1.6rem; }
-            .hero-floating-tabs {
-                bottom: 18px;
-                padding: 14px 16px;
-                border-radius: 22px;
-            }
             .brand-showcase { grid-template-columns: 1fr; }
         }
     </style>
@@ -442,7 +384,7 @@
                     <span>🔍</span>
                     <input type="text" id="searchInput" placeholder="ค้นหาสินค้า แบรนด์ หรือหมวดหมู่">
                 </label>
-                <a href="{{ route('cart.index') }}" class="pill-link">ตะกร้าสินค้า</a>
+                <button type="button" class="pill-link" data-open-cart style="font-family: inherit; cursor: pointer;">ตะกร้าสินค้า</button>
                 @auth
                     <a href="{{ auth()->user()->role === 'admin' ? route('admin.dashboard') : route('dashboard') }}" class="user-action">บัญชีของฉัน</a>
                 @else
@@ -451,12 +393,6 @@
             </div>
         </div>
 
-        <div class="header-tabs">
-            <a href="#new-arrivals" class="tab-link active">มาใหม่</a>
-            @foreach($categories as $category)
-                <a href="#category-{{ $category->slug }}" class="tab-link">{{ $category->name }}</a>
-            @endforeach
-        </div>
     </header>
 
     @if(session('success'))
@@ -465,14 +401,7 @@
         </div>
     @endif
 
-    <section class="hero" aria-label="แบนเนอร์หลัก">
-        <div class="hero-floating-tabs">
-            <a href="#new-arrivals" class="hero-chip">สินค้าใหม่</a>
-            @foreach($brands as $brand)
-                <a href="#brand-{{ $brand->slug }}" class="hero-chip">{{ $brand->name }}</a>
-            @endforeach
-        </div>
-    </section>
+    <section class="hero" aria-label="แบนเนอร์หลัก"></section>
 
     <section class="page-section" id="categories" style="padding-top: 26px;">
         <div class="section-head">
@@ -636,7 +565,11 @@
         @endif
     </section>
 
-    @include('store.partials.floating-cart', ['cartCount' => $cartCount])
+    @include('store.partials.floating-cart', [
+        'cartCount' => $cartCount,
+        'cartItems' => $cartSummary['items'],
+        'cartTotal' => $cartSummary['total'],
+    ])
 
     <script>
         const searchInput = document.getElementById('searchInput');

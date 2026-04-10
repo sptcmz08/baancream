@@ -365,7 +365,11 @@
         </section>
     </div>
 
-    @include('store.partials.floating-cart', ['cartCount' => $cartCount])
+    @include('store.partials.floating-cart', [
+        'cartCount' => $cartCount,
+        'cartItems' => $cartSummary['items'],
+        'cartTotal' => $cartSummary['total'],
+    ])
 
     <script>
         const variantOptions = Array.from(document.querySelectorAll('[data-variant-option]'));

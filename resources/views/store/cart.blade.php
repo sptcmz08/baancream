@@ -29,7 +29,7 @@
             <div style="background:#22c55e20; color:#16a34a; padding:15px; border-radius:12px; margin-top:20px;">{{ session('success') }}</div>
         @endif
 
-        @if(count($cart) > 0)
+        @if(count($cart ?? []) > 0)
             <table class="table">
                 <thead>
                     <tr>
@@ -45,27 +45,27 @@
                         <tr>
                             <td>
                                 <div style="display:flex; align-items:center; gap:15px;">
-                                    @if($item['image'])
+                                    @if(!empty($item['image']))
                                         <img src="{{ asset('storage/'.$item['image']) }}" style="width:72px; height:72px; object-fit:cover; border-radius:14px;">
                                     @endif
                                     <div>
-                                        <strong style="display:block; margin-bottom:6px;">{{ $item['name'] }}</strong>
-                                        @if($item['variant_name'])
+                                        <strong style="display:block; margin-bottom:6px;">{{ $item['name'] ?? 'สินค้า' }}</strong>
+                                        @if(!empty($item['variant_name']))
                                             <span class="pill variant">{{ $item['variant_name'] }}</span>
                                         @endif
-                                        @if($item['uses_wholesale'])
+                                        @if(!empty($item['uses_wholesale']))
                                             <span class="pill wholesale">เรทส่ง 10 ชิ้น</span>
                                         @endif
                                     </div>
                                 </div>
                             </td>
-                            <td>฿{{ number_format($item['unit_price'], 2) }}</td>
-                            <td>{{ $item['quantity'] }} ชิ้น</td>
-                            <td style="font-weight:700; color:#0f172a;">฿{{ number_format($item['subtotal'], 2) }}</td>
+                            <td>฿{{ number_format((float) ($item['unit_price'] ?? 0), 2) }}</td>
+                            <td>{{ $item['quantity'] ?? 0 }} ชิ้น</td>
+                            <td style="font-weight:700; color:#0f172a;">฿{{ number_format((float) ($item['subtotal'] ?? 0), 2) }}</td>
                             <td>
                                 <form action="{{ route('cart.remove') }}" method="POST">
                                     @csrf
-                                    <input type="hidden" name="id" value="{{ $item['id'] }}">
+                                    <input type="hidden" name="id" value="{{ $item['id'] ?? '' }}">
                                     <button type="submit" class="btn-danger">ลบ</button>
                                 </form>
                             </td>
