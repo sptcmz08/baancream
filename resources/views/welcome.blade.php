@@ -497,7 +497,7 @@
             'price' => number_format($product->displayRetailPrice(), 2),
             'url' => route('products.show', $product),
             'image' => $product->displayImage() ? route('media.show', ['path' => $product->displayImage()]) : null,
-            'search' => strtolower($product->name . ' ' . $product->categories->pluck('name')->implode(' ') . ' ' . $product->variants->pluck('name')->implode(' ')),
+            'search' => strtolower($product->name),
         ])->values();
     @endphp
     <div class="top-strip">
@@ -639,7 +639,7 @@
                         class="product-card"
                         data-card
                         data-filter-tags="{{ implode('|', $filterTags) }}"
-                        data-search="{{ strtolower($product->name . ' ' . $product->categories->pluck('name')->implode(' ') . ' ' . $product->variants->pluck('name')->implode(' ')) }}">
+                        data-search="{{ strtolower($product->name) }}">
                         <a href="{{ route('products.show', $product) }}" aria-label="{{ $product->name }}">
                             <div class="product-image">
                                 @if($product->displayImage())
