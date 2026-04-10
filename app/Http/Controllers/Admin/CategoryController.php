@@ -23,10 +23,16 @@ class CategoryController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate(['name' => 'required|string|max:255']);
+        $request->validate([
+            'name' => 'required|string|max:255|unique:categories,name'
+        ]);
+        
+        $slug = \Illuminate\Support\Str::slug($request->name);
+        if (empty($slug)) $slug = 'cat-' . uniqid();
+
         \App\Models\Category::create([
             'name' => $request->name,
-            'slug' => \Str::slug($request->name)
+            'slug' => $slug
         ]);
         return redirect()->route('admin.categories.index')->with('success', 'เพิ่มหมวดหมู่สำเร็จ');
     }
@@ -38,10 +44,16 @@ class CategoryController extends Controller
 
     public function update(Request $request, \App\Models\Category $category)
     {
-        $request->validate(['name' => 'required|string|max:255']);
+        $request->validate([
+            'name' => 'required|string|max:255|unique:categories,name,' . $category->id
+        ]);
+
+        $slug = \Illuminate\Support\Str::slug($request->name);
+        if (empty($slug)) $slug = 'cat-' . uniqid();
+
         $category->update([
             'name' => $request->name,
-            'slug' => \Str::slug($request->name)
+            'slug' => $slug
         ]);
         return redirect()->route('admin.categories.index')->with('success', 'อัปเดตหมวดหมู่สำเร็จ');
     }

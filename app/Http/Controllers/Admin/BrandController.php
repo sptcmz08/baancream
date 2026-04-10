@@ -29,9 +29,12 @@ class BrandController extends Controller
             'name' => 'required|string|max:255|unique:brands,name',
         ]);
 
+        $slug = Str::slug($request->name);
+        if (empty($slug)) $slug = 'brand-' . uniqid();
+
         Brand::create([
             'name' => $request->name,
-            'slug' => Str::slug($request->name),
+            'slug' => $slug,
         ]);
 
         return redirect()->route('admin.brands.index')->with('success', 'เพิ่มแบรนด์สำเร็จ');
@@ -48,9 +51,12 @@ class BrandController extends Controller
             'name' => 'required|string|max:255|unique:brands,name,' . $brand->id,
         ]);
 
+        $slug = Str::slug($request->name);
+        if (empty($slug)) $slug = 'brand-' . uniqid();
+
         $brand->update([
             'name' => $request->name,
-            'slug' => Str::slug($request->name),
+            'slug' => $slug,
         ]);
 
         return redirect()->route('admin.brands.index')->with('success', 'อัปเดตแบรนด์สำเร็จ');
