@@ -28,4 +28,18 @@ class RegistrationTest extends TestCase
         $this->assertAuthenticated();
         $response->assertRedirect(route('dashboard', absolute: false));
     }
+
+    public function test_new_users_can_register_and_return_to_cart(): void
+    {
+        $response = $this->post('/register', [
+            'name' => 'Test User',
+            'email' => 'cart-user@example.com',
+            'password' => 'Zt7!vK2#Lm9@Qa1',
+            'password_confirmation' => 'Zt7!vK2#Lm9@Qa1',
+            'redirect_to' => '/cart',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect('/cart');
+    }
 }

@@ -66,7 +66,7 @@
             @auth
                 <a href="{{ route('checkout.index') }}" style="display:flex; align-items:center; justify-content:center; min-height:52px; border-radius:18px; background:linear-gradient(135deg, #12c758, #10b34e); color:white; font-weight:700; text-decoration:none;">ไปชำระเงิน</a>
             @else
-                <button type="button" data-open-auth data-auth-mode="login" style="display:flex; align-items:center; justify-content:center; min-height:52px; border:none; width:100%; border-radius:18px; background:#152034; color:white; font-weight:700; cursor:pointer;">เข้าสู่ระบบเพื่อชำระเงิน</button>
+                <button type="button" data-open-auth data-auth-mode="login" data-auth-redirect="{{ route('cart.index', absolute: false) }}" style="display:flex; align-items:center; justify-content:center; min-height:52px; border:none; width:100%; border-radius:18px; background:#152034; color:white; font-weight:700; cursor:pointer;">เข้าสู่ระบบเพื่อชำระเงิน</button>
             @endauth
         </div>
     </div>

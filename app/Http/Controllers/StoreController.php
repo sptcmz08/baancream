@@ -189,6 +189,7 @@ class StoreController extends Controller
             'credit' => $credit,
             'cartCount' => $cart['count'],
             'cartTotal' => $cart['total'],
+            'customerName' => old('recipient_name', $user->name),
         ]);
     }
 
@@ -199,30 +200,47 @@ class StoreController extends Controller
             return redirect()->route('home');
         }
 
+        $validated = $request->validate([
+            'recipient_name' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:50'],
+            'address_line' => ['required', 'string'],
+            'subdistrict' => ['required', 'string', 'max:255'],
+            'district' => ['required', 'string', 'max:255'],
+            'province' => ['required', 'string', 'max:255'],
+            'postal_code' => ['required', 'string', 'max:20'],
+            'order_note' => ['nullable', 'string'],
+            'payment_type' => ['required', 'in:promptpay,credit'],
+            'slip_image' => ['nullable', 'image'],
+        ]);
+
         $totalAmount = $cart['total'];
-        $type = $request->payment_type ?? 'money_transfer';
+        $paymentType = $validated['payment_type'];
+        $type = $paymentType === 'credit' ? 'credit' : 'normal';
         $status = 'pending';
+
+        if ($paymentType === 'promptpay' && !$request->hasFile('slip_image')) {
+            return back()->withInput()->with('error', 'กรุณาแนบสลิปการโอนผ่าน PromptPay');
+        }
 
         if ($request->hasFile('slip_image')) {
             $slipPath = $request->file('slip_image')->store('slips', 'public');
-            $status = 'paid_wait_shipping';
         } else {
             $slipPath = null;
         }
 
-        if ($type === 'credit') {
+        if ($paymentType === 'credit') {
             $credit = CreditCycle::where('user_id', auth()->id())
                 ->where('month', date('n'))
                 ->where('year', date('Y'))
                 ->first();
             if ($credit) {
                 if ($credit->credit_limit !== null && ($credit->spent_amount + $totalAmount > $credit->credit_limit)) {
-                    return back()->with('error', 'โควตาเครดิตในเดือนนี้ของคุณไม่เพียงพอ!');
+                    return back()->withInput()->with('error', 'โควตาเครดิตในเดือนนี้ของคุณไม่เพียงพอ!');
                 }
                 $credit->increment('spent_amount', $totalAmount);
                 $status = 'paid_wait_shipping';
             } else {
-                return back()->with('error', 'คุณยังไม่ได้รับสิทธิ์เครดิตในเดือนนี้');
+                return back()->withInput()->with('error', 'คุณยังไม่ได้รับสิทธิ์เครดิตในเดือนนี้');
             }
         }
 
@@ -230,8 +248,17 @@ class StoreController extends Controller
             'user_id' => auth()->id(),
             'total_amount' => $totalAmount,
             'type' => $type,
+            'payment_method' => $paymentType,
             'status' => $status,
             'slip_image' => $slipPath,
+            'recipient_name' => $validated['recipient_name'],
+            'phone' => $validated['phone'],
+            'address_line' => $validated['address_line'],
+            'subdistrict' => $validated['subdistrict'],
+            'district' => $validated['district'],
+            'province' => $validated['province'],
+            'postal_code' => $validated['postal_code'],
+            'order_note' => $validated['order_note'] ?? null,
         ]);
 
         foreach ($cart['items'] as $item) {
@@ -248,7 +275,7 @@ class StoreController extends Controller
 
         session()->forget('cart');
 
-        return redirect()->route('dashboard')->with('success', 'สั่งซื้อสำเร็จ ขอบคุณที่ใช้บริการครับ!');
+        return redirect()->route('account.orders')->with('success', 'สั่งซื้อสำเร็จ ขอบคุณที่ใช้บริการครับ!');
     }
 
     private function resolveVariant(Product $product, ?int $variantId): ?ProductVariant

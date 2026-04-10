@@ -13,9 +13,12 @@ class AuthenticatedSessionController extends Controller
     /**
      * Display the login view.
      */
-    public function create(): RedirectResponse
+    public function create(Request $request): RedirectResponse
     {
-        return redirect()->route('home', ['auth' => 'login']);
+        return redirect()->route('home', array_filter([
+            'auth' => 'login',
+            'redirect_to' => $this->redirectTarget($request),
+        ]));
     }
 
     /**
@@ -27,7 +30,11 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $redirectTarget = $this->redirectTarget($request);
+
+        return $redirectTarget
+            ? redirect()->to($redirectTarget)
+            : redirect()->intended(route('dashboard', absolute: false));
     }
 
     /**
@@ -42,5 +49,20 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+    private function redirectTarget(Request $request): ?string
+    {
+        $target = (string) $request->input('redirect_to', $request->query('redirect_to', ''));
+
+        if ($target === '') {
+            return null;
+        }
+
+        if (str_starts_with($target, '/')) {
+            return $target;
+        }
+
+        return null;
     }
 }

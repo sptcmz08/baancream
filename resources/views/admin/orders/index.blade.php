@@ -10,8 +10,9 @@
                 <th>รหัส Order</th>
                 <th>วันที่สั่งซื้อ</th>
                 <th>ลูกค้า</th>
+                <th>จัดส่งถึง</th>
                 <th>ยอดรวม</th>
-                <th>ประเภทการจ่าย</th>
+                <th>วิธีชำระเงิน</th>
                 <th>สถานะการจัดส่ง</th>
                 <th>จัดการสถานะ</th>
             </tr>
@@ -22,12 +23,34 @@
                 <td style="font-weight:500;">#ORD-{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}</td>
                 <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
                 <td>{{ $order->user->name ?? 'Unknown' }}</td>
+                <td style="min-width:220px;">
+                    <div style="font-weight:600;">{{ $order->recipient_name ?: '-' }}</div>
+                    @if($order->phone)
+                        <div style="color:var(--text-muted); font-size:0.85rem;">{{ $order->phone }}</div>
+                    @endif
+                    @if($order->address_line)
+                        <div style="color:var(--text-muted); font-size:0.82rem; margin-top:4px; line-height:1.55;">
+                            {{ $order->address_line }}
+                            @if($order->subdistrict || $order->district || $order->province || $order->postal_code)
+                                <br>
+                                {{ collect([$order->subdistrict, $order->district, $order->province, $order->postal_code])->filter()->implode(' ') }}
+                            @endif
+                        </div>
+                    @endif
+                </td>
                 <td style="color:var(--primary-color);">฿{{ number_format($order->total_amount, 2) }}</td>
                 <td>
-                    @if($order->type == 'credit')
-                        <span style="background:#3b82f615; color:#2563eb; padding:4px 8px; border-radius:4px; font-size:0.8rem;">รอบบิลเครดิต</span>
+                    @if($order->payment_method === 'credit' || $order->type == 'credit')
+                        <span style="background:#3b82f615; color:#2563eb; padding:4px 8px; border-radius:4px; font-size:0.8rem;">เครดิต</span>
                     @else 
-                        <span style="background:#f3f4f6; color:#4b5563; padding:4px 8px; border-radius:4px; font-size:0.8rem;">เงินสด/โอน</span>
+                        <span style="background:#f3f4f6; color:#4b5563; padding:4px 8px; border-radius:4px; font-size:0.8rem;">PromptPay / โอนเงิน</span>
+                    @endif
+                    @if($order->slip_image)
+                        <div style="margin-top:6px;">
+                            <a href="{{ route('media.show', ['path' => $order->slip_image]) }}" target="_blank" style="font-size:0.82rem; color:var(--primary-color); text-decoration:none;">
+                                ดูสลิป
+                            </a>
+                        </div>
                     @endif
                 </td>
                 <td>
@@ -52,7 +75,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="7" style="text-align:center; padding:30px; color:var(--text-muted);">ยังไม่มีรายการออเดอร์</td>
+                <td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">ยังไม่มีรายการออเดอร์</td>
             </tr>
             @endforelse
         </tbody>

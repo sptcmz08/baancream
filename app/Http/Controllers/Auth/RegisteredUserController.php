@@ -17,9 +17,12 @@ class RegisteredUserController extends Controller
     /**
      * Display the registration view.
      */
-    public function create(): RedirectResponse
+    public function create(Request $request): RedirectResponse
     {
-        return redirect()->route('home', ['auth' => 'register']);
+        return redirect()->route('home', array_filter([
+            'auth' => 'register',
+            'redirect_to' => $this->redirectTarget($request),
+        ]));
     }
 
     /**
@@ -46,6 +49,25 @@ class RegisteredUserController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect(route('dashboard', absolute: false));
+        $redirectTarget = $this->redirectTarget($request);
+
+        return $redirectTarget
+            ? redirect()->to($redirectTarget)
+            : redirect(route('dashboard', absolute: false));
+    }
+
+    private function redirectTarget(Request $request): ?string
+    {
+        $target = (string) $request->input('redirect_to', $request->query('redirect_to', ''));
+
+        if ($target === '') {
+            return null;
+        }
+
+        if (str_starts_with($target, '/')) {
+            return $target;
+        }
+
+        return null;
     }
 }

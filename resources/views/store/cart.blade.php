@@ -5,6 +5,13 @@
     <title>ตะกร้าสินค้า | บ้านครีม สิงห์บุรี</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #ff4f87;
+            --text-soft: #62708a;
+            --text-dark: #1a2233;
+            --border-color: #e7ebf3;
+            --gold-color: #f8c64f;
+        }
         body { font-family: 'Prompt', sans-serif; background: #f6f8fc; color: #1A1A1A; margin:0; padding:40px 20px; }
         .container { max-width: 1080px; margin: 0 auto; background: white; padding: 34px; border-radius: 28px; box-shadow: 0 18px 50px rgba(19, 33, 68, 0.08); }
         h1 { margin-top:0; color:#1f2937; font-size:2.2rem; }
@@ -76,11 +83,19 @@
 
             <div style="text-align:right; margin-top:30px;">
                 <h2 style="font-size: 1.8rem; margin-bottom: 20px;">ยอดรวมทั้งสิ้น: <span style="color:#22c55e;">฿{{ number_format($cartTotal, 2) }}</span></h2>
-                <a href="{{ route('checkout.index') }}" class="btn-primary" style="font-size:1.05rem;">ดำเนินการชำระเงิน</a>
+                @auth
+                    <a href="{{ route('checkout.index') }}" class="btn-primary" style="font-size:1.05rem;">ดำเนินการชำระเงิน</a>
+                @else
+                    <button type="button" class="btn-primary" data-open-auth data-auth-mode="login" data-auth-redirect="{{ route('cart.index', absolute: false) }}" style="font-size:1.05rem;">เข้าสู่ระบบเพื่อชำระเงิน</button>
+                @endauth
             </div>
         @else
             <div style="text-align:center; padding:60px; color:#94a3b8;">ตะกร้าสินค้าว่างเปล่า</div>
         @endif
     </div>
+
+    @guest
+        @include('store.partials.auth-modal')
+    @endguest
 </body>
 </html>

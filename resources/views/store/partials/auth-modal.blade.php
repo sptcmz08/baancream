@@ -1,7 +1,8 @@
 @php
     $initialAuthMode = old('auth_mode', request('auth', 'login'));
     $initialAuthMode = in_array($initialAuthMode, ['login', 'register'], true) ? $initialAuthMode : 'login';
-    $authHasErrors = $errors->has('email') || $errors->has('password') || $errors->has('name') || $errors->has('password_confirmation');
+    $initialAuthRedirect = old('redirect_to', request('redirect_to', route('home', absolute: false)));
+    $authHasErrors = $errors->has('login') || $errors->has('email') || $errors->has('password') || $errors->has('name') || $errors->has('password_confirmation');
 @endphp
 
 <style>
@@ -269,11 +270,12 @@
             <form method="POST" action="{{ route('login') }}" class="auth-form" data-auth-form="login">
                 @csrf
                 <input type="hidden" name="auth_mode" value="login">
+                <input type="hidden" name="redirect_to" value="{{ $initialAuthRedirect }}" data-auth-redirect-input>
 
                 <div class="auth-field">
-                    <label class="auth-label" for="auth_login_username">ชื่อผู้ใช้ (Username)</label>
-                    <input class="auth-input" id="auth_login_username" type="text" name="username" value="{{ old('auth_mode') === 'login' ? old('username') : '' }}" required autocomplete="username" placeholder="กรอก username">
-                    @error('username')
+                    <label class="auth-label" for="auth_login_email">อีเมล</label>
+                    <input class="auth-input" id="auth_login_email" type="email" name="email" value="{{ old('auth_mode') === 'login' ? old('email') : '' }}" required autocomplete="email" placeholder="กรอกอีเมล">
+                    @error('email')
                         <div class="auth-help">{{ $message }}</div>
                     @enderror
                 </div>
@@ -302,6 +304,7 @@
             <form method="POST" action="{{ route('register') }}" class="auth-form" data-auth-form="register">
                 @csrf
                 <input type="hidden" name="auth_mode" value="register">
+                <input type="hidden" name="redirect_to" value="{{ $initialAuthRedirect }}" data-auth-redirect-input>
 
                 <div class="auth-field">
                     <label class="auth-label" for="auth_register_name">ชื่อ-นามสกุล</label>
@@ -312,9 +315,9 @@
                 </div>
 
                 <div class="auth-field">
-                    <label class="auth-label" for="auth_register_username">Username <span style="color:var(--text-soft);font-weight:400;font-size:0.85rem;">(ภาษาอังกฤษเท่านั้น)</span></label>
-                    <input class="auth-input" id="auth_register_username" type="text" name="username" value="{{ old('auth_mode') === 'register' ? old('username') : '' }}" required autocomplete="off" placeholder="เช่น john_doe" pattern="[a-zA-Z0-9_]+" title="ภาษาอังกฤษ ตัวเลข หรือ _ เท่านั้น">
-                    @error('username')
+                    <label class="auth-label" for="auth_register_email">อีเมล</label>
+                    <input class="auth-input" id="auth_register_email" type="email" name="email" value="{{ old('auth_mode') === 'register' ? old('email') : '' }}" required autocomplete="email" placeholder="กรอกอีเมล">
+                    @error('email')
                         <div class="auth-help">{{ $message }}</div>
                     @enderror
                 </div>
@@ -353,6 +356,7 @@
 
         const tabs = Array.from(document.querySelectorAll('[data-auth-tab]'));
         const forms = Array.from(document.querySelectorAll('[data-auth-form]'));
+        const redirectInputs = Array.from(document.querySelectorAll('[data-auth-redirect-input]'));
         const openers = Array.from(document.querySelectorAll('[data-open-auth]'));
         const closers = Array.from(document.querySelectorAll('[data-auth-close]'));
         const switchers = Array.from(document.querySelectorAll('[data-auth-switch]'));
@@ -364,8 +368,17 @@
             forms.forEach((form) => form.classList.toggle('is-active', form.dataset.authForm === currentMode));
         };
 
-        const openModal = (mode) => {
+        const setRedirectTarget = (target) => {
+            const fallback = @json(route('home', absolute: false));
+            const nextTarget = target || fallback;
+            redirectInputs.forEach((input) => {
+                input.value = nextTarget;
+            });
+        };
+
+        const openModal = (mode, redirectTarget) => {
             setMode(mode || currentMode);
+            setRedirectTarget(redirectTarget);
             authModal.classList.add('is-open');
             authModal.setAttribute('aria-hidden', 'false');
             document.body.style.overflow = 'hidden';
@@ -380,7 +393,7 @@
         tabs.forEach((tab) => tab.addEventListener('click', () => setMode(tab.dataset.authTab)));
         switchers.forEach((button) => button.addEventListener('click', () => setMode(button.dataset.authSwitch)));
         openers.forEach((button) => {
-            button.addEventListener('click', () => openModal(button.dataset.authMode));
+            button.addEventListener('click', () => openModal(button.dataset.authMode, button.dataset.authRedirect));
         });
         closers.forEach((button) => button.addEventListener('click', closeModal));
         authModal.addEventListener('click', (event) => {
@@ -395,6 +408,7 @@
         });
 
         setMode(currentMode);
+        setRedirectTarget(@json($initialAuthRedirect));
 
         if (authModal.classList.contains('is-open')) {
             document.body.style.overflow = 'hidden';
