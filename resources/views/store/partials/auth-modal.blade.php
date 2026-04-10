@@ -42,21 +42,21 @@
         margin-bottom: 14px;
     }
     .auth-logo {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: block;
         width: 100%;
+        height: 100%;
         font-size: 2.15rem;
         font-weight: 700;
         letter-spacing: -0.04em;
         color: var(--primary-color);
         line-height: 1;
-        padding: 32px;
+        padding: 0;
+        margin: 0;
     }
     .auth-logo-image {
         width: 100%;
         height: 100%;
-        object-fit: contain;
+        object-fit: cover;
         display: block;
     }
     .auth-logo span:nth-child(2) { color: #6a67ff; }
