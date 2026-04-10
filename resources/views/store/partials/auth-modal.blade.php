@@ -31,10 +31,10 @@
     .auth-panel {
         background: linear-gradient(145deg, #fff3f7 0%, #eef8ff 100%);
         display: flex;
-        align-items: center;
+        align-items: stretch;
         justify-content: center;
-        padding: 24px;
-        min-height: 360px;
+        padding: 0;
+        overflow: hidden;
     }
     .auth-panel-title {
         font-size: clamp(2rem, 5vw, 3.4rem);
@@ -51,11 +51,11 @@
         letter-spacing: -0.04em;
         color: var(--primary-color);
         line-height: 1;
+        padding: 32px;
     }
     .auth-logo-image {
         width: 100%;
-        max-width: 340px;
-        height: auto;
+        height: 100%;
         object-fit: contain;
         display: block;
     }
