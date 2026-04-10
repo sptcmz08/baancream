@@ -36,7 +36,7 @@
                 <td>{{ $product->name }}</td>
                 <td>{{ $product->variants->count() ?: '-' }}</td>
                 <td style="color: var(--primary-color);">฿{{ number_format($product->displayRetailPrice(), 2) }}</td>
-                <td style="color: #16a34a;">฿{{ number_format($product->displayWholesalePrice(), 2) }}</td>
+                <td style="color: #16a34a;">{{ $product->displayWholesaleMinQty() }} ชิ้น / ฿{{ number_format($product->displayWholesaleBundlePrice(), 2) }}</td>
                 <td>{{ $product->categories->pluck('name')->join(', ') ?: '-' }}</td>
                 <td>{{ $product->is_new_arrival ? 'ใช่' : '-' }}</td>
                 <td style="display: flex; gap: 8px;">

@@ -54,7 +54,7 @@
                                             <span class="pill variant">{{ $item['variant_name'] }}</span>
                                         @endif
                                         @if(!empty($item['uses_wholesale']))
-                                            <span class="pill wholesale">เรทส่ง 10 ชิ้น</span>
+                                            <span class="pill wholesale">เรทส่ง {{ $item['wholesale_min_qty'] ?? 1 }} ชิ้น</span>
                                         @endif
                                     </div>
                                 </div>

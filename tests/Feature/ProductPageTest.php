@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductVariant;
@@ -20,40 +19,38 @@ class ProductPageTest extends TestCase
             'slug' => 'skincare',
         ]);
 
-        $brand = Brand::create([
-            'name' => 'Baancream',
-            'slug' => 'baancream',
-        ]);
-
         $product = Product::create([
             'sku' => 'P-001',
             'name' => 'ครีมหน้าใส',
             'description' => 'รายละเอียดสินค้า',
             'retail_price' => 590,
             'wholesale_price' => 350,
-            'category_id' => $category->id,
-            'brand_id' => $brand->id,
+            'stock' => 20,
+            'wholesale_min_qty' => 10,
         ]);
+        $product->categories()->sync([$category->id]);
 
         ProductVariant::create([
             'product_id' => $product->id,
             'name' => 'สูตรกลางวัน',
             'sku' => 'P-001-DAY',
             'retail_price' => 590,
-            'wholesale_price' => 350,
+            'wholesale_price' => 3500,
+            'wholesale_min_qty' => 10,
             'stock' => 12,
             'sort_order' => 1,
         ]);
 
-        Product::create([
+        $relatedProduct = Product::create([
             'sku' => 'P-002',
             'name' => 'เซรั่มบำรุงผิว',
             'description' => 'สินค้าแนะนำ',
             'retail_price' => 790,
-            'wholesale_price' => 520,
-            'category_id' => $category->id,
-            'brand_id' => $brand->id,
+            'wholesale_price' => 5200,
+            'stock' => 10,
+            'wholesale_min_qty' => 10,
         ]);
+        $relatedProduct->categories()->sync([$category->id]);
 
         $response = $this->get(route('products.show', $product));
 
@@ -70,9 +67,9 @@ class ProductPageTest extends TestCase
             'name' => 'สินค้าทดสอบ',
             'description' => null,
             'retail_price' => 199,
-            'wholesale_price' => 150,
-            'category_id' => null,
-            'brand_id' => null,
+            'wholesale_price' => 1500,
+            'stock' => 3,
+            'wholesale_min_qty' => 10,
         ]);
 
         $response = $this->get(route('products.show', $product));

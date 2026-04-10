@@ -618,8 +618,9 @@
         $categorySlug = $firstCategory ? $firstCategory->slug : null;
         $selectedRetailPrice = (float) (data_get($selectedVariant, 'retail_price') ?? data_get($product, 'retail_price', 0));
         $selectedWholesalePrice = (float) (data_get($selectedVariant, 'wholesale_price') ?? data_get($product, 'wholesale_price', 0));
+        $selectedWholesaleMinQty = (int) (data_get($selectedVariant, 'wholesale_min_qty') ?? data_get($product, 'wholesale_min_qty', 1));
         $selectedStock = data_get($selectedVariant, 'stock');
-        $mainImage = data_get($selectedVariant, 'image') ?: data_get($product, 'image');
+        $mainImage = $selectedVariant?->displayImage() ?: $product->displayImage();
         $selectedVariantName = (string) data_get($selectedVariant, 'name', 'สูตรเริ่มต้น');
         $selectedVariantSku = (string) (data_get($selectedVariant, 'sku') ?: 'สูตรสินค้า');
     @endphp
@@ -679,16 +680,17 @@
                     @endif
                 </div>
 
-                @if($product->variants->isNotEmpty() || !empty($product->images))
+                @if($product->variants->isNotEmpty() || !empty($product->galleryImages()))
                     <div class="thumb-row">
-                        @if(!empty($product->images))
-                            @foreach($product->images as $index => $img)
+                        @if(!empty($product->galleryImages()))
+                            @foreach($product->galleryImages() as $index => $img)
                                 <button type="button" class="thumb {{ $index === 0 && !$selectedVariant ? 'active' : '' }}"
                                     data-variant-thumb
                                     data-variant-id=""
                                     data-variant-image="{{ asset('storage/' . $img) }}"
                                     data-variant-retail="{{ number_format($selectedRetailPrice, 2, '.', '') }}"
                                     data-variant-wholesale="{{ number_format($selectedWholesalePrice, 2, '.', '') }}"
+                                    data-variant-min-qty="{{ $selectedWholesaleMinQty }}"
                                     data-variant-stock="{{ $selectedStock }}"
                                     data-variant-sku=""
                                     data-variant-name="{{ $productName }}">
@@ -698,13 +700,14 @@
                         @endif
 
                         @foreach($product->variants as $variant)
-                            @php $imagePath = $variant->image ?: $product->displayImage(); @endphp
+                            @php $imagePath = $variant->displayImage() ?: $product->displayImage(); @endphp
                             <button type="button" class="thumb {{ $selectedVariant && $selectedVariant->id === $variant->id ? 'active' : '' }}"
                                 data-variant-thumb
                                 data-variant-id="{{ $variant->id }}"
                                 data-variant-image="{{ $imagePath ? asset('storage/' . $imagePath) : '' }}"
                                 data-variant-retail="{{ number_format($variant->retail_price, 2, '.', '') }}"
                                 data-variant-wholesale="{{ number_format($variant->wholesale_price, 2, '.', '') }}"
+                                data-variant-min-qty="{{ $variant->wholesale_min_qty ?: $product->wholesale_min_qty }}"
                                 data-variant-stock="{{ $variant->stock }}"
                                 data-variant-sku="{{ data_get($variant, 'sku') ?: 'สูตรสินค้า' }}"
                                 data-variant-name="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
@@ -752,7 +755,7 @@
                             <div class="price-retail" id="retailPrice">฿{{ number_format($selectedRetailPrice, 2) }}</div>
                         </div>
                         <div class="price-wholesale">
-                            <span>ส่ง {{ $product->wholesale_min_qty }} ชิ้น</span>
+                            <span id="bulkQtyText">ส่ง {{ $selectedWholesaleMinQty }} ชิ้น</span>
                             <strong id="wholesalePrice">฿{{ number_format($selectedWholesalePrice, 2) }}</strong>
                         </div>
                     </div>
@@ -764,17 +767,18 @@
                         <div class="variant-current">
                             <div class="variant-current-label">สูตรที่เลือก</div>
                             <div class="variant-current-name" id="variantNameText">{{ $selectedVariantName }}</div>
-                            <div class="variant-current-meta" id="variantMetaText">{{ $selectedVariantSku }} · คงเหลือ {{ $selectedStock ?? 0 }} ชิ้น</div>
+                            <div class="variant-current-meta" id="variantMetaText">{{ $selectedVariantSku }} · คงเหลือ {{ $selectedStock ?? 0 }} ชิ้น · ส่ง {{ $selectedWholesaleMinQty }} ชิ้น</div>
                         </div>
                         <div class="variant-picker">
                             @foreach($product->variants as $variant)
-                                @php $imagePath = $variant->image ?: $product->image; @endphp
+                                @php $imagePath = $variant->displayImage() ?: $product->displayImage(); @endphp
                                 <button type="button" class="variant-option {{ $selectedVariant && $selectedVariant->id === $variant->id ? 'active' : '' }}"
                                     data-variant-option
                                     data-variant-id="{{ $variant->id }}"
                                     data-variant-image="{{ $imagePath ? asset('storage/' . $imagePath) : '' }}"
                                     data-variant-retail="{{ number_format($variant->retail_price, 2, '.', '') }}"
                                     data-variant-wholesale="{{ number_format($variant->wholesale_price, 2, '.', '') }}"
+                                    data-variant-min-qty="{{ $variant->wholesale_min_qty ?: $product->wholesale_min_qty }}"
                                     data-variant-stock="{{ $variant->stock }}"
                                     data-variant-sku="{{ data_get($variant, 'sku') ?: 'สูตรสินค้า' }}"
                                     data-variant-name="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
@@ -803,8 +807,8 @@
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
                         <input type="hidden" name="variant_id" id="bulkVariantId" value="{{ data_get($selectedVariant, 'id') }}">
-                        <input type="hidden" name="quantity" value="{{ $product->wholesale_min_qty }}">
-                        <button type="submit" class="cta-button primary">ใส่ตะกร้า {{ $product->wholesale_min_qty }} ชิ้น <span id="bulkPriceText">฿{{ number_format($selectedWholesalePrice * $product->wholesale_min_qty, 2) }}</span></button>
+                        <input type="hidden" name="quantity" id="bulkQuantity" value="{{ $selectedWholesaleMinQty }}">
+                        <button type="submit" class="cta-button primary">ใส่ตะกร้า <span id="bulkQtyButtonText">{{ $selectedWholesaleMinQty }}</span> ชิ้น <span id="bulkPriceText">฿{{ number_format($selectedWholesalePrice, 2) }}</span></button>
                     </form>
                 </div>
             </div>
@@ -832,12 +836,9 @@
                         </a>
                         <div class="product-body">
                             <div class="product-meta">
-                                @if(data_get($item, 'category.name'))
-                                    <span class="product-badge">{{ data_get($item, 'category.name') }}</span>
-                                @endif
-                                @if(data_get($item, 'brand.name'))
-                                    <span class="product-badge brand">{{ data_get($item, 'brand.name') }}</span>
-                                @endif
+                                @foreach($item->categories as $category)
+                                    <span class="product-badge">{{ $category->name }}</span>
+                                @endforeach
                                 @if($item->hasVariants())
                                     <span class="product-badge">{{ $item->variants->count() }} สูตร</span>
                                 @endif
@@ -847,7 +848,7 @@
                             <div class="product-footer">
                                 <div>
                                     <div class="price-retail" style="font-size:1.15rem;">฿{{ number_format((float) $item->displayRetailPrice(), 2) }}</div>
-                                    <div class="price-wholesale">ราคาส่ง ฿{{ number_format((float) $item->displayWholesalePrice(), 2) }}</div>
+                                    <div class="price-wholesale">ราคาส่ง {{ $item->displayWholesaleMinQty() }} ชิ้น / ฿{{ number_format((float) $item->displayWholesaleBundlePrice(), 2) }}</div>
                                 </div>
                                 <form method="POST" action="{{ route('cart.add') }}" style="margin:0;">
                                     @csrf
@@ -886,9 +887,9 @@
                     <button type="button" class="lightbox-close" id="lightboxClose" aria-label="ปิดรูปขยาย">✕</button>
                 </div>
                 <div class="lightbox-thumbs">
-                    @if($product->variants->isNotEmpty() || !empty($product->images))
-                        @if(!empty($product->images))
-                            @foreach($product->images as $index => $img)
+                    @if($product->variants->isNotEmpty() || !empty($product->galleryImages()))
+                        @if(!empty($product->galleryImages()))
+                            @foreach($product->galleryImages() as $index => $img)
                                 <button type="button" class="lightbox-thumb {{ $index === 0 && !$selectedVariant ? 'active' : '' }}"
                                     data-lightbox-thumb
                                     data-variant-id=""
@@ -899,7 +900,7 @@
                         @endif
 
                         @foreach($product->variants as $variant)
-                            @php $imagePath = $variant->image ?: $product->displayImage(); @endphp
+                            @php $imagePath = $variant->displayImage() ?: $product->displayImage(); @endphp
                             <button type="button"
                                 class="lightbox-thumb {{ $selectedVariant && $selectedVariant->id === $variant->id ? 'active' : '' }}"
                                 data-lightbox-thumb
@@ -933,6 +934,9 @@
         const variantMetaText = document.getElementById('variantMetaText');
         const singleVariantId = document.getElementById('singleVariantId');
         const bulkVariantId = document.getElementById('bulkVariantId');
+        const bulkQuantity = document.getElementById('bulkQuantity');
+        const bulkQtyText = document.getElementById('bulkQtyText');
+        const bulkQtyButtonText = document.getElementById('bulkQtyButtonText');
         const singlePriceText = document.getElementById('singlePriceText');
         const bulkPriceText = document.getElementById('bulkPriceText');
         const lightbox = document.getElementById('imageLightbox');
@@ -948,6 +952,7 @@
             if (!dataset) return;
             const currentMainImage = document.getElementById('mainImage');
             const stockLabel = dataset.variantStock ? `${dataset.variantStock} ชิ้น` : 'พร้อมขาย';
+            const wholesaleMinQty = Number(dataset.variantMinQty || {{ $selectedWholesaleMinQty }});
 
             if (dataset.variantImage && galleryMain) {
                 if (currentMainImage && currentMainImage.tagName === 'IMG') {
@@ -965,13 +970,16 @@
                 variantNameText.textContent = dataset.variantName || 'สูตรสินค้า';
             }
             if (variantMetaText) {
-                variantMetaText.textContent = `${dataset.variantSku || 'สูตรสินค้า'} · คงเหลือ ${dataset.variantStock || 0} ชิ้น`;
+                variantMetaText.textContent = `${dataset.variantSku || 'สูตรสินค้า'} · คงเหลือ ${dataset.variantStock || 0} ชิ้น · ส่ง ${wholesaleMinQty} ชิ้น`;
             }
             singlePriceText.textContent = `฿${Number(dataset.variantRetail).toFixed(2)}`;
-            bulkPriceText.textContent = `฿${(Number(dataset.variantWholesale) * {{ $product->wholesale_min_qty }}).toFixed(2)}`;
+            bulkPriceText.textContent = `฿${Number(dataset.variantWholesale).toFixed(2)}`;
+            if (bulkQtyText) bulkQtyText.textContent = `ส่ง ${wholesaleMinQty} ชิ้น`;
+            if (bulkQtyButtonText) bulkQtyButtonText.textContent = wholesaleMinQty;
 
             if (singleVariantId) singleVariantId.value = dataset.variantId;
             if (bulkVariantId) bulkVariantId.value = dataset.variantId;
+            if (bulkQuantity) bulkQuantity.value = wholesaleMinQty;
 
             variantOptions.forEach((option) => option.classList.toggle('active', option.dataset.variantId === dataset.variantId));
             variantThumbs.forEach((thumb) => thumb.classList.toggle('active', thumb.dataset.variantId === dataset.variantId));

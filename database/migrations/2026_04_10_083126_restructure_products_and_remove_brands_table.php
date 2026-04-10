@@ -11,32 +11,52 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // 1. Remove brand_id and category_id from products
-        Schema::table('products', function (Blueprint $table) {
-            $table->dropForeign(['brand_id']);
-            $table->dropForeign(['category_id']);
-            $table->dropColumn(['brand_id', 'category_id']);
-            
-            $table->integer('stock')->default(0)->after('wholesale_price');
-            $table->integer('wholesale_min_qty')->default(10)->after('stock');
-            $table->json('images')->nullable()->after('image');
-        });
+        if (Schema::hasTable('products')) {
+            if (Schema::hasColumn('products', 'brand_id')) {
+                Schema::table('products', function (Blueprint $table) {
+                    $table->dropConstrainedForeignId('brand_id');
+                });
+            }
 
-        // 2. Drop brands table
+            if (Schema::hasColumn('products', 'category_id')) {
+                Schema::table('products', function (Blueprint $table) {
+                    $table->dropConstrainedForeignId('category_id');
+                });
+            }
+
+            Schema::table('products', function (Blueprint $table) {
+                if (! Schema::hasColumn('products', 'stock')) {
+                    $table->integer('stock')->default(0)->after('wholesale_price');
+                }
+                if (! Schema::hasColumn('products', 'wholesale_min_qty')) {
+                    $table->integer('wholesale_min_qty')->default(10)->after('stock');
+                }
+                if (! Schema::hasColumn('products', 'images')) {
+                    $table->json('images')->nullable()->after('image');
+                }
+            });
+        }
+
         Schema::dropIfExists('brands');
 
-        // 3. Create category_product table
-        Schema::create('category_product', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('category_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
-        });
+        if (! Schema::hasTable('category_product')) {
+            Schema::create('category_product', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('category_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('product_id')->constrained()->cascadeOnDelete();
+            });
+        }
 
-        // 4. Update product_variants table
-        Schema::table('product_variants', function (Blueprint $table) {
-            $table->dropColumn('sku');
-            $table->text('description')->nullable()->after('name');
-        });
+        if (Schema::hasTable('product_variants')) {
+            Schema::table('product_variants', function (Blueprint $table) {
+                if (Schema::hasColumn('product_variants', 'sku')) {
+                    $table->dropColumn('sku');
+                }
+                if (! Schema::hasColumn('product_variants', 'description')) {
+                    $table->text('description')->nullable()->after('name');
+                }
+            });
+        }
     }
 
     public function down(): void

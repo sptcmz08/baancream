@@ -32,13 +32,14 @@ class StoreController extends Controller
                 'wholesale_price',
                 'stock',
                 'wholesale_min_qty',
+                'image',
                 'images',
                 'is_new_arrival',
                 'created_at',
             ])
             ->with([
                 'categories:id,name,slug',
-                'variants:id,product_id,name,description,image,retail_price,wholesale_price,stock,sort_order',
+                'variants:id,product_id,name,description,image,images,retail_price,wholesale_price,wholesale_min_qty,stock,sort_order',
             ])
             ->latest()
             ->get();
@@ -136,7 +137,7 @@ class StoreController extends Controller
         }
 
         $cart[$cartKey]['retail_subtotal'] = $cart[$cartKey]['retail_price'] * $cart[$cartKey]['quantity'];
-        $cart[$cartKey]['wholesale_subtotal'] = $cart[$cartKey]['wholesale_price'] * $cart[$cartKey]['quantity'];
+        $cart[$cartKey]['wholesale_subtotal'] = $cart[$cartKey]['wholesale_bundle_price'];
 
         session()->put('cart', $cart);
 
@@ -281,9 +282,9 @@ class StoreController extends Controller
             'variant_name' => $variant?->name,
             'quantity' => $quantity,
             'retail_price' => (float) ($variant?->retail_price ?? $product->retail_price),
-            'wholesale_price' => (float) ($variant?->wholesale_price ?? $product->wholesale_price),
-            'wholesale_min_qty' => $product->wholesale_min_qty,
-            'image' => $variant?->image ?: $product->displayImage(),
+            'wholesale_bundle_price' => (float) ($variant?->wholesale_price ?? $product->wholesale_price),
+            'wholesale_min_qty' => (int) ($variant?->wholesale_min_qty ?? $product->wholesale_min_qty ?? 1),
+            'image' => $variant?->displayImage() ?: $product->displayImage(),
             'stock' => $variant?->stock ?? $product->stock,
         ];
     }
@@ -295,9 +296,13 @@ class StoreController extends Controller
         $total = 0;
 
         foreach ($items as &$item) {
-            $minQty = $item['wholesale_min_qty'] ?? 10;
+            $minQty = max(1, (int) ($item['wholesale_min_qty'] ?? 1));
             $item['uses_wholesale'] = $item['quantity'] >= $minQty;
-            $item['unit_price'] = $item['uses_wholesale'] ? $item['wholesale_price'] : $item['retail_price'];
+            $wholesaleUnitPrice = $minQty > 0
+                ? ((float) ($item['wholesale_bundle_price'] ?? 0) / $minQty)
+                : (float) ($item['wholesale_bundle_price'] ?? 0);
+
+            $item['unit_price'] = $item['uses_wholesale'] ? $wholesaleUnitPrice : (float) $item['retail_price'];
             $item['subtotal'] = $item['unit_price'] * $item['quantity'];
             $count += $item['quantity'];
             $total += $item['subtotal'];

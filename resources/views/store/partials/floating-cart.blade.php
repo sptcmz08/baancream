@@ -37,7 +37,7 @@
                                 <div style="margin-top:6px; display:inline-flex; padding:5px 10px; border-radius:999px; background:#fff1f5; color:#e11d72; font-size:0.78rem; font-weight:700;">{{ $item['variant_name'] }}</div>
                             @endif
                             @if(!empty($item['uses_wholesale']))
-                                <div style="margin-top:6px; display:inline-flex; padding:5px 10px; border-radius:999px; background:#e9faef; color:#15803d; font-size:0.78rem; font-weight:700;">ราคาส่ง 10 ชิ้น</div>
+                                <div style="margin-top:6px; display:inline-flex; padding:5px 10px; border-radius:999px; background:#e9faef; color:#15803d; font-size:0.78rem; font-weight:700;">ราคาส่ง {{ $item['wholesale_min_qty'] ?? 1 }} ชิ้น</div>
                             @endif
                             <div style="margin-top:8px; color:#708198; font-size:0.92rem;">{{ $item['quantity'] ?? 0 }} ชิ้น x ฿{{ number_format((float) ($item['unit_price'] ?? 0), 2) }}</div>
                         </div>

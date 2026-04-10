@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -15,6 +14,7 @@ class Product extends Model
         'description',
         'retail_price',
         'wholesale_price',
+        'image',
         'stock',
         'wholesale_min_qty',
         'images',
@@ -60,16 +60,44 @@ class Product extends Model
         return $variant ? (float) $variant->wholesale_price : (float) $this->wholesale_price;
     }
 
+    public function displayWholesaleBundlePrice(): float
+    {
+        return $this->displayWholesalePrice();
+    }
+
+    public function displayWholesaleMinQty(): int
+    {
+        $variant = $this->defaultVariant();
+
+        return max(1, (int) ($variant?->wholesale_min_qty ?? $this->wholesale_min_qty ?? 1));
+    }
+
+    public function displayWholesaleUnitPrice(): float
+    {
+        $minQty = $this->displayWholesaleMinQty();
+
+        return $minQty > 0 ? $this->displayWholesaleBundlePrice() / $minQty : $this->displayWholesaleBundlePrice();
+    }
+
+    public function galleryImages(): array
+    {
+        $images = collect((array) $this->images)
+            ->filter()
+            ->values();
+
+        if ($images->isEmpty() && !empty($this->image)) {
+            $images->push($this->image);
+        }
+
+        return $images->unique()->values()->all();
+    }
+
     public function displayImage(): ?string
     {
-        if ($this->hasVariants() && $this->defaultVariant()->image) {
-            return $this->defaultVariant()->image;
+        if ($this->hasVariants() && $this->defaultVariant()?->displayImage()) {
+            return $this->defaultVariant()->displayImage();
         }
 
-        if (is_array($this->images) && count($this->images) > 0) {
-            return $this->images[0];
-        }
-
-        return null;
+        return $this->galleryImages()[0] ?? null;
     }
 }

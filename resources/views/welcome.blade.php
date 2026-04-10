@@ -626,7 +626,7 @@
                             <div class="product-footer">
                                 <div>
                                     <div class="price-retail">฿{{ number_format($product->displayRetailPrice(), 2) }}</div>
-                                    <div class="price-wholesale">ราคาส่ง ฿{{ number_format($product->displayWholesalePrice(), 2) }}</div>
+                                    <div class="price-wholesale">ราคาส่ง {{ $product->displayWholesaleMinQty() }} ชิ้น / ฿{{ number_format($product->displayWholesaleBundlePrice(), 2) }}</div>
                                 </div>
                                 <form method="POST" action="{{ route('cart.add') }}" class="cart-form">
                                     @csrf

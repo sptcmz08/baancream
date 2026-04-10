@@ -104,8 +104,12 @@ class ProductController extends Controller
             'variants.*.description' => 'nullable|string',
             'variants.*.retail_price' => 'nullable|numeric|min:0',
             'variants.*.wholesale_price' => 'nullable|numeric|min:0',
+            'variants.*.wholesale_min_qty' => 'nullable|integer|min:1',
             'variants.*.stock' => 'nullable|integer|min:0',
-            'variants.*.image' => 'nullable|image',
+            'variants.*.images' => 'nullable|array',
+            'variants.*.images.*' => 'nullable|image',
+            'variants.*.kept_images' => 'nullable|array',
+            'variants.*.kept_images.*' => 'string',
         ]);
     }
 
@@ -134,6 +138,7 @@ class ProductController extends Controller
             Storage::disk('public')->delete($removedImage);
         }
 
+        $data['image'] = $images[0] ?? null;
         $data['images'] = $images;
 
         return $data;
@@ -155,23 +160,34 @@ class ProductController extends Controller
             }
 
             $variant = $product->variants()->find($variantInput['id'] ?? null) ?? new ProductVariant();
+            $existingImages = collect($variant->galleryImages());
+            $variantImages = collect($variantInput['kept_images'] ?? [])
+                ->filter(fn ($path) => is_string($path) && $path !== '')
+                ->values()
+                ->all();
+
             $variant->product_id = $product->id;
             $variant->name = $name;
             $variant->description = $variantInput['description'] ?? null;
             $variant->retail_price = $retailPrice ?: 0;
             $variant->wholesale_price = $wholesalePrice ?: 0;
+            $variant->wholesale_min_qty = max(1, (int) ($variantInput['wholesale_min_qty'] ?? $request->integer('wholesale_min_qty', 10)));
             $variant->stock = (int) ($variantInput['stock'] ?? 0);
             $variant->sort_order = $index;
 
-            $imageFile = $variantFiles[$index]['image'] ?? null;
-            if ($imageFile) {
-                if ($variant->exists && $variant->image) {
-                    Storage::disk('public')->delete($variant->image);
+            $imageFiles = $variantFiles[$index]['images'] ?? [];
+            foreach ((array) $imageFiles as $imageFile) {
+                if ($imageFile) {
+                    $variantImages[] = $imageFile->store('products/variants', 'public');
                 }
-
-                $variant->image = $imageFile->store('products/variants', 'public');
             }
 
+            foreach ($existingImages->diff($variantImages) as $removedImage) {
+                Storage::disk('public')->delete($removedImage);
+            }
+
+            $variant->images = array_values(array_unique(array_filter($variantImages)));
+            $variant->image = $variant->images[0] ?? null;
             $variant->save();
             $keptVariantIds[] = $variant->id;
         }
