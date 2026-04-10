@@ -13,9 +13,11 @@
                 <th>รูปภาพ</th>
                 <th>SKU</th>
                 <th>ชื่อสินค้า</th>
+                <th>แบรนด์</th>
                 <th>ราคาปลีก</th>
                 <th>ราคาส่ง</th>
                 <th>หมวดหมู่</th>
+                <th>สินค้าใหม่</th>
                 <th>จัดการ</th>
             </tr>
         </thead>
@@ -31,9 +33,11 @@
                 </td>
                 <td style="font-weight: 500;">{{ $product->sku }}</td>
                 <td>{{ $product->name }}</td>
+                <td>{{ $product->brand->name ?? '-' }}</td>
                 <td style="color: var(--primary-color);">฿{{ number_format($product->retail_price, 2) }}</td>
                 <td style="color: #16a34a;">฿{{ number_format($product->wholesale_price, 2) }}</td>
                 <td>{{ $product->category->name ?? '-' }}</td>
+                <td>{{ $product->is_new_arrival ? 'ใช่' : '-' }}</td>
                 <td style="display: flex; gap: 8px;">
                     <a href="{{ route('admin.products.edit', $product) }}" class="btn" style="background:#f3f4f6; color: #4b5563; padding: 6px 12px; font-size:0.8rem; text-decoration:none;">แก้ไข</a>
                     <form action="{{ route('admin.products.destroy', $product) }}" method="POST" onsubmit="return confirm('ยืนยันการลบสินค้า {{ $product->sku }}?');">
@@ -44,7 +48,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 50px;">
+                <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 50px;">
                     <div style="font-size: 3rem; margin-bottom: 10px;">📦</div>
                     <div>ยังไม่มีรายการสินค้าในระบบ</div>
                 </td>

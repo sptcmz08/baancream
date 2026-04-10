@@ -3,205 +3,650 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>บ้านครีม สิงห์บุรี | Premium Skincare</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Prompt:wght@300;400;500&display=swap" rel="stylesheet">
+    <title>บ้านครีม สิงห์บุรี | Beauty Marketplace</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #CCA35E;
-            --text-dark: #1A1A1A;
-            --bg-color: #F8F5F1;
-            --surface-color: rgba(255, 255, 255, 0.92);
-            --border-color: rgba(26, 26, 26, 0.08);
+            --primary-color: #ff4f87;
+            --primary-dark: #e93574;
+            --accent-color: #1fbad6;
+            --gold-color: #f8c64f;
+            --text-dark: #1a2233;
+            --text-soft: #62708a;
+            --border-color: #e7ebf3;
+            --surface-color: #ffffff;
+            --page-color: #f6f8fc;
         }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
-        body { font-family: 'Prompt', sans-serif; background: var(--bg-color); color: var(--text-dark); }
-        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+        body { font-family: 'Prompt', sans-serif; background: var(--page-color); color: var(--text-dark); }
+        a { color: inherit; text-decoration: none; }
+        img { display: block; max-width: 100%; }
 
-        /* Header */
-        .site-header {
+        .top-strip {
+            background: linear-gradient(90deg, #8b5cf6 0%, #ff2d76 35%, #ff5f6d 68%, #35c98b 100%);
+            color: white;
+            padding: 10px 24px;
+            font-size: 0.95rem;
+        }
+        .top-strip-inner {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .top-strip-badges {
+            display: flex;
+            gap: 22px;
+            flex-wrap: wrap;
+        }
+
+        .header-shell {
             position: sticky;
             top: 0;
             z-index: 20;
-            padding: 18px 40px;
-            background: rgba(248, 245, 241, 0.94);
+            background: rgba(255, 255, 255, 0.96);
             backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 12px 30px rgba(40, 58, 100, 0.06);
         }
-        .nav {
-            max-width: 1280px;
+        .header-main,
+        .header-tabs {
+            max-width: 1440px;
             margin: 0 auto;
-            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 24px;
+        }
+        .header-main {
+            min-height: 82px;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
             gap: 24px;
         }
-        .nav-brand {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
-            font-weight: 600;
-            letter-spacing: 1px;
+        .brand-logo {
+            font-size: 2.35rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            letter-spacing: -0.04em;
         }
-        .nav-links {
+        .brand-logo span:nth-child(2) { color: #6a67ff; }
+        .brand-logo span:nth-child(3) { color: #22c1dc; }
+        .brand-logo span:nth-child(4) { color: #f8c64f; }
+        .brand-logo span:nth-child(5) { color: #35c98b; }
+        .main-links {
+            display: flex;
+            gap: 28px;
+            align-items: center;
+            font-weight: 500;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .main-links a:hover { color: var(--primary-color); }
+        .header-tools {
             display: flex;
             align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: flex-end;
+            gap: 14px;
         }
-        .nav-tab {
-            color: var(--text-dark);
-            text-decoration: none;
-            padding: 10px 18px;
+        .search-box {
+            width: min(360px, 42vw);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f7f8fb;
+            border: 1px solid var(--border-color);
             border-radius: 999px;
-            border: 1px solid transparent;
-            font-weight: 500;
-            font-size: 0.98rem;
-            transition: 0.25s ease;
+            padding: 12px 18px;
         }
-        .nav-tab:hover {
-            border-color: rgba(204, 163, 94, 0.35);
-            background: rgba(204, 163, 94, 0.08);
+        .search-box input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            outline: none;
+            font-family: inherit;
+            font-size: 0.96rem;
+        }
+        .user-action,
+        .pill-link {
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-weight: 500;
+            background: white;
+        }
+        .user-action:hover,
+        .pill-link:hover {
+            border-color: rgba(255, 79, 135, 0.35);
             color: var(--primary-color);
         }
-        .btn-gold {
-            background: var(--primary-color); color: white; padding: 16px 40px; 
-            text-decoration: none; border-radius: 50px; font-size: 1.1rem; 
-            transition: 0.3s ease; display: inline-block; font-weight: 500;
-            box-shadow: 0 4px 15px rgba(204, 163, 94, 0.4);
+        .header-tabs {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            overflow-x: auto;
+            padding-top: 14px;
+            padding-bottom: 16px;
+            border-top: 1px solid var(--border-color);
+            white-space: nowrap;
         }
-        .btn-gold:hover { background: #b38a4d; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(204, 163, 94, 0.6); }
-        .main-content {
-            padding: 24px 40px 80px;
+        .tab-link {
+            color: var(--text-soft);
+            padding: 8px 0;
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
         }
-        .hero-banner {
-            max-width: 1280px;
-            margin: 0 auto 56px;
+        .tab-link:hover,
+        .tab-link.active {
+            color: var(--text-dark);
+            border-bottom-color: var(--primary-color);
         }
-        .hero-banner-frame {
+
+        .hero {
+            width: 100%;
+            min-height: 74vh;
+            background:
+                linear-gradient(180deg, rgba(11, 24, 58, 0.08), rgba(11, 24, 58, 0.08)),
+                url('https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=2200&auto=format&fit=crop') center/cover;
+            position: relative;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            inset: auto 0 0 0;
+            height: 160px;
+            background: linear-gradient(180deg, rgba(246, 248, 252, 0) 0%, rgba(246, 248, 252, 1) 100%);
+        }
+        .hero-floating-tabs {
+            position: absolute;
+            left: 50%;
+            bottom: 28px;
+            transform: translateX(-50%);
+            width: min(1120px, calc(100% - 32px));
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.65);
+            border-radius: 28px;
+            box-shadow: 0 24px 70px rgba(25, 38, 74, 0.18);
+            padding: 18px 24px;
+            display: flex;
+            gap: 14px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .hero-chip {
+            background: #f7f9ff;
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 10px 16px;
+            font-weight: 500;
+            color: var(--text-soft);
+        }
+        .hero-chip:hover {
+            color: var(--primary-color);
+            border-color: rgba(255, 79, 135, 0.35);
+        }
+
+        .page-section {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 24px 56px;
+        }
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        .section-title {
+            font-size: 2rem;
+            line-height: 1.15;
+        }
+        .section-subtitle {
+            color: var(--text-soft);
+            margin-top: 8px;
+        }
+        .section-scroll {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 4px;
+        }
+        .section-pill {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 10px 18px;
+            color: var(--text-soft);
+        }
+        .section-pill:hover {
+            color: var(--primary-color);
+            border-color: rgba(255, 79, 135, 0.3);
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 22px;
+        }
+        .product-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 26px;
             overflow: hidden;
-            border-radius: 32px;
-            background: #EDE7DD;
-            box-shadow: 0 18px 60px rgba(63, 40, 16, 0.12);
-            aspect-ratio: 16 / 7;
+            box-shadow: 0 18px 50px rgba(29, 41, 76, 0.08);
         }
-        .hero-banner-frame img {
+        .product-image {
+            aspect-ratio: 1 / 1;
+            background: linear-gradient(135deg, #f8f0f3 0%, #eef7ff 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .product-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            display: block;
         }
-        .catalog-section {
-            padding: 0 0 80px;
-            max-width: 1200px;
-            margin: 0 auto;
+        .product-image span {
+            color: #9aa7bd;
+            font-size: 0.95rem;
+        }
+        .product-body {
+            padding: 18px;
+        }
+        .product-meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .product-badge {
+            background: #fff4f8;
+            color: var(--primary-color);
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+        .product-badge.brand {
+            background: #eef8ff;
+            color: var(--accent-color);
+        }
+        .product-name {
+            font-size: 1.06rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            min-height: 3.2em;
+        }
+        .product-desc {
+            color: var(--text-soft);
+            font-size: 0.92rem;
+            min-height: 3.9em;
+            margin-bottom: 16px;
+        }
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 12px;
+        }
+        .price-retail {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+        .price-wholesale {
+            color: #1f9d68;
+            font-size: 0.82rem;
+        }
+        .buy-button {
+            border: none;
+            background: linear-gradient(135deg, var(--gold-color), #ffb340);
+            color: #46260a;
+            border-radius: 999px;
+            padding: 10px 16px;
+            font-family: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .buy-button:hover { transform: translateY(-1px); }
+
+        .brand-showcase {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        .brand-block {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: 0 18px 50px rgba(29, 41, 76, 0.08);
+        }
+        .brand-block h3 {
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+        }
+        .brand-block p {
+            color: var(--text-soft);
+            margin-bottom: 18px;
+        }
+        .brand-mini-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+        .brand-mini-card {
+            background: #f8fafe;
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+        .brand-mini-card div {
+            padding: 12px;
+            font-size: 0.88rem;
+            font-weight: 500;
+        }
+        .brand-mini-card img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            background: #eef3fb;
         }
 
-        @media (max-width: 900px) {
-            .site-header { padding: 16px 20px; }
-            .main-content { padding: 20px 20px 64px; }
-            .nav { flex-direction: column; align-items: stretch; }
-            .nav-links { justify-content: flex-start; }
-            .nav-brand { font-size: 1.5rem; }
-            .hero-banner { margin-bottom: 40px; }
-            .hero-banner-frame { border-radius: 24px; aspect-ratio: 4 / 3; }
+        .notice {
+            max-width: 1440px;
+            margin: 24px auto 0;
+            padding: 0 24px;
+        }
+        .notice-box {
+            background: #e9fff5;
+            color: #117a4d;
+            border: 1px solid #b8f0d6;
+            padding: 14px 18px;
+            border-radius: 18px;
         }
 
+        .empty-state {
+            background: white;
+            border: 1px dashed #c9d2e3;
+            border-radius: 24px;
+            padding: 32px;
+            text-align: center;
+            color: var(--text-soft);
+        }
+
+        @media (max-width: 1080px) {
+            .header-main {
+                grid-template-columns: 1fr;
+                padding-top: 16px;
+                padding-bottom: 16px;
+            }
+            .header-tools {
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
+            .search-box { width: 100%; }
+            .hero { min-height: 56vh; }
+        }
+
+        @media (max-width: 720px) {
+            .top-strip { padding: 10px 16px; }
+            .header-main,
+            .header-tabs,
+            .page-section,
+            .notice { padding-left: 16px; padding-right: 16px; }
+            .brand-logo { font-size: 2rem; }
+            .section-title { font-size: 1.6rem; }
+            .hero-floating-tabs {
+                bottom: 18px;
+                padding: 14px 16px;
+                border-radius: 22px;
+            }
+            .brand-showcase { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
-    <header class="site-header">
-        <nav class="nav">
-            <div class="nav-brand">บ้านครีม สิงห์บุรี</div>
-            <div class="nav-links">
-                <a href="#catalog" class="nav-tab">สินค้าทั้งหมด</a>
-                <a href="#" class="nav-tab">ตรวจสอบสถานะ</a>
+    <div class="top-strip">
+        <div class="top-strip-inner">
+            <div class="top-strip-badges">
+                <span>ซื้อครบตามเงื่อนไข รับโปรพิเศษ</span>
+                <span>อัปเดตแบรนด์ใหม่ได้จากหลังบ้าน</span>
+                <span>สินค้าใหม่แยกแสดงอัตโนมัติ</span>
+            </div>
+            <span>บ้านครีม สิงห์บุรี</span>
+        </div>
+    </div>
+
+    <header class="header-shell">
+        <div class="header-main">
+            <a href="{{ route('home') }}" class="brand-logo" aria-label="บ้านครีม สิงห์บุรี">
+                <span>b</span><span>a</span><span>a</span><span>n</span><span>cream</span>
+            </a>
+
+            <nav class="main-links" aria-label="เมนูหลัก">
+                <a href="#categories">หมวดหมู่</a>
+                <a href="#brands">แบรนด์</a>
+                <a href="#new-arrivals">สินค้าใหม่</a>
+                <a href="#all-products">สินค้าทั้งหมด</a>
+            </nav>
+
+            <div class="header-tools">
+                <label class="search-box" for="searchInput">
+                    <span>🔍</span>
+                    <input type="text" id="searchInput" placeholder="ค้นหาสินค้า แบรนด์ หรือหมวดหมู่">
+                </label>
+                <a href="{{ route('cart.index') }}" class="pill-link">ตะกร้าสินค้า</a>
                 @auth
-                    <a href="{{ route('admin.dashboard') }}" class="nav-tab">ระบบหลังบ้าน</a>
+                    <a href="{{ auth()->user()->role === 'admin' ? route('admin.dashboard') : route('dashboard') }}" class="user-action">บัญชีของฉัน</a>
                 @else
-                    <a href="{{ route('login') }}" class="btn-gold" style="padding: 10px 24px; font-size: 1rem;">เข้าสู่ระบบ</a>
+                    <a href="{{ route('login') }}" class="user-action">เข้าสู่ระบบ</a>
                 @endauth
-            </div>
-        </nav>
-    </header>
-
-    <main class="main-content">
-        <section class="hero-banner" aria-label="แบนเนอร์หลัก">
-            <div class="hero-banner-frame">
-                <img src="https://images.unsplash.com/photo-1615397349754-cfa2066a298e?q=80&w=1920&auto=format" alt="แบนเนอร์บ้านครีม สิงห์บุรี">
-            </div>
-        </section>
-
-    <!-- Catalog Section -->
-    <section id="catalog" class="catalog-section">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
-            <h2 style="font-size: 2.5rem; color: var(--text-dark);">คอลเลกชั่นสกินแคร์ของเรา</h2>
-            <div style="position: relative; width: 300px;">
-                <input type="text" id="searchInput" placeholder="ค้นหาสินค้าแบบ Real-time..." style="width: 100%; padding: 12px 20px; border-radius: 30px; border: 1px solid #ddd; outline: none; font-family: 'Prompt';">
             </div>
         </div>
 
-        <div id="productGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 30px;">
-            @foreach($products as $product)
-            <div class="product-card" style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.03); transition: 0.3s; padding-bottom: 20px;">
-                <div style="height: 250px; background: #eee; display:flex; align-items:center; justify-content:center;">
-                    @if($product->image)
-                        <img src="{{ asset('storage/'.$product->image) }}" style="width:100%; height:100%; object-fit:cover;">
-                    @else
-                        <span style="color:#aaa;">No Image</span>
-                    @endif
-                </div>
-                <div style="padding: 20px;">
-                    <div style="font-size: 0.8rem; color: var(--primary-color); font-weight: 500; margin-bottom: 5px;">{{ $product->category->name ?? 'ทั่วไป' }}</div>
-                    <h3 style="font-size: 1.2rem; margin-bottom: 10px; font-family: 'Prompt'; font-weight: 500;">{{ $product->name }}</h3>
-                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">{{ Str::limit($product->description, 50) }}</p>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="font-size: 1.1rem; font-weight: 600; color: var(--text-dark);">฿{{ number_format($product->retail_price, 2) }}</div>
-                            <div style="font-size: 0.8rem; color: #16a34a;">ราคาส่ง ฿{{ number_format($product->wholesale_price, 2) }}</div>
-                        </div>
-                        <button class="btn-gold" style="padding: 8px 20px; font-size: 0.9rem;" onclick="alert('ระบบตะกร้ากำลังอยู่ระหว่างพัฒนา')">หยิบใส่ตะกร้า</button>
-                    </div>
-                </div>
-            </div>
+        <div class="header-tabs">
+            <a href="#new-arrivals" class="tab-link active">มาใหม่</a>
+            @foreach($categories as $category)
+                <a href="#category-{{ $category->slug }}" class="tab-link">{{ $category->name }}</a>
+            @endforeach
+        </div>
+    </header>
+
+    @if(session('success'))
+        <div class="notice">
+            <div class="notice-box">{{ session('success') }}</div>
+        </div>
+    @endif
+
+    <section class="hero" aria-label="แบนเนอร์หลัก">
+        <div class="hero-floating-tabs">
+            <a href="#new-arrivals" class="hero-chip">สินค้าใหม่</a>
+            @foreach($brands as $brand)
+                <a href="#brand-{{ $brand->slug }}" class="hero-chip">{{ $brand->name }}</a>
             @endforeach
         </div>
     </section>
-    </main>
 
-    <script>
-        // Real-time search implementation
-        const searchInput = document.getElementById('searchInput');
-        const productGrid = document.getElementById('productGrid');
-        
-        searchInput.addEventListener('input', function(e) {
-            const query = e.target.value;
-            fetch(`/search?q=${query}`)
-                .then(res => res.json())
-                .then(data => {
-                    productGrid.innerHTML = '';
-                    if(data.length === 0) {
-                        productGrid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#999; padding: 50px;">ไม่พบสินค้าที่ค้นหา</p>';
-                        return;
-                    }
-                    data.forEach(item => {
-                        productGrid.innerHTML += `
-                            <div class="product-card" style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.03); transition: 0.3s; padding-bottom: 20px;">
-                                <div style="height: 250px; background: #eee; display:flex; align-items:center; justify-content:center;">
-                                    ${item.image ? `<img src="/storage/${item.image}" style="width:100%; height:100%; object-fit:cover;">` : '<span style="color:#aaa;">No Image</span>'}
+    <section class="page-section" id="categories" style="padding-top: 26px;">
+        <div class="section-head">
+            <div>
+                <h2 class="section-title">เลือกช้อปตามหมวดหมู่</h2>
+                <p class="section-subtitle">หมวดหมู่ทั้งหมดดึงจากหลังบ้าน admin และอัปเดตขึ้นหน้าแรกอัตโนมัติ</p>
+            </div>
+        </div>
+        <div class="section-scroll">
+            @foreach($categories as $category)
+                <a href="#category-{{ $category->slug }}" class="section-pill">{{ $category->name }} ({{ $category->products->count() }})</a>
+            @endforeach
+        </div>
+    </section>
+
+    <section class="page-section" id="brands">
+        <div class="section-head">
+            <div>
+                <h2 class="section-title">แบรนด์เด่นในร้าน</h2>
+                <p class="section-subtitle">สร้างแบรนด์จากหลังบ้านได้เลย แล้วสินค้าในแบรนด์นั้นจะถูกรวมขึ้นมาแสดงอัตโนมัติ</p>
+            </div>
+        </div>
+        <div class="section-scroll">
+            @foreach($brands as $brand)
+                <a href="#brand-{{ $brand->slug }}" class="section-pill">{{ $brand->name }} ({{ $brand->products_count }})</a>
+            @endforeach
+        </div>
+    </section>
+
+    <section class="page-section" id="new-arrivals">
+        <div class="section-head">
+            <div>
+                <h2 class="section-title">สินค้ามาใหม่</h2>
+                <p class="section-subtitle">ติ๊กสถานะสินค้าใหม่จากหลังบ้านเพื่อดันขึ้น section นี้ได้ทันที</p>
+            </div>
+        </div>
+
+        @if($newArrivals->isEmpty())
+            <div class="empty-state">ยังไม่มีสินค้าใหม่ในระบบ</div>
+        @else
+            <div class="product-grid">
+                @foreach($newArrivals as $product)
+                    <article class="product-card" data-search="{{ strtolower($product->name . ' ' . ($product->category->name ?? '') . ' ' . ($product->brand->name ?? '')) }}">
+                        <div class="product-image">
+                            @if($product->image)
+                                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}">
+                            @else
+                                <span>No Image</span>
+                            @endif
+                        </div>
+                        <div class="product-body">
+                            <div class="product-meta">
+                                @if($product->category)
+                                    <span class="product-badge">{{ $product->category->name }}</span>
+                                @endif
+                                @if($product->brand)
+                                    <span class="product-badge brand">{{ $product->brand->name }}</span>
+                                @endif
+                            </div>
+                            <h3 class="product-name">{{ $product->name }}</h3>
+                            <p class="product-desc">{{ Str::limit($product->description ?: 'อัปเดตรายละเอียดสินค้าเพิ่มเติมได้จากหลังบ้าน', 90) }}</p>
+                            <div class="product-footer">
+                                <div>
+                                    <div class="price-retail">฿{{ number_format($product->retail_price, 2) }}</div>
+                                    <div class="price-wholesale">ราคาส่ง ฿{{ number_format($product->wholesale_price, 2) }}</div>
                                 </div>
-                                <div style="padding: 20px;">
-                                    <h3 style="font-size: 1.2rem; margin-bottom: 10px; font-family: 'Prompt'; font-weight: 500;">${item.name}</h3>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
-                                        <div>
-                                            <div style="font-size: 1.1rem; font-weight: 600; color: #1A1A1A;">฿${parseFloat(item.retail_price).toFixed(2)}</div>
-                                            <div style="font-size: 0.8rem; color: #16a34a;">ราคาส่ง ฿${parseFloat(item.wholesale_price).toFixed(2)}</div>
-                                        </div>
-                                        <button class="btn-gold" style="padding: 8px 20px; font-size: 0.9rem;" onclick="alert('ระบบตะกร้ากำลังอยู่ระหว่างพัฒนา')">หยิบใส่ตะกร้า</button>
+                                <form method="POST" action="{{ route('cart.add') }}">
+                                    @csrf
+                                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                    <button type="submit" class="buy-button">ใส่ตะกร้า</button>
+                                </form>
+                            </div>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+        @endif
+    </section>
+
+    <section class="page-section" id="all-products">
+        @foreach($categories as $category)
+            <div id="category-{{ $category->slug }}" style="margin-bottom: 56px;">
+                <div class="section-head">
+                    <div>
+                        <h2 class="section-title">{{ $category->name }}</h2>
+                        <p class="section-subtitle">สินค้าในหมวดนี้ถูกดึงจากหลังบ้านตามหมวดหมู่ที่เลือกไว้</p>
+                    </div>
+                    <a href="#categories" class="section-pill">กลับไปดูหมวดหมู่</a>
+                </div>
+
+                <div class="product-grid">
+                    @foreach($category->products->take(8) as $product)
+                        <article class="product-card" data-search="{{ strtolower($product->name . ' ' . $category->name . ' ' . ($product->brand->name ?? '')) }}">
+                            <div class="product-image">
+                                @if($product->image)
+                                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}">
+                                @else
+                                    <span>No Image</span>
+                                @endif
+                            </div>
+                            <div class="product-body">
+                                <div class="product-meta">
+                                    <span class="product-badge">{{ $category->name }}</span>
+                                    @if($product->brand)
+                                        <span class="product-badge brand">{{ $product->brand->name }}</span>
+                                    @endif
+                                    @if($product->is_new_arrival)
+                                        <span class="product-badge">มาใหม่</span>
+                                    @endif
+                                </div>
+                                <h3 class="product-name">{{ $product->name }}</h3>
+                                <p class="product-desc">{{ Str::limit($product->description ?: 'อัปเดตรายละเอียดสินค้าเพิ่มเติมได้จากหลังบ้าน', 90) }}</p>
+                                <div class="product-footer">
+                                    <div>
+                                        <div class="price-retail">฿{{ number_format($product->retail_price, 2) }}</div>
+                                        <div class="price-wholesale">ราคาส่ง ฿{{ number_format($product->wholesale_price, 2) }}</div>
                                     </div>
+                                    <form method="POST" action="{{ route('cart.add') }}">
+                                        @csrf
+                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                        <button type="submit" class="buy-button">ใส่ตะกร้า</button>
+                                    </form>
                                 </div>
                             </div>
-                        `;
-                    });
-                });
+                        </article>
+                    @endforeach
+                </div>
+            </div>
+        @endforeach
+    </section>
+
+    <section class="page-section">
+        <div class="section-head">
+            <div>
+                <h2 class="section-title">แยกดูตามแบรนด์</h2>
+                <p class="section-subtitle">เหมาะกับหน้าแบบตัวอย่างที่ต้องการให้ลูกค้าเลือกต่อจากแบรนด์ก่อนลงไปดูสินค้า</p>
+            </div>
+        </div>
+
+        @if($brandCollections->isEmpty())
+            <div class="empty-state">ยังไม่มีแบรนด์ที่ผูกสินค้าไว้</div>
+        @else
+            <div class="brand-showcase">
+                @foreach($brandCollections as $brand)
+                    <section class="brand-block" id="brand-{{ $brand->slug }}">
+                        <h3>{{ $brand->name }}</h3>
+                        <p>รวมสินค้าของแบรนด์ {{ $brand->name }} ที่ดึงจากหลังบ้านโดยตรง</p>
+                        <div class="brand-mini-grid">
+                            @foreach($brand->products as $product)
+                                <article class="brand-mini-card" data-search="{{ strtolower($product->name . ' ' . ($product->category->name ?? '') . ' ' . $brand->name) }}">
+                                    @if($product->image)
+                                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}">
+                                    @else
+                                        <img src="https://placehold.co/600x600/f4f7fb/9aa7bd?text=No+Image" alt="No Image">
+                                    @endif
+                                    <div>{{ Str::limit($product->name, 40) }}</div>
+                                </article>
+                            @endforeach
+                        </div>
+                    </section>
+                @endforeach
+            </div>
+        @endif
+    </section>
+
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const productCards = Array.from(document.querySelectorAll('[data-search]'));
+
+        searchInput?.addEventListener('input', (event) => {
+            const query = event.target.value.trim().toLowerCase();
+
+            productCards.forEach((card) => {
+                const haystack = card.dataset.search || '';
+                const visible = !query || haystack.includes(query);
+                card.style.display = visible ? '' : 'none';
+            });
         });
     </script>
 </body>

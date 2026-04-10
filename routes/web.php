@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
@@ -17,8 +18,14 @@ Route::get('/checkout', [\App\Http\Controllers\StoreController::class, 'checkout
 Route::post('/checkout', [\App\Http\Controllers\StoreController::class, 'processCheckout'])->name('checkout.process')->middleware('auth');
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+    $user = request()->user();
+
+    if ($user?->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+
+    return redirect()->route('home');
+})->middleware(['auth'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -31,6 +38,7 @@ require __DIR__.'/auth.php';
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('categories', CategoryController::class);
+    Route::resource('brands', BrandController::class);
     Route::resource('products', ProductController::class);
     Route::resource('credits', CreditController::class);
     Route::resource('orders', OrderController::class);

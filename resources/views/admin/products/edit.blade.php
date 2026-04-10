@@ -34,7 +34,16 @@
                     @endforeach
                 </select>
             </div>
-             <div>
+            <div>
+                <label style="display:block; margin-bottom:10px; font-weight:500;">แบรนด์สินค้า</label>
+                <select name="brand_id" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
+                    <option value="">เลือกแบรนด์</option>
+                    @foreach($brands as $brand)
+                        <option value="{{ $brand->id }}" {{ $product->brand_id == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
                 <label style="display:block; margin-bottom:10px; font-weight:500;">ราคาปลีก (Retail) <span style="color:red;">*</span></label>
                 <input type="number" name="retail_price" value="{{ $product->retail_price }}" step="0.01" required style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
             </div>
@@ -45,6 +54,12 @@
             <div style="grid-column: 1 / -1;">
                 <label style="display:block; margin-bottom:10px; font-weight:500;">รายละเอียดสินค้า</label>
                 <textarea name="description" rows="4" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">{{ $product->description }}</textarea>
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <label style="display:flex; align-items:center; gap:10px; font-weight:500;">
+                    <input type="checkbox" name="is_new_arrival" value="1" {{ $product->is_new_arrival ? 'checked' : '' }}>
+                    แสดงในหมวดสินค้าใหม่
+                </label>
             </div>
         </div>
         <button type="submit" class="btn btn-primary" style="width:100%; padding:14px; font-size:1.1rem;">บันทึกการแก้ไข</button>

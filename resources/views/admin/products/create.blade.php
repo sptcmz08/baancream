@@ -27,6 +27,15 @@
                 </select>
             </div>
             <div>
+                <label style="display:block; margin-bottom:10px; font-weight:500;">แบรนด์สินค้า</label>
+                <select name="brand_id" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
+                    <option value="">เลือกแบรนด์</option>
+                    @foreach($brands as $brand)
+                        <option value="{{ $brand->id }}">{{ $brand->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
                 <label style="display:block; margin-bottom:10px; font-weight:500;">รูปภาพ</label>
                 <input type="file" name="image" accept="image/*" style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:8px;">
             </div>
@@ -41,6 +50,12 @@
             <div style="grid-column: 1 / -1;">
                 <label style="display:block; margin-bottom:10px; font-weight:500;">รายละเอียดสินค้า</label>
                 <textarea name="description" rows="4" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;"></textarea>
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <label style="display:flex; align-items:center; gap:10px; font-weight:500;">
+                    <input type="checkbox" name="is_new_arrival" value="1">
+                    แสดงในหมวดสินค้าใหม่
+                </label>
             </div>
         </div>
         <button type="submit" class="btn btn-primary" style="width:100%; padding:14px; font-size:1.1rem;">บันทึกสินค้าใหม่</button>
