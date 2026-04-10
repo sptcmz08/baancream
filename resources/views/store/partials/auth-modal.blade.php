@@ -42,20 +42,24 @@
         margin-bottom: 14px;
     }
     .auth-logo {
-        display: inline-flex;
+        display: flex;
         align-items: center;
-        margin-bottom: 18px;
+        justify-content: center;
+        margin-bottom: 20px;
         font-size: 2.15rem;
         font-weight: 700;
         letter-spacing: -0.04em;
         color: var(--primary-color);
         line-height: 1;
+        width: 100%;
     }
     .auth-logo-image {
-        max-width: min(100%, 240px);
-        max-height: 72px;
-        width: auto;
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        max-height: 260px;
         object-fit: contain;
+        display: block;
     }
     .auth-logo span:nth-child(2) { color: #6a67ff; }
     .auth-logo span:nth-child(3) { color: #22c1dc; }
