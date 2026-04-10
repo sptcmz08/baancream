@@ -296,13 +296,14 @@
             padding: 34px;
         }
         .product-title {
-            font-size: clamp(2.2rem, 4.5vw, 4rem);
-            line-height: 1.05;
+            font-size: clamp(1.9rem, 3.6vw, 3.2rem);
+            line-height: 1.12;
             margin-bottom: 16px;
         }
         .product-subtitle {
             color: var(--text-soft);
-            line-height: 1.7;
+            font-size: 1.08rem;
+            line-height: 1.9;
             margin-bottom: 28px;
         }
         .price-panel {
@@ -365,22 +366,6 @@
             border-color: rgba(255, 79, 135, 0.35);
             box-shadow: 0 0 0 4px rgba(255, 79, 135, 0.08);
         }
-        .variant-current {
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            padding: 18px 20px;
-            background: #fbfcff;
-        }
-        .variant-current-label {
-            color: var(--text-soft);
-            font-size: 0.88rem;
-            margin-bottom: 6px;
-        }
-        .variant-current-name {
-            font-size: 1.08rem;
-            font-weight: 700;
-            color: var(--text-dark);
-        }
         .variant-picker {
             display: flex;
             gap: 12px;
@@ -388,8 +373,8 @@
             padding-bottom: 4px;
         }
         .variant-option {
-            width: 92px;
-            min-width: 92px;
+            width: 88px;
+            min-width: 88px;
             border: 2px solid transparent;
             border-radius: 22px;
             background: white;
@@ -408,18 +393,12 @@
         }
         .variant-option img {
             width: 100%;
-            aspect-ratio: 1 / 1;
+            height: 88px;
             object-fit: cover;
             background: #f8fafc;
         }
         .variant-option span {
-            display: block;
-            padding: 10px 8px;
-            font-size: 0.78rem;
-            line-height: 1.3;
-            font-weight: 600;
-            color: var(--text-soft);
-            text-align: center;
+            display: none;
         }
         .variant-option.is-main {
             background: linear-gradient(180deg, #fff7ef 0%, #ffffff 100%);
@@ -693,10 +672,6 @@
                                 </option>
                             @endforeach
                         </select>
-                        <div class="variant-current">
-                            <div class="variant-current-label">ตัวเลือกที่เลือก</div>
-                            <div class="variant-current-name" id="variantNameText">{{ $selectedVariantName }}</div>
-                        </div>
                         <div class="variant-picker">
                             <button type="button" class="variant-option is-main {{ $selectedOptionKey === 'main' ? 'active' : '' }}"
                                 data-variant-option
@@ -851,7 +826,6 @@
         const productSubtitleText = document.getElementById('productSubtitleText');
         const retailPrice = document.getElementById('retailPrice');
         const wholesalePrice = document.getElementById('wholesalePrice');
-        const variantNameText = document.getElementById('variantNameText');
         const singleVariantId = document.getElementById('singleVariantId');
         const bulkVariantId = document.getElementById('bulkVariantId');
         const bulkQuantity = document.getElementById('bulkQuantity');
@@ -965,9 +939,6 @@
                 const description = (dataset.variantDescription || '').trim();
                 productSubtitleText.textContent = description;
                 productSubtitleText.style.display = description ? '' : 'none';
-            }
-            if (variantNameText) {
-                variantNameText.textContent = dataset.variantName || 'สูตรสินค้า';
             }
             singlePriceText.textContent = `฿${Number(dataset.variantRetail).toFixed(2)}`;
             bulkPriceText.textContent = `฿${Number(dataset.variantWholesale).toFixed(2)}`;
