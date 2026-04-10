@@ -3,11 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Brand;
-use App\Models\Category;
-use App\Models\Product;
-use App\Models\ProductVariant;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -16,7 +11,7 @@ class ProductController extends Controller
 {
     public function index(): View
     {
-        $products = Product::with(['category', 'brand', 'variants'])->latest()->get();
+        $products = Product::with(['categories', 'variants'])->latest()->get();
 
         return view('admin.products.index', compact('products'));
     }
@@ -24,9 +19,8 @@ class ProductController extends Controller
     public function create(): View
     {
         $categories = Category::orderBy('name')->get();
-        $brands = Brand::orderBy('name')->get();
 
-        return view('admin.products.create', compact('categories', 'brands'));
+        return view('admin.products.create', compact('categories'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -35,6 +29,7 @@ class ProductController extends Controller
         $data = $this->extractProductData($request, $validated);
 
         $product = Product::create($data);
+        $product->categories()->sync($request->input('category_ids', []));
         $this->syncVariants($request, $product);
 
         return redirect()->route('admin.products.index')->with('success', 'เพิ่มสินค้าสำเร็จ');
@@ -42,11 +37,10 @@ class ProductController extends Controller
 
     public function edit(Product $product): View
     {
-        $product->load('variants');
+        $product->load(['variants', 'categories']);
         $categories = Category::orderBy('name')->get();
-        $brands = Brand::orderBy('name')->get();
 
-        return view('admin.products.edit', compact('product', 'categories', 'brands'));
+        return view('admin.products.edit', compact('product', 'categories'));
     }
 
     public function update(Request $request, Product $product): RedirectResponse
@@ -55,6 +49,7 @@ class ProductController extends Controller
         $data = $this->extractProductData($request, $validated, $product);
 
         $product->update($data);
+        $product->categories()->sync($request->input('category_ids', []));
         $this->syncVariants($request, $product);
 
         return redirect()->route('admin.products.index')->with('success', 'อัปเดตสินค้าสำเร็จ');
@@ -62,8 +57,10 @@ class ProductController extends Controller
 
     public function destroy(Product $product): RedirectResponse
     {
-        if ($product->image) {
-            Storage::disk('public')->delete($product->image);
+        if (is_array($product->images)) {
+            foreach($product->images as $img) {
+                Storage::disk('public')->delete($img);
+            }
         }
 
         $product->variants->each(function (ProductVariant $variant) {
@@ -84,14 +81,17 @@ class ProductController extends Controller
             'name' => 'required|string',
             'retail_price' => 'required|numeric|min:0',
             'wholesale_price' => 'required|numeric|min:0',
-            'image' => 'nullable|image',
-            'category_id' => 'required|exists:categories,id',
-            'brand_id' => 'nullable|exists:brands,id',
+            'stock' => 'nullable|integer|min:0',
+            'wholesale_min_qty' => 'nullable|integer|min:1',
+            'category_ids' => 'required|array',
+            'category_ids.*' => 'exists:categories,id',
+            'images.*' => 'nullable|image',
+            'kept_images' => 'nullable|array',
             'is_new_arrival' => 'nullable|boolean',
             'variants' => 'nullable|array',
             'variants.*.id' => 'nullable|exists:product_variants,id',
             'variants.*.name' => 'required_with:variants.*.retail_price,variants.*.wholesale_price|string|max:255',
-            'variants.*.sku' => 'nullable|string|max:255',
+            'variants.*.description' => 'nullable|string',
             'variants.*.retail_price' => 'nullable|numeric|min:0',
             'variants.*.wholesale_price' => 'nullable|numeric|min:0',
             'variants.*.stock' => 'nullable|integer|min:0',
@@ -102,18 +102,29 @@ class ProductController extends Controller
     private function extractProductData(Request $request, array $validated, ?Product $product = null): array
     {
         $data = collect($validated)
-            ->except(['image', 'variants'])
+            ->except(['images', 'kept_images', 'variants', 'category_ids'])
             ->toArray();
 
         $data['is_new_arrival'] = $request->boolean('is_new_arrival');
+        $data['stock'] = $request->integer('stock', 0);
+        $data['wholesale_min_qty'] = $request->integer('wholesale_min_qty', 10);
 
-        if ($request->hasFile('image')) {
-            if ($product?->image) {
-                Storage::disk('public')->delete($product->image);
+        $images = $request->input('kept_images', []);
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                $images[] = $file->store('products', 'public');
             }
-
-            $data['image'] = $request->file('image')->store('products', 'public');
         }
+
+        if ($product && is_array($product->images)) {
+            $removed = array_diff($product->images, $images);
+            foreach ($removed as $img) {
+                Storage::disk('public')->delete($img);
+            }
+        }
+
+        $data['images'] = $images;
 
         return $data;
     }
@@ -136,7 +147,7 @@ class ProductController extends Controller
             $variant = $product->variants()->find($variantInput['id'] ?? null) ?? new ProductVariant();
             $variant->product_id = $product->id;
             $variant->name = $name;
-            $variant->sku = $variantInput['sku'] ?? null;
+            $variant->description = $variantInput['description'] ?? null;
             $variant->retail_price = $retailPrice ?: 0;
             $variant->wholesale_price = $wholesalePrice ?: 0;
             $variant->stock = (int) ($variantInput['stock'] ?? 0);

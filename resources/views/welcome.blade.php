@@ -596,15 +596,15 @@
                         if (in_array($product->id, $featuredIds, true)) {
                             $filterTags[] = 'featured';
                         }
-                        if ($product->category?->slug) {
-                            $filterTags[] = 'category:' . $product->category->slug;
+                        foreach($product->categories as $pc) {
+                            $filterTags[] = 'category:' . $pc->slug;
                         }
                     @endphp
                     <article
                         class="product-card"
                         data-card
                         data-filter-tags="{{ implode('|', $filterTags) }}"
-                        data-search="{{ strtolower($product->name . ' ' . ($product->category->name ?? '') . ' ' . ($product->brand->name ?? '') . ' ' . $product->variants->pluck('name')->implode(' ')) }}">
+                        data-search="{{ strtolower($product->name . ' ' . $product->categories->pluck('name')->implode(' ') . ' ' . $product->variants->pluck('name')->implode(' ')) }}">
                         <a href="{{ route('products.show', $product) }}" class="product-image">
                             @if($product->displayImage())
                                 <img src="{{ asset('storage/' . $product->displayImage()) }}" alt="{{ $product->name }}">
@@ -614,12 +614,9 @@
                         </a>
                         <div class="product-body">
                             <div class="product-meta">
-                                @if($product->category)
-                                    <span class="product-badge">{{ $product->category->name }}</span>
-                                @endif
-                                @if($product->brand)
-                                    <span class="product-badge brand">{{ $product->brand->name }}</span>
-                                @endif
+                                @foreach($product->categories as $pc)
+                                    <span class="product-badge">{{ $pc->name }}</span>
+                                @endforeach
                                 @if($product->hasVariants())
                                     <span class="product-badge">{{ $product->variants->count() }} สูตร</span>
                                 @endif

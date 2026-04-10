@@ -15,8 +15,6 @@ use Illuminate\View\View;
 
 class StoreController extends Controller
 {
-    private const WHOLESALE_MIN_QTY = 10;
-
     public function index(Request $request): View
     {
         $categories = Category::query()
@@ -32,16 +30,15 @@ class StoreController extends Controller
                 'description',
                 'retail_price',
                 'wholesale_price',
-                'image',
-                'category_id',
-                'brand_id',
+                'stock',
+                'wholesale_min_qty',
+                'images',
                 'is_new_arrival',
                 'created_at',
             ])
             ->with([
-                'category:id,name,slug',
-                'brand:id,name,slug',
-                'variants:id,product_id,name,image,retail_price,wholesale_price,stock,sort_order',
+                'categories:id,name,slug',
+                'variants:id,product_id,name,description,image,retail_price,wholesale_price,stock,sort_order',
             ])
             ->latest()
             ->get();
@@ -72,18 +69,25 @@ class StoreController extends Controller
 
     public function show(Product $product): View
     {
-        $product->load(['category', 'brand', 'variants']);
+        $product->load(['categories', 'variants']);
 
         $selectedVariant = $product->defaultVariant();
-        $relatedProducts = Product::with(['category', 'brand', 'variants'])
+        
+        $categoryIds = $product->categories->pluck('id')->toArray();
+
+        $relatedProducts = Product::with(['categories', 'variants'])
             ->whereKeyNot($product->id)
-            ->when($product->category_id, fn ($query) => $query->where('category_id', $product->category_id))
+            ->when(!empty($categoryIds), function ($query) use ($categoryIds) {
+                $query->whereHas('categories', function ($q) use ($categoryIds) {
+                    $q->whereIn('categories.id', $categoryIds);
+                });
+            })
             ->latest()
             ->take(4)
             ->get();
 
         if ($relatedProducts->isEmpty()) {
-            $relatedProducts = Product::with(['category', 'brand', 'variants'])
+            $relatedProducts = Product::with(['categories', 'variants'])
                 ->whereKeyNot($product->id)
                 ->latest()
                 ->take(4)
@@ -98,12 +102,9 @@ class StoreController extends Controller
 
     public function search(Request $request): JsonResponse
     {
-        $products = Product::with(['category', 'brand', 'variants'])
+        $products = Product::with(['categories', 'variants'])
             ->where('name', 'like', '%' . $request->q . '%')
-            ->orWhereHas('category', function ($query) use ($request) {
-                $query->where('name', 'like', '%' . $request->q . '%');
-            })
-            ->orWhereHas('brand', function ($query) use ($request) {
+            ->orWhereHas('categories', function ($query) use ($request) {
                 $query->where('name', 'like', '%' . $request->q . '%');
             })
             ->orWhereHas('variants', function ($query) use ($request) {
@@ -281,8 +282,9 @@ class StoreController extends Controller
             'quantity' => $quantity,
             'retail_price' => (float) ($variant?->retail_price ?? $product->retail_price),
             'wholesale_price' => (float) ($variant?->wholesale_price ?? $product->wholesale_price),
-            'image' => $variant?->image ?: $product->image,
-            'stock' => $variant?->stock,
+            'wholesale_min_qty' => $product->wholesale_min_qty,
+            'image' => $variant?->image ?: $product->displayImage(),
+            'stock' => $variant?->stock ?? $product->stock,
         ];
     }
 
@@ -293,7 +295,8 @@ class StoreController extends Controller
         $total = 0;
 
         foreach ($items as &$item) {
-            $item['uses_wholesale'] = $item['quantity'] >= self::WHOLESALE_MIN_QTY;
+            $minQty = $item['wholesale_min_qty'] ?? 10;
+            $item['uses_wholesale'] = $item['quantity'] >= $minQty;
             $item['unit_price'] = $item['uses_wholesale'] ? $item['wholesale_price'] : $item['retail_price'];
             $item['subtotal'] = $item['unit_price'] * $item['quantity'];
             $count += $item['quantity'];

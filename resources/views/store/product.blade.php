@@ -613,9 +613,9 @@
     @php
         $productName = (string) data_get($product, 'name', 'สินค้า');
         $productDescription = (string) data_get($product, 'description', '');
-        $categoryName = data_get($product, 'category.name');
-        $categorySlug = data_get($product, 'category.slug');
-        $brandName = data_get($product, 'brand.name');
+        $firstCategory = $product->categories->first();
+        $categoryName = $firstCategory ? $firstCategory->name : null;
+        $categorySlug = $firstCategory ? $firstCategory->slug : null;
         $selectedRetailPrice = (float) (data_get($selectedVariant, 'retail_price') ?? data_get($product, 'retail_price', 0));
         $selectedWholesalePrice = (float) (data_get($selectedVariant, 'wholesale_price') ?? data_get($product, 'wholesale_price', 0));
         $selectedStock = data_get($selectedVariant, 'stock');
@@ -679,10 +679,26 @@
                     @endif
                 </div>
 
-                @if($product->variants->isNotEmpty())
+                @if($product->variants->isNotEmpty() || !empty($product->images))
                     <div class="thumb-row">
+                        @if(!empty($product->images))
+                            @foreach($product->images as $index => $img)
+                                <button type="button" class="thumb {{ $index === 0 && !$selectedVariant ? 'active' : '' }}"
+                                    data-variant-thumb
+                                    data-variant-id=""
+                                    data-variant-image="{{ asset('storage/' . $img) }}"
+                                    data-variant-retail="{{ number_format($selectedRetailPrice, 2, '.', '') }}"
+                                    data-variant-wholesale="{{ number_format($selectedWholesalePrice, 2, '.', '') }}"
+                                    data-variant-stock="{{ $selectedStock }}"
+                                    data-variant-sku=""
+                                    data-variant-name="{{ $productName }}">
+                                    <img src="{{ asset('storage/' . $img) }}" alt="{{ $productName }}">
+                                </button>
+                            @endforeach
+                        @endif
+
                         @foreach($product->variants as $variant)
-                            @php $imagePath = $variant->image ?: $product->image; @endphp
+                            @php $imagePath = $variant->image ?: $product->displayImage(); @endphp
                             <button type="button" class="thumb {{ $selectedVariant && $selectedVariant->id === $variant->id ? 'active' : '' }}"
                                 data-variant-thumb
                                 data-variant-id="{{ $variant->id }}"
@@ -715,12 +731,9 @@
                 </div>
 
                 <div class="product-meta">
-                    @if($categoryName)
-                        <span class="product-badge">{{ $categoryName }}</span>
-                    @endif
-                    @if($brandName)
-                        <span class="product-badge brand">{{ $brandName }}</span>
-                    @endif
+                    @foreach($product->categories as $pc)
+                        <span class="product-badge">{{ $pc->name }}</span>
+                    @endforeach
                     @if($product->hasVariants())
                         <span class="product-badge">{{ $product->variants->count() }} สูตร</span>
                     @endif
@@ -739,7 +752,7 @@
                             <div class="price-retail" id="retailPrice">฿{{ number_format($selectedRetailPrice, 2) }}</div>
                         </div>
                         <div class="price-wholesale">
-                            <span>ส่ง 10 ชิ้น</span>
+                            <span>ส่ง {{ $product->wholesale_min_qty }} ชิ้น</span>
                             <strong id="wholesalePrice">฿{{ number_format($selectedWholesalePrice, 2) }}</strong>
                         </div>
                     </div>
@@ -790,8 +803,8 @@
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
                         <input type="hidden" name="variant_id" id="bulkVariantId" value="{{ data_get($selectedVariant, 'id') }}">
-                        <input type="hidden" name="quantity" value="10">
-                        <button type="submit" class="cta-button primary">ใส่ตะกร้า 10 ชิ้น <span id="bulkPriceText">฿{{ number_format($selectedWholesalePrice * 10, 2) }}</span></button>
+                        <input type="hidden" name="quantity" value="{{ $product->wholesale_min_qty }}">
+                        <button type="submit" class="cta-button primary">ใส่ตะกร้า {{ $product->wholesale_min_qty }} ชิ้น <span id="bulkPriceText">฿{{ number_format($selectedWholesalePrice * $product->wholesale_min_qty, 2) }}</span></button>
                     </form>
                 </div>
             </div>
@@ -873,9 +886,20 @@
                     <button type="button" class="lightbox-close" id="lightboxClose" aria-label="ปิดรูปขยาย">✕</button>
                 </div>
                 <div class="lightbox-thumbs">
-                    @if($product->variants->isNotEmpty())
+                    @if($product->variants->isNotEmpty() || !empty($product->images))
+                        @if(!empty($product->images))
+                            @foreach($product->images as $index => $img)
+                                <button type="button" class="lightbox-thumb {{ $index === 0 && !$selectedVariant ? 'active' : '' }}"
+                                    data-lightbox-thumb
+                                    data-variant-id=""
+                                    data-variant-image="{{ asset('storage/' . $img) }}">
+                                    <img src="{{ asset('storage/' . $img) }}" alt="{{ $productName }}">
+                                </button>
+                            @endforeach
+                        @endif
+
                         @foreach($product->variants as $variant)
-                            @php $imagePath = $variant->image ?: $product->image; @endphp
+                            @php $imagePath = $variant->image ?: $product->displayImage(); @endphp
                             <button type="button"
                                 class="lightbox-thumb {{ $selectedVariant && $selectedVariant->id === $variant->id ? 'active' : '' }}"
                                 data-lightbox-thumb
@@ -944,7 +968,7 @@
                 variantMetaText.textContent = `${dataset.variantSku || 'สูตรสินค้า'} · คงเหลือ ${dataset.variantStock || 0} ชิ้น`;
             }
             singlePriceText.textContent = `฿${Number(dataset.variantRetail).toFixed(2)}`;
-            bulkPriceText.textContent = `฿${(Number(dataset.variantWholesale) * 10).toFixed(2)}`;
+            bulkPriceText.textContent = `฿${(Number(dataset.variantWholesale) * {{ $product->wholesale_min_qty }}).toFixed(2)}`;
 
             if (singleVariantId) singleVariantId.value = dataset.variantId;
             if (bulkVariantId) bulkVariantId.value = dataset.variantId;

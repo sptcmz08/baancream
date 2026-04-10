@@ -1,6 +1,58 @@
 @extends('layouts.admin')
 
 @section('content')
+<style>
+    .img-preview-box {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        background: #f8fafc;
+        flex-shrink: 0;
+    }
+    .img-preview-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .img-preview-remove {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        background: rgba(220, 38, 38, 0.9);
+        color: white;
+        border: none;
+        border-radius: 999px;
+        width: 22px;
+        height: 22px;
+        font-size: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .category-checkboxes {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 10px;
+        padding: 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        max-height: 200px;
+        overflow-y: auto;
+        background: white;
+    }
+    .category-checkboxes label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 400;
+        cursor: pointer;
+    }
+</style>
+
 <div class="header-actions">
     <h2>เพิ่มสินค้าใหม่</h2>
     <a href="{{ route('admin.products.index') }}" class="btn" style="background:var(--border-color); text-decoration:none;">กลับ</a>
@@ -8,7 +60,7 @@
 
 @php
     $variantRows = old('variants', [
-        ['name' => '', 'sku' => '', 'retail_price' => '', 'wholesale_price' => '', 'stock' => ''],
+        ['name' => '', 'description' => '', 'retail_price' => '', 'wholesale_price' => '', 'stock' => ''],
     ]);
 @endphp
 
@@ -24,28 +76,25 @@
                 <label style="display:block; margin-bottom:10px; font-weight:500;">ชื่อสินค้า <span style="color:red;">*</span></label>
                 <input type="text" name="name" value="{{ old('name') }}" required style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
             </div>
-            <div>
-                <label style="display:block; margin-bottom:10px; font-weight:500;">หมวดหมู่ <span style="color:red;">*</span></label>
-                <select name="category_id" required style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
-                    <option value="">เลือกหมวดหมู่</option>
+            
+            <div style="grid-column: 1 / -1;">
+                <label style="display:block; margin-bottom:10px; font-weight:500;">หมวดหมู่ (เลือกได้มากกว่า 1) <span style="color:red;">*</span></label>
+                <div class="category-checkboxes">
                     @foreach($categories as $cat)
-                        <option value="{{ $cat->id }}" {{ (string) old('category_id') === (string) $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                        <label>
+                            <input type="checkbox" name="category_ids[]" value="{{ $cat->id }}" {{ in_array($cat->id, old('category_ids', [])) ? 'checked' : '' }}>
+                            {{ $cat->name }}
+                        </label>
                     @endforeach
-                </select>
+                </div>
             </div>
-            <div>
-                <label style="display:block; margin-bottom:10px; font-weight:500;">แบรนด์สินค้า</label>
-                <select name="brand_id" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
-                    <option value="">เลือกแบรนด์</option>
-                    @foreach($brands as $brand)
-                        <option value="{{ $brand->id }}" {{ (string) old('brand_id') === (string) $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
-                    @endforeach
-                </select>
+
+            <div style="grid-column: 1 / -1;">
+                <label style="display:block; margin-bottom:10px; font-weight:500;">รูปภาพสินค้า (อัปโหลดหลายรูปได้)</label>
+                <input type="file" id="imagesInput" name="images[]" multiple accept="image/*" style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:8px;">
+                <div id="imagePreviewContainer" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px;"></div>
             </div>
-            <div>
-                <label style="display:block; margin-bottom:10px; font-weight:500;">รูปภาพหลัก</label>
-                <input type="file" name="image" accept="image/*" style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:8px;">
-            </div>
+
             <div>
                 <label style="display:block; margin-bottom:10px; font-weight:500;">ราคาปลีกหลัก <span style="color:red;">*</span></label>
                 <input type="number" name="retail_price" value="{{ old('retail_price') }}" step="0.01" required style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
@@ -54,6 +103,18 @@
                 <label style="display:block; margin-bottom:10px; font-weight:500;">ราคาส่งหลัก <span style="color:red;">*</span></label>
                 <input type="number" name="wholesale_price" value="{{ old('wholesale_price') }}" step="0.01" required style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
             </div>
+
+            <div>
+                <label style="display:block; margin-bottom:10px; font-weight:500;">จำนวนขั้นต่ำราคาส่งหลัก <span style="color:red;">*</span></label>
+                <input type="number" name="wholesale_min_qty" value="{{ old('wholesale_min_qty', 10) }}" min="1" required style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
+                <small style="color:var(--text-muted);">ซื้อตั้งแต่กี่ชิ้นถึงได้ราคาส่ง</small>
+            </div>
+            <div>
+                <label style="display:block; margin-bottom:10px; font-weight:500;">สต็อกสินค้าหลัก</label>
+                <input type="number" name="stock" value="{{ old('stock', 0) }}" min="0" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
+                <small style="color:var(--text-muted);">กรณีที่สินค้าไม่มีแยกสูตรย่อย</small>
+            </div>
+
             <div style="grid-column: 1 / -1;">
                 <label style="display:block; margin-bottom:10px; font-weight:500;">รายละเอียดสินค้า</label>
                 <textarea name="description" rows="4" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">{{ old('description') }}</textarea>
@@ -69,8 +130,8 @@
         <div style="border-top:1px solid var(--border-color); padding-top:24px; margin-top:12px;">
             <div class="header-actions" style="margin-bottom:16px;">
                 <div>
-                    <h3 style="margin:0;">สูตรสินค้า</h3>
-                    <p style="margin:6px 0 0; color:var(--text-muted);">ถ้าสินค้าตัวเดียวมีหลายสูตร สามารถเพิ่มได้จากตรงนี้</p>
+                    <h3 style="margin:0;">สูตรสินค้าย่อย</h3>
+                    <p style="margin:6px 0 0; color:var(--text-muted);">ถ้าสินค้าตัวเดียวมีหลายสูตร สามารถเพิ่มได้จากตรงนี้ (ราคาของสูตรจะแทนที่ราคาหลัก)</p>
                 </div>
                 <button type="button" id="addVariantButton" class="btn btn-primary">+ เพิ่มสูตร</button>
             </div>
@@ -83,13 +144,13 @@
                             <button type="button" class="btn" data-remove-variant style="background:#fee2e2; color:#dc2626;">ลบสูตรนี้</button>
                         </div>
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-                            <div>
-                                <label style="display:block; margin-bottom:8px;">ชื่อสูตร</label>
+                            <div style="grid-column: 1 / -1;">
+                                <label style="display:block; margin-bottom:8px;">ชื่อสินค้าย่อย / ชื่อสูตร</label>
                                 <input type="text" name="variants[{{ $index }}][name]" value="{{ $variant['name'] ?? '' }}" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
                             </div>
-                            <div>
-                                <label style="display:block; margin-bottom:8px;">SKU สูตร</label>
-                                <input type="text" name="variants[{{ $index }}][sku]" value="{{ $variant['sku'] ?? '' }}" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
+                            <div style="grid-column: 1 / -1;">
+                                <label style="display:block; margin-bottom:8px;">รายละเอียดสูตร (ถ้ามี)</label>
+                                <textarea name="variants[{{ $index }}][description]" rows="2" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">{{ $variant['description'] ?? '' }}</textarea>
                             </div>
                             <div>
                                 <label style="display:block; margin-bottom:8px;">ราคาปลีกสูตร</label>
@@ -100,7 +161,7 @@
                                 <input type="number" step="0.01" name="variants[{{ $index }}][wholesale_price]" value="{{ $variant['wholesale_price'] ?? '' }}" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
                             </div>
                             <div>
-                                <label style="display:block; margin-bottom:8px;">สต็อก</label>
+                                <label style="display:block; margin-bottom:8px;">สต็อกสูตรนี้</label>
                                 <input type="number" name="variants[{{ $index }}][stock]" value="{{ $variant['stock'] ?? '' }}" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
                             </div>
                             <div>
@@ -124,13 +185,13 @@
             <button type="button" class="btn" data-remove-variant style="background:#fee2e2; color:#dc2626;">ลบสูตรนี้</button>
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-            <div>
-                <label style="display:block; margin-bottom:8px;">ชื่อสูตร</label>
+            <div style="grid-column: 1 / -1;">
+                <label style="display:block; margin-bottom:8px;">ชื่อสินค้าย่อย / ชื่อสูตร</label>
                 <input type="text" data-field="name" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
             </div>
-            <div>
-                <label style="display:block; margin-bottom:8px;">SKU สูตร</label>
-                <input type="text" data-field="sku" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
+            <div style="grid-column: 1 / -1;">
+                <label style="display:block; margin-bottom:8px;">รายละเอียดสูตร (ถ้ามี)</label>
+                <textarea data-field="description" rows="2" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;"></textarea>
             </div>
             <div>
                 <label style="display:block; margin-bottom:8px;">ราคาปลีกสูตร</label>
@@ -141,7 +202,7 @@
                 <input type="number" step="0.01" data-field="wholesale_price" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
             </div>
             <div>
-                <label style="display:block; margin-bottom:8px;">สต็อก</label>
+                <label style="display:block; margin-bottom:8px;">สต็อกสูตรนี้</label>
                 <input type="number" data-field="stock" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
             </div>
             <div>
@@ -155,6 +216,59 @@
 
 @section('scripts')
 <script>
+    // ----------------------------------------
+    // Multiple Images Preview Logic (Create)
+    // ----------------------------------------
+    const imagesInput = document.getElementById('imagesInput');
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    
+    // We use DataTransfer to allow users to "remove" selected files
+    let dataTransfer = new DataTransfer();
+
+    imagesInput.addEventListener('change', function(e) {
+        // Add new files to our dataTransfer list
+        Array.from(this.files).forEach(file => {
+            dataTransfer.items.add(file);
+        });
+        
+        // Update input
+        updateInputAndPreview();
+    });
+
+    function updateInputAndPreview() {
+        imagesInput.files = dataTransfer.files;
+        previewContainer.innerHTML = '';
+        
+        Array.from(imagesInput.files).forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const box = document.createElement('div');
+                box.className = 'img-preview-box';
+                box.innerHTML = `
+                    <img src="${e.target.result}" alt="preview">
+                    <button type="button" class="img-preview-remove" onclick="removeImage(${index})">✕</button>
+                `;
+                previewContainer.appendChild(box);
+            }
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // Global function to remove an uploaded image before submit
+    window.removeImage = function(indexToRemove) {
+        const newDataTransfer = new DataTransfer();
+        Array.from(imagesInput.files).forEach((file, index) => {
+            if (index !== indexToRemove) {
+                newDataTransfer.items.add(file);
+            }
+        });
+        dataTransfer = newDataTransfer;
+        updateInputAndPreview();
+    };
+
+    // ----------------------------------------
+    // Variant Logic
+    // ----------------------------------------
     const variantList = document.getElementById('variantList');
     const variantTemplate = document.getElementById('variantTemplate');
     const addVariantButton = document.getElementById('addVariantButton');
@@ -185,9 +299,11 @@
 
         const cards = variantList.querySelectorAll('[data-variant-card]');
         if (cards.length === 1) {
-            cards[0].querySelectorAll('input').forEach((input) => {
+            cards[0].querySelectorAll('input, textarea').forEach((input) => {
                 if (input.type === 'file') {
                     input.value = '';
+                } else if(input.type === 'checkbox' || input.type === 'radio') {
+                    input.checked = false;
                 } else {
                     input.value = '';
                 }
