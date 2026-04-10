@@ -486,6 +486,17 @@
     </style>
 </head>
 <body>
+    @php
+        $productName = (string) data_get($product, 'name', 'สินค้า');
+        $productDescription = (string) data_get($product, 'description', '');
+        $categoryName = data_get($product, 'category.name');
+        $categorySlug = data_get($product, 'category.slug');
+        $brandName = data_get($product, 'brand.name');
+        $selectedRetailPrice = (float) (data_get($selectedVariant, 'retail_price') ?? data_get($product, 'retail_price', 0));
+        $selectedWholesalePrice = (float) (data_get($selectedVariant, 'wholesale_price') ?? data_get($product, 'wholesale_price', 0));
+        $selectedStock = data_get($selectedVariant, 'stock');
+        $mainImage = data_get($selectedVariant, 'image') ?: data_get($product, 'image');
+    @endphp
     <div class="top-strip">
         <div class="top-strip-inner">
             <div class="top-strip-badges">
@@ -535,9 +546,8 @@
         <div class="product-shell">
             <div class="surface-card gallery-card">
                 <div class="gallery-main" id="galleryMain">
-                    @php $mainImage = $selectedVariant?->image ?: $product->image; @endphp
                     @if($mainImage)
-                        <img id="mainImage" src="{{ asset('storage/' . $mainImage) }}" alt="{{ $product->name }}">
+                        <img id="mainImage" src="{{ asset('storage/' . $mainImage) }}" alt="{{ $productName }}">
                     @else
                         <div class="placeholder" id="mainImage">No Image</div>
                     @endif
@@ -554,9 +564,9 @@
                                 data-variant-retail="{{ number_format($variant->retail_price, 2, '.', '') }}"
                                 data-variant-wholesale="{{ number_format($variant->wholesale_price, 2, '.', '') }}"
                                 data-variant-stock="{{ $variant->stock }}"
-                                data-variant-name="{{ $variant->name }}">
+                                data-variant-name="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
                                 @if($imagePath)
-                                    <img src="{{ asset('storage/' . $imagePath) }}" alt="{{ $variant->name }}">
+                                    <img src="{{ asset('storage/' . $imagePath) }}" alt="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
                                 @else
                                     <img src="https://placehold.co/400x400/f4f7fb/99a4b5?text=No+Image" alt="No Image">
                                 @endif
@@ -570,38 +580,38 @@
                 <div class="breadcrumb">
                     <a href="{{ route('home') }}">หน้าแรก</a>
                     <span>/</span>
-                    @if($product->category)
-                        <a href="{{ route('home') }}#category-{{ $product->category->slug }}">{{ $product->category->name }}</a>
+                    @if($categoryName)
+                        <a href="{{ route('home') }}{{ $categorySlug ? '#category-' . $categorySlug : '' }}">{{ $categoryName }}</a>
                         <span>/</span>
                     @endif
-                    <span>{{ $product->name }}</span>
+                    <span>{{ $productName }}</span>
                 </div>
 
                 <div class="product-meta">
-                    @if($product->category)
-                        <span class="product-badge">{{ $product->category->name }}</span>
+                    @if($categoryName)
+                        <span class="product-badge">{{ $categoryName }}</span>
                     @endif
-                    @if($product->brand)
-                        <span class="product-badge brand">{{ $product->brand->name }}</span>
+                    @if($brandName)
+                        <span class="product-badge brand">{{ $brandName }}</span>
                     @endif
                     @if($product->hasVariants())
                         <span class="product-badge">{{ $product->variants->count() }} สูตร</span>
                     @endif
-                    <span class="product-badge success" id="stockText">มีสินค้า {{ $selectedVariant?->stock ?? 'พร้อมขาย' }} ชิ้น</span>
+                    <span class="product-badge success" id="stockText">มีสินค้า {{ $selectedStock ?? 'พร้อมขาย' }} ชิ้น</span>
                 </div>
 
-                <h1 class="product-title">{{ $product->name }}</h1>
-                <p class="product-subtitle">{{ $product->description ?: 'เลือกรายละเอียดสูตรที่ต้องการ แล้วเพิ่มลงตะกร้าได้ทันทีจากหน้านี้' }}</p>
+                <h1 class="product-title">{{ $productName }}</h1>
+                <p class="product-subtitle">{{ $productDescription !== '' ? $productDescription : 'เลือกรายละเอียดสูตรที่ต้องการ แล้วเพิ่มลงตะกร้าได้ทันทีจากหน้านี้' }}</p>
 
                 <div class="price-panel">
                     <div class="price-main">
                         <div>
                             <div class="price-label">ราคาปลีก</div>
-                            <div class="price-retail" id="retailPrice">฿{{ number_format($selectedVariant?->retail_price ?? $product->retail_price, 2) }}</div>
+                            <div class="price-retail" id="retailPrice">฿{{ number_format($selectedRetailPrice, 2) }}</div>
                         </div>
                         <div class="price-wholesale">
                             <span>ส่ง 10 ชิ้น</span>
-                            <strong id="wholesalePrice">฿{{ number_format($selectedVariant?->wholesale_price ?? $product->wholesale_price, 2) }}</strong>
+                            <strong id="wholesalePrice">฿{{ number_format($selectedWholesalePrice, 2) }}</strong>
                         </div>
                     </div>
                 </div>
@@ -618,14 +628,14 @@
                                 data-variant-retail="{{ number_format($variant->retail_price, 2, '.', '') }}"
                                 data-variant-wholesale="{{ number_format($variant->wholesale_price, 2, '.', '') }}"
                                 data-variant-stock="{{ $variant->stock }}"
-                                data-variant-name="{{ $variant->name }}">
+                                data-variant-name="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
                                 <div>
-                                    <div class="variant-name">{{ $variant->name }}</div>
-                                    <div class="variant-meta">{{ $variant->sku ?: 'สูตรสินค้า' }} · คงเหลือ {{ $variant->stock }} ชิ้น</div>
+                                    <div class="variant-name">{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}</div>
+                                    <div class="variant-meta">{{ data_get($variant, 'sku') ?: 'สูตรสินค้า' }} · คงเหลือ {{ data_get($variant, 'stock', 0) }} ชิ้น</div>
                                 </div>
                                 <div class="variant-price">
-                                    <div>฿{{ number_format($variant->retail_price, 2) }}</div>
-                                    <small>ส่ง ฿{{ number_format($variant->wholesale_price, 2) }}</small>
+                                    <div>฿{{ number_format((float) data_get($variant, 'retail_price', 0), 2) }}</div>
+                                    <small>ส่ง ฿{{ number_format((float) data_get($variant, 'wholesale_price', 0), 2) }}</small>
                                 </div>
                             </button>
                         @endforeach
@@ -640,17 +650,17 @@
                     <form method="POST" action="{{ route('cart.add') }}">
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
-                        <input type="hidden" name="variant_id" id="singleVariantId" value="{{ $selectedVariant?->id }}">
+                        <input type="hidden" name="variant_id" id="singleVariantId" value="{{ data_get($selectedVariant, 'id') }}">
                         <input type="hidden" name="quantity" value="1">
-                        <button type="submit" class="cta-button">เพิ่มลงตะกร้า 1 ชิ้น <span id="singlePriceText">฿{{ number_format($selectedVariant?->retail_price ?? $product->retail_price, 2) }}</span></button>
+                        <button type="submit" class="cta-button">เพิ่มลงตะกร้า 1 ชิ้น <span id="singlePriceText">฿{{ number_format($selectedRetailPrice, 2) }}</span></button>
                     </form>
 
                     <form method="POST" action="{{ route('cart.add') }}">
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
-                        <input type="hidden" name="variant_id" id="bulkVariantId" value="{{ $selectedVariant?->id }}">
+                        <input type="hidden" name="variant_id" id="bulkVariantId" value="{{ data_get($selectedVariant, 'id') }}">
                         <input type="hidden" name="quantity" value="10">
-                        <button type="submit" class="cta-button primary">เพิ่มลงตะกร้า 10 ชิ้น <span id="bulkPriceText">฿{{ number_format(($selectedVariant?->wholesale_price ?? $product->wholesale_price) * 10, 2) }}</span></button>
+                        <button type="submit" class="cta-button primary">เพิ่มลงตะกร้า 10 ชิ้น <span id="bulkPriceText">฿{{ number_format($selectedWholesalePrice * 10, 2) }}</span></button>
                     </form>
                 </div>
             </div>
@@ -666,41 +676,45 @@
             <a href="{{ route('home') }}#all-products" class="section-pill">ดูสินค้าทั้งหมด</a>
         </div>
 
-        <div class="related-grid">
-            @foreach($relatedProducts as $item)
-                <article class="product-card">
-                    <a href="{{ route('products.show', $item) }}" class="product-image">
-                        @if($item->displayImage())
-                            <img src="{{ asset('storage/' . $item->displayImage()) }}" alt="{{ $item->name }}">
-                        @else
-                            <span>No Image</span>
-                        @endif
-                    </a>
-                    <div class="product-body">
-                        <div class="product-meta">
-                            @if($item->category)
-                                <span class="product-badge">{{ $item->category->name }}</span>
+        @if($relatedProducts->isNotEmpty())
+            <div class="related-grid">
+                @foreach($relatedProducts as $item)
+                    <article class="product-card">
+                        <a href="{{ route('products.show', $item) }}" class="product-image">
+                            @if($item->displayImage())
+                                <img src="{{ asset('storage/' . $item->displayImage()) }}" alt="{{ (string) data_get($item, 'name', 'สินค้า') }}">
+                            @else
+                                <span>No Image</span>
                             @endif
-                            @if($item->brand)
-                                <span class="product-badge brand">{{ $item->brand->name }}</span>
-                            @endif
-                            @if($item->hasVariants())
-                                <span class="product-badge">{{ $item->variants->count() }} สูตร</span>
-                            @endif
-                        </div>
-                        <a href="{{ route('products.show', $item) }}"><h3 class="product-name">{{ $item->name }}</h3></a>
-                        <p class="product-desc">{{ Str::limit($item->description ?: 'เลือกดูรายละเอียดสินค้าเพิ่มเติมได้จากหน้ารายการนี้', 90) }}</p>
-                        <div class="product-footer">
-                            <div>
-                                <div class="price-retail" style="font-size:1.15rem;">฿{{ number_format($item->displayRetailPrice(), 2) }}</div>
-                                <div class="price-wholesale">ราคาส่ง ฿{{ number_format($item->displayWholesalePrice(), 2) }}</div>
+                        </a>
+                        <div class="product-body">
+                            <div class="product-meta">
+                                @if(data_get($item, 'category.name'))
+                                    <span class="product-badge">{{ data_get($item, 'category.name') }}</span>
+                                @endif
+                                @if(data_get($item, 'brand.name'))
+                                    <span class="product-badge brand">{{ data_get($item, 'brand.name') }}</span>
+                                @endif
+                                @if($item->hasVariants())
+                                    <span class="product-badge">{{ $item->variants->count() }} สูตร</span>
+                                @endif
                             </div>
-                            <a href="{{ route('products.show', $item) }}" class="buy-button">เลือกสูตร</a>
+                            <a href="{{ route('products.show', $item) }}"><h3 class="product-name">{{ (string) data_get($item, 'name', 'สินค้า') }}</h3></a>
+                            <p class="product-desc">{{ \Illuminate\Support\Str::limit((string) (data_get($item, 'description') ?: 'เลือกดูรายละเอียดสินค้าเพิ่มเติมได้จากหน้ารายการนี้'), 90) }}</p>
+                            <div class="product-footer">
+                                <div>
+                                    <div class="price-retail" style="font-size:1.15rem;">฿{{ number_format((float) $item->displayRetailPrice(), 2) }}</div>
+                                    <div class="price-wholesale">ราคาส่ง ฿{{ number_format((float) $item->displayWholesalePrice(), 2) }}</div>
+                                </div>
+                                <a href="{{ route('products.show', $item) }}" class="buy-button">เลือกสูตร</a>
+                            </div>
                         </div>
-                    </div>
-                </article>
-            @endforeach
-        </div>
+                    </article>
+                @endforeach
+            </div>
+        @else
+            <div class="surface-card" style="padding:24px; color:var(--text-soft);">ยังไม่มีสินค้าที่เกี่ยวข้องในตอนนี้</div>
+        @endif
     </section>
 
     @include('store.partials.floating-cart', [
@@ -730,7 +744,8 @@
                 if (currentMainImage && currentMainImage.tagName === 'IMG') {
                     currentMainImage.src = dataset.variantImage;
                 } else {
-                    galleryMain.innerHTML = `<img id="mainImage" src="${dataset.variantImage}" alt="{{ addslashes($product->name) }}">`;
+                    galleryMain.innerHTML = `<img id="mainImage" src="${dataset.variantImage}" alt="">`;
+                    document.getElementById('mainImage')?.setAttribute('alt', @json($productName));
                 }
             }
 
