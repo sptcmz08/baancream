@@ -27,7 +27,7 @@
                 <td>
                     @php($displayImage = $product->displayImage())
                     @if($displayImage)
-                        <img src="{{ asset('storage/' . $displayImage) }}" alt="{{ $product->name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                        <img src="{{ url('/media/' . $displayImage) }}" alt="{{ $product->name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
                     @else
                         <div style="width: 50px; height: 50px; background: #eee; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #aaa;">No Img</div>
                     @endif

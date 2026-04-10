@@ -149,7 +149,7 @@
                             <td>
                                 <div class="item-thumb">
                                     @if($item->product?->displayImage())
-                                        <img src="{{ asset('storage/' . $item->product->displayImage()) }}" alt="">
+                                        <img src="{{ url('/media/' . $item->product->displayImage()) }}" alt="">
                                     @endif
                                 </div>
                             </td>

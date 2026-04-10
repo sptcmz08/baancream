@@ -26,7 +26,7 @@
                     <div style="display:flex; gap:12px; align-items:flex-start;">
                         <div style="width:72px; height:72px; border-radius:18px; overflow:hidden; flex:0 0 auto; background:#f3f6fb;">
                             @if(!empty($item['image']))
-                                <img src="{{ asset('storage/' . $item['image']) }}" alt="{{ $item['name'] ?? 'สินค้า' }}" style="width:100%; height:100%; object-fit:cover;">
+                                <img src="{{ url('/media/' . $item['image']) }}" alt="{{ $item['name'] ?? 'สินค้า' }}" style="width:100%; height:100%; object-fit:cover;">
                             @else
                                 <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#94a3b8; font-size:0.8rem;">No image</div>
                             @endif

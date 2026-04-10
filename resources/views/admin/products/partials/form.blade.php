@@ -97,7 +97,7 @@
                 <div id="imagePreviewContainer" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
                     @foreach($existingProductImages as $index => $img)
                         <div class="img-preview-box" data-existing-preview>
-                            <img src="{{ asset('storage/' . $img) }}" alt="img">
+                            <img src="{{ url('/media/' . $img) }}" alt="img">
                             <button type="button" class="img-preview-remove" data-remove-existing>✕</button>
                             <input type="hidden" name="kept_images[]" value="{{ $img }}">
                         </div>
@@ -186,7 +186,7 @@
                                 <div data-variant-preview-container style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
                                     @foreach(($variant['images'] ?? []) as $image)
                                         <div class="img-preview-box" data-existing-preview>
-                                            <img src="{{ asset('storage/' . $image) }}" alt="img">
+                                            <img src="{{ url('/media/' . $image) }}" alt="img">
                                             <button type="button" class="img-preview-remove" data-remove-existing>✕</button>
                                             <input type="hidden" data-field="kept_images" data-array="true" value="{{ $image }}">
                                         </div>

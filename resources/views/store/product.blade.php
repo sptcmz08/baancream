@@ -674,7 +674,7 @@
             <div class="surface-card gallery-card">
                 <div class="gallery-main" id="galleryMain" aria-label="กดเพื่อขยายรูปสินค้า">
                     @if($mainImage)
-                        <img id="mainImage" src="{{ asset('storage/' . $mainImage) }}" alt="{{ $productName }}">
+                        <img id="mainImage" src="{{ url('/media/' . $mainImage) }}" alt="{{ $productName }}">
                     @else
                         <div class="placeholder" id="mainImage">No Image</div>
                     @endif
@@ -687,14 +687,14 @@
                                 <button type="button" class="thumb {{ $index === 0 && !$selectedVariant ? 'active' : '' }}"
                                     data-variant-thumb
                                     data-variant-id=""
-                                    data-variant-image="{{ asset('storage/' . $img) }}"
+                                    data-variant-image="{{ url('/media/' . $img) }}"
                                     data-variant-retail="{{ number_format($selectedRetailPrice, 2, '.', '') }}"
                                     data-variant-wholesale="{{ number_format($selectedWholesalePrice, 2, '.', '') }}"
                                     data-variant-min-qty="{{ $selectedWholesaleMinQty }}"
                                     data-variant-stock="{{ $selectedStock }}"
                                     data-variant-sku=""
                                     data-variant-name="{{ $productName }}">
-                                    <img src="{{ asset('storage/' . $img) }}" alt="{{ $productName }}">
+                                    <img src="{{ url('/media/' . $img) }}" alt="{{ $productName }}">
                                 </button>
                             @endforeach
                         @endif
@@ -704,7 +704,7 @@
                             <button type="button" class="thumb {{ $selectedVariant && $selectedVariant->id === $variant->id ? 'active' : '' }}"
                                 data-variant-thumb
                                 data-variant-id="{{ $variant->id }}"
-                                data-variant-image="{{ $imagePath ? asset('storage/' . $imagePath) : '' }}"
+                                data-variant-image="{{ $imagePath ? url('/media/' . $imagePath) : '' }}"
                                 data-variant-retail="{{ number_format($variant->retail_price, 2, '.', '') }}"
                                 data-variant-wholesale="{{ number_format($variant->wholesale_price, 2, '.', '') }}"
                                 data-variant-min-qty="{{ $variant->wholesale_min_qty ?: $product->wholesale_min_qty }}"
@@ -712,7 +712,7 @@
                                 data-variant-sku="{{ data_get($variant, 'sku') ?: 'สูตรสินค้า' }}"
                                 data-variant-name="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
                                 @if($imagePath)
-                                    <img src="{{ asset('storage/' . $imagePath) }}" alt="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
+                                    <img src="{{ url('/media/' . $imagePath) }}" alt="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
                                 @else
                                     <img src="https://placehold.co/400x400/f4f7fb/99a4b5?text=No+Image" alt="No Image">
                                 @endif
@@ -775,7 +775,7 @@
                                 <button type="button" class="variant-option {{ $selectedVariant && $selectedVariant->id === $variant->id ? 'active' : '' }}"
                                     data-variant-option
                                     data-variant-id="{{ $variant->id }}"
-                                    data-variant-image="{{ $imagePath ? asset('storage/' . $imagePath) : '' }}"
+                                    data-variant-image="{{ $imagePath ? url('/media/' . $imagePath) : '' }}"
                                     data-variant-retail="{{ number_format($variant->retail_price, 2, '.', '') }}"
                                     data-variant-wholesale="{{ number_format($variant->wholesale_price, 2, '.', '') }}"
                                     data-variant-min-qty="{{ $variant->wholesale_min_qty ?: $product->wholesale_min_qty }}"
@@ -783,7 +783,7 @@
                                     data-variant-sku="{{ data_get($variant, 'sku') ?: 'สูตรสินค้า' }}"
                                     data-variant-name="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
                                     @if($imagePath)
-                                        <img src="{{ asset('storage/' . $imagePath) }}" alt="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
+                                        <img src="{{ url('/media/' . $imagePath) }}" alt="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
                                     @else
                                         <img src="https://placehold.co/200x200/f4f7fb/99a4b5?text=No+Image" alt="No Image">
                                     @endif
@@ -829,7 +829,7 @@
                     <article class="product-card">
                         <a href="{{ route('products.show', $item) }}" class="product-image">
                             @if($item->displayImage())
-                                <img src="{{ asset('storage/' . $item->displayImage()) }}" alt="{{ (string) data_get($item, 'name', 'สินค้า') }}">
+                                <img src="{{ url('/media/' . $item->displayImage()) }}" alt="{{ (string) data_get($item, 'name', 'สินค้า') }}">
                             @else
                                 <span>No Image</span>
                             @endif
@@ -893,8 +893,8 @@
                                 <button type="button" class="lightbox-thumb {{ $index === 0 && !$selectedVariant ? 'active' : '' }}"
                                     data-lightbox-thumb
                                     data-variant-id=""
-                                    data-variant-image="{{ asset('storage/' . $img) }}">
-                                    <img src="{{ asset('storage/' . $img) }}" alt="{{ $productName }}">
+                                    data-variant-image="{{ url('/media/' . $img) }}">
+                                    <img src="{{ url('/media/' . $img) }}" alt="{{ $productName }}">
                                 </button>
                             @endforeach
                         @endif
@@ -905,17 +905,17 @@
                                 class="lightbox-thumb {{ $selectedVariant && $selectedVariant->id === $variant->id ? 'active' : '' }}"
                                 data-lightbox-thumb
                                 data-variant-id="{{ $variant->id }}"
-                                data-variant-image="{{ $imagePath ? asset('storage/' . $imagePath) : '' }}">
+                                data-variant-image="{{ $imagePath ? url('/media/' . $imagePath) : '' }}">
                                 @if($imagePath)
-                                    <img src="{{ asset('storage/' . $imagePath) }}" alt="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
+                                    <img src="{{ url('/media/' . $imagePath) }}" alt="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
                                 @else
                                     <img src="https://placehold.co/400x400/f4f7fb/99a4b5?text=No+Image" alt="No Image">
                                 @endif
                             </button>
                         @endforeach
                     @elseif($mainImage)
-                        <button type="button" class="lightbox-thumb active" data-lightbox-thumb data-variant-id="" data-variant-image="{{ asset('storage/' . $mainImage) }}">
-                            <img src="{{ asset('storage/' . $mainImage) }}" alt="{{ $productName }}">
+                        <button type="button" class="lightbox-thumb active" data-lightbox-thumb data-variant-id="" data-variant-image="{{ url('/media/' . $mainImage) }}">
+                            <img src="{{ url('/media/' . $mainImage) }}" alt="{{ $productName }}">
                         </button>
                     @endif
                 </div>

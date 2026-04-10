@@ -247,7 +247,7 @@
                                         @foreach($order->items->take(5) as $item)
                                             <div class="thumb" title="{{ $item->product?->name }}">
                                                 @if($item->product?->displayImage())
-                                                    <img src="{{ asset('storage/'.$item->product->displayImage()) }}" alt="">
+                                                    <img src="{{ url('/media/' . $item->product->displayImage()) }}" alt="">
                                                 @endif
                                             </div>
                                         @endforeach
@@ -294,7 +294,7 @@
                                         <div class="detail-item">
                                             <div class="detail-thumb">
                                                 @if($item->product?->displayImage())
-                                                    <img src="{{ asset('storage/'.$item->product->displayImage()) }}" alt="">
+                                                    <img src="{{ url('/media/' . $item->product->displayImage()) }}" alt="">
                                                 @endif
                                             </div>
                                             <div>

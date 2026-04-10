@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\Admin\SiteSettingController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [\App\Http\Controllers\StoreController::class, 'index'])->name('home');
+Route::get('/media/{path}', [MediaController::class, 'show'])->where('path', '.*')->name('media.show');
 Route::get('/products/{product}', [\App\Http\Controllers\StoreController::class, 'show'])->name('products.show');
 Route::get('/search', [\App\Http\Controllers\StoreController::class, 'search'])->name('store.search');
 Route::get('/branding/logo', [SiteSettingController::class, 'showStorefrontLogo'])->name('branding.logo');

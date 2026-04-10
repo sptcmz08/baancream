@@ -607,7 +607,7 @@
                         data-search="{{ strtolower($product->name . ' ' . $product->categories->pluck('name')->implode(' ') . ' ' . $product->variants->pluck('name')->implode(' ')) }}">
                         <a href="{{ route('products.show', $product) }}" class="product-image">
                             @if($product->displayImage())
-                                <img src="{{ asset('storage/' . $product->displayImage()) }}" alt="{{ $product->name }}">
+                                <img src="{{ url('/media/' . $product->displayImage()) }}" alt="{{ $product->name }}">
                             @else
                                 <span>No Image</span>
                             @endif
