@@ -96,8 +96,12 @@
             align-items: center;
             gap: 14px;
         }
-        .search-box {
+        .search-shell {
+            position: relative;
             width: min(360px, 42vw);
+        }
+        .search-box {
+            width: 100%;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -113,6 +117,66 @@
             outline: none;
             font-family: inherit;
             font-size: 0.96rem;
+        }
+        .search-results {
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 0;
+            right: 0;
+            display: none;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            box-shadow: 0 18px 50px rgba(29, 41, 76, 0.14);
+            overflow: hidden;
+            z-index: 40;
+        }
+        .search-results.is-open {
+            display: block;
+        }
+        .search-result-item {
+            display: grid;
+            grid-template-columns: 56px 1fr;
+            gap: 12px;
+            align-items: center;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        .search-result-item:hover {
+            background: #fff7fb;
+        }
+        .search-result-thumb {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f8f0f3 0%, #eef7ff 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .search-result-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .search-result-name {
+            font-size: 0.96rem;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 3px;
+        }
+        .search-result-price {
+            color: var(--text-soft);
+            font-size: 0.9rem;
+        }
+        .search-result-empty {
+            padding: 16px 18px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
         }
         .user-action,
         .pill-link {
@@ -297,6 +361,7 @@
                 flex-wrap: wrap;
                 justify-content: flex-start;
             }
+            .search-shell { width: 100%; }
             .search-box { width: 100%; }
             .hero { min-height: 56vh; }
             .product-grid {
@@ -427,6 +492,13 @@
     @php
         $newArrivalIds = $newArrivals->pluck('id')->all();
         $featuredIds = $featuredProducts->pluck('id')->all();
+        $searchProducts = $catalogProducts->map(fn ($product) => [
+            'name' => $product->name,
+            'price' => number_format($product->displayRetailPrice(), 2),
+            'url' => route('products.show', $product),
+            'image' => $product->displayImage() ? route('media.show', ['path' => $product->displayImage()]) : null,
+            'search' => strtolower($product->name . ' ' . $product->categories->pluck('name')->implode(' ') . ' ' . $product->variants->pluck('name')->implode(' ')),
+        ])->values();
     @endphp
     <div class="top-strip">
         <div class="top-strip-inner">
@@ -453,10 +525,13 @@
             </nav>
 
             <div class="header-tools">
-                <label class="search-box" for="searchInput">
-                    <span>🔍</span>
-                    <input type="text" id="searchInput" placeholder="ค้นหาสินค้า แบรนด์ หรือหมวดหมู่">
-                </label>
+                <div class="search-shell" id="searchShell">
+                    <label class="search-box" for="searchInput">
+                        <span>🔍</span>
+                        <input type="text" id="searchInput" placeholder="ค้นหาสินค้า แบรนด์ หรือหมวดหมู่" autocomplete="off">
+                    </label>
+                    <div class="search-results" id="searchResults" aria-live="polite"></div>
+                </div>
                 <button type="button" class="pill-link" data-open-cart style="font-family: inherit; cursor: pointer;">ตะกร้าสินค้า</button>
                 @auth
                     {{-- Bell notification --}}
@@ -597,11 +672,54 @@
 
     <script>
         const searchInput = document.getElementById('searchInput');
+        const searchShell = document.getElementById('searchShell');
+        const searchResults = document.getElementById('searchResults');
         const productCards = Array.from(document.querySelectorAll('[data-card]'));
         const filterButtons = Array.from(document.querySelectorAll('#catalogFilters [data-filter]'));
         const catalogTitle = document.getElementById('catalogTitle');
         const catalogCount = document.getElementById('catalogCount');
+        const searchProducts = @json($searchProducts);
         let activeFilter = 'all';
+
+        function closeSearchResults() {
+            searchResults?.classList.remove('is-open');
+        }
+
+        function renderSearchResults(query) {
+            if (!searchResults) {
+                return;
+            }
+
+            const normalizedQuery = query.trim().toLowerCase();
+            if (!normalizedQuery) {
+                searchResults.innerHTML = '';
+                closeSearchResults();
+                return;
+            }
+
+            const matched = searchProducts
+                .filter((product) => (product.search || '').includes(normalizedQuery))
+                .slice(0, 6);
+
+            if (!matched.length) {
+                searchResults.innerHTML = '<div class="search-result-empty">ไม่พบสินค้าที่ค้นหา</div>';
+                searchResults.classList.add('is-open');
+                return;
+            }
+
+            searchResults.innerHTML = matched.map((product) => `
+                <a href="${product.url}" class="search-result-item">
+                    <div class="search-result-thumb">
+                        ${product.image ? `<img src="${product.image}" alt="${product.name}">` : '<span>No Image</span>'}
+                    </div>
+                    <div>
+                        <div class="search-result-name">${product.name}</div>
+                        <div class="search-result-price">฿${product.price}</div>
+                    </div>
+                </a>
+            `).join('');
+            searchResults.classList.add('is-open');
+        }
 
         function currentFilterLabel() {
             return filterButtons.find((button) => button.dataset.filter === activeFilter)?.textContent?.replace(/\s*\(\d+\)\s*$/, '') || 'ทั้งหมด';
@@ -642,7 +760,12 @@
         });
 
         searchInput?.addEventListener('input', (event) => {
+            renderSearchResults(event.target.value);
             applyCatalogFilters();
+        });
+
+        searchInput?.addEventListener('focus', (event) => {
+            renderSearchResults(event.target.value);
         });
 
         applyCatalogFilters();
@@ -710,7 +833,10 @@
             loadNotifications();
         }
 
-        document.addEventListener('click', () => {
+        document.addEventListener('click', (event) => {
+            if (!searchShell?.contains(event.target)) {
+                closeSearchResults();
+            }
             userDropdown?.classList.remove('is-open');
             userMenuBtn?.setAttribute('aria-expanded', 'false');
             notifDropdown?.classList.remove('is-open');
