@@ -24,4 +24,18 @@ class MediaRouteTest extends TestCase
 
         $response->assertOk();
     }
+
+    public function test_media_route_can_serve_legacy_storage_style_paths(): void
+    {
+        Storage::fake('public');
+
+        $path = UploadedFile::fake()->createWithContent(
+            'legacy sample.png',
+            base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9sZrxhQAAAAASUVORK5CYII=')
+        )->store('products', 'public');
+
+        $response = $this->get('/media/storage/' . $path);
+
+        $response->assertOk();
+    }
 }

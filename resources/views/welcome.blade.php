@@ -190,15 +190,20 @@
 
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 22px;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 26px;
         }
         .product-card {
             background: var(--surface-color);
             border: 1px solid var(--border-color);
-            border-radius: 26px;
+            border-radius: 30px;
             overflow: hidden;
             box-shadow: 0 18px 50px rgba(29, 41, 76, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 24px 58px rgba(29, 41, 76, 0.12);
         }
         .product-image {
             aspect-ratio: 1 / 1;
@@ -217,68 +222,23 @@
             font-size: 0.95rem;
         }
         .product-body {
-            padding: 18px;
-        }
-        .product-meta {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-        .product-badge {
-            background: #fff4f8;
-            color: var(--primary-color);
-            border-radius: 999px;
-            padding: 6px 10px;
-            font-size: 0.78rem;
-            font-weight: 600;
-        }
-        .product-badge.brand {
-            background: #eef8ff;
-            color: var(--accent-color);
+            padding: 22px 22px 24px;
         }
         .product-name {
-            font-size: 1.06rem;
+            font-size: 1.12rem;
             font-weight: 600;
-            margin-bottom: 8px;
-            min-height: 3.2em;
+            line-height: 1.5;
+            margin-bottom: 14px;
+            min-height: 3em;
         }
-        .product-desc {
-            color: var(--text-soft);
-            font-size: 0.92rem;
-            min-height: 3.9em;
-            margin-bottom: 16px;
-        }
-        .product-footer {
+        .product-price {
             display: flex;
-            justify-content: space-between;
-            align-items: end;
-            gap: 12px;
+            flex-direction: column;
+            gap: 4px;
         }
         .price-retail {
-            font-size: 1.15rem;
+            font-size: 1.45rem;
             font-weight: 700;
-        }
-        .price-wholesale {
-            color: #1f9d68;
-            font-size: 0.82rem;
-        }
-        .buy-button {
-            border: none;
-            background: linear-gradient(135deg, var(--gold-color), #ffb340);
-            color: #46260a;
-            border-radius: 999px;
-            padding: 10px 16px;
-            font-family: inherit;
-            font-weight: 700;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .buy-button:hover { transform: translateY(-1px); }
-        .cart-form {
-            margin: 0;
         }
 
         .catalog-toolbar {
@@ -605,38 +565,21 @@
                         data-card
                         data-filter-tags="{{ implode('|', $filterTags) }}"
                         data-search="{{ strtolower($product->name . ' ' . $product->categories->pluck('name')->implode(' ') . ' ' . $product->variants->pluck('name')->implode(' ')) }}">
-                        <a href="{{ route('products.show', $product) }}" class="product-image">
-                            @if($product->displayImage())
-                                <img src="{{ url('/media/' . $product->displayImage()) }}" alt="{{ $product->name }}">
-                            @else
-                                <span>No Image</span>
-                            @endif
-                        </a>
-                        <div class="product-body">
-                            <div class="product-meta">
-                                @foreach($product->categories as $pc)
-                                    <span class="product-badge">{{ $pc->name }}</span>
-                                @endforeach
-                                @if($product->hasVariants())
-                                    <span class="product-badge">{{ $product->variants->count() }} สูตร</span>
+                        <a href="{{ route('products.show', $product) }}" aria-label="{{ $product->name }}">
+                            <div class="product-image">
+                                @if($product->displayImage())
+                                    <img src="{{ url('/media/' . $product->displayImage()) }}" alt="{{ $product->name }}">
+                                @else
+                                    <span>No Image</span>
                                 @endif
                             </div>
-                            <a href="{{ route('products.show', $product) }}"><h3 class="product-name">{{ $product->name }}</h3></a>
-                            <p class="product-desc">{{ Str::limit($product->description ?: 'อัปเดตรายละเอียดสินค้าเพิ่มเติมได้จากหลังบ้าน', 90) }}</p>
-                            <div class="product-footer">
-                                <div>
+                            <div class="product-body">
+                                <h3 class="product-name">{{ $product->name }}</h3>
+                                <div class="product-price">
                                     <div class="price-retail">฿{{ number_format($product->displayRetailPrice(), 2) }}</div>
-                                    <div class="price-wholesale">ราคาส่ง {{ $product->displayWholesaleMinQty() }} ชิ้น / ฿{{ number_format($product->displayWholesaleBundlePrice(), 2) }}</div>
                                 </div>
-                                <form method="POST" action="{{ route('cart.add') }}" class="cart-form">
-                                    @csrf
-                                    <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                    <input type="hidden" name="variant_id" value="{{ data_get($product->defaultVariant(), 'id') }}">
-                                    <input type="hidden" name="quantity" value="1">
-                                    <button type="submit" class="buy-button">ใส่ตะกร้า</button>
-                                </form>
                             </div>
-                        </div>
+                        </a>
                     </article>
                 @endforeach
             </div>

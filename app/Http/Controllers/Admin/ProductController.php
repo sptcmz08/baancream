@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Support\MediaPath;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -124,6 +125,7 @@ class ProductController extends Controller
         $data['wholesale_min_qty'] = $request->integer('wholesale_min_qty', 10);
 
         $images = collect($request->input('kept_images', []))
+            ->map(fn ($path) => MediaPath::normalize($path))
             ->filter(fn ($path) => is_string($path) && $path !== '')
             ->values()
             ->all();
@@ -162,6 +164,7 @@ class ProductController extends Controller
             $variant = $product->variants()->find($variantInput['id'] ?? null) ?? new ProductVariant();
             $existingImages = collect($variant->galleryImages());
             $variantImages = collect($variantInput['kept_images'] ?? [])
+                ->map(fn ($path) => MediaPath::normalize($path))
                 ->filter(fn ($path) => is_string($path) && $path !== '')
                 ->values()
                 ->all();

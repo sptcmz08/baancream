@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Support\MediaPath;
 
 class Product extends Model
 {
@@ -82,11 +83,12 @@ class Product extends Model
     public function galleryImages(): array
     {
         $images = collect((array) $this->images)
+            ->map(fn ($path) => MediaPath::normalize($path))
             ->filter()
             ->values();
 
         if ($images->isEmpty() && !empty($this->image)) {
-            $images->push($this->image);
+            $images->push(MediaPath::normalize($this->image));
         }
 
         return $images->unique()->values()->all();

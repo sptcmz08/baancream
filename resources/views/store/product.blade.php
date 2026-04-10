@@ -293,57 +293,26 @@
         }
 
         .detail-card {
-            padding: 30px;
-        }
-        .breadcrumb {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            color: var(--text-soft);
-            font-size: 0.92rem;
-            margin-bottom: 18px;
-        }
-        .breadcrumb a:hover { color: var(--primary-color); }
-        .product-meta {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 14px;
-        }
-        .product-badge {
-            background: #fff4f8;
-            color: var(--primary-color);
-            border-radius: 999px;
-            padding: 6px 10px;
-            font-size: 0.78rem;
-            font-weight: 600;
-        }
-        .product-badge.brand {
-            background: #eef8ff;
-            color: var(--accent-color);
-        }
-        .product-badge.success {
-            background: #edf9f4;
-            color: #1f9d68;
+            padding: 34px;
         }
         .product-title {
             font-size: clamp(2.2rem, 4.5vw, 4rem);
             line-height: 1.05;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
         .product-subtitle {
             color: var(--text-soft);
             line-height: 1.7;
-            margin-bottom: 22px;
+            margin-bottom: 28px;
         }
         .price-panel {
             display: grid;
-            gap: 14px;
-            padding: 20px 22px;
+            gap: 16px;
+            padding: 24px 26px;
             border: 1px solid var(--border-color);
-            border-radius: 24px;
+            border-radius: 28px;
             background: linear-gradient(135deg, #fff8ee 0%, #ffffff 55%);
-            margin-bottom: 22px;
+            margin-bottom: 26px;
         }
         .price-main {
             display: flex;
@@ -374,19 +343,19 @@
             font-weight: 700;
         }
         .variant-panel-title {
-            font-size: 1.15rem;
+            font-size: 1.02rem;
             font-weight: 700;
             margin-bottom: 14px;
         }
         .variant-select-shell {
             display: grid;
-            gap: 14px;
-            margin-bottom: 22px;
+            gap: 16px;
+            margin-bottom: 28px;
         }
         .variant-current {
             border: 1px solid var(--border-color);
-            border-radius: 22px;
-            padding: 16px 18px;
+            border-radius: 24px;
+            padding: 18px 20px;
             background: #fbfcff;
         }
         .variant-current-label {
@@ -395,26 +364,21 @@
             margin-bottom: 6px;
         }
         .variant-current-name {
-            font-size: 1.02rem;
+            font-size: 1.08rem;
             font-weight: 700;
             color: var(--text-dark);
-            margin-bottom: 4px;
-        }
-        .variant-current-meta {
-            color: var(--text-soft);
-            font-size: 0.92rem;
         }
         .variant-picker {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             overflow-x: auto;
             padding-bottom: 4px;
         }
         .variant-option {
-            width: 76px;
-            min-width: 76px;
+            width: 92px;
+            min-width: 92px;
             border: 2px solid transparent;
-            border-radius: 18px;
+            border-radius: 22px;
             background: white;
             padding: 0;
             overflow: hidden;
@@ -437,21 +401,12 @@
         }
         .variant-option span {
             display: block;
-            padding: 8px 6px;
-            font-size: 0.72rem;
+            padding: 10px 8px;
+            font-size: 0.78rem;
             line-height: 1.3;
             font-weight: 600;
             color: var(--text-soft);
             text-align: center;
-        }
-        .description-card {
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            padding: 20px 22px;
-            background: #fbfcff;
-            color: var(--text-soft);
-            line-height: 1.9;
-            margin-bottom: 22px;
         }
         .cta-stack {
             display: grid;
@@ -506,15 +461,20 @@
         }
         .related-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-            gap: 22px;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 24px;
         }
         .product-card {
             background: var(--surface-color);
             border: 1px solid var(--border-color);
-            border-radius: 26px;
+            border-radius: 30px;
             overflow: hidden;
             box-shadow: 0 18px 50px rgba(29, 41, 76, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 24px 58px rgba(29, 41, 76, 0.12);
         }
         .product-image {
             aspect-ratio: 1 / 1;
@@ -533,38 +493,22 @@
             font-size: 0.95rem;
         }
         .product-body {
-            padding: 18px;
+            padding: 22px 22px 24px;
         }
         .product-name {
-            font-size: 1.06rem;
+            font-size: 1.12rem;
             font-weight: 600;
-            margin-bottom: 8px;
-            min-height: 3.2em;
+            line-height: 1.5;
+            margin-bottom: 14px;
+            min-height: 3em;
         }
-        .product-desc {
-            color: var(--text-soft);
-            font-size: 0.92rem;
-            min-height: 3.9em;
-            margin-bottom: 16px;
-        }
-        .product-footer {
+        .product-price {
             display: flex;
-            justify-content: space-between;
-            align-items: end;
-            gap: 12px;
+            flex-direction: column;
+            gap: 4px;
         }
-        .buy-button {
-            border: none;
-            background: linear-gradient(135deg, var(--gold-color), #ffb340);
-            color: #46260a;
-            border-radius: 999px;
-            padding: 10px 16px;
-            font-family: inherit;
-            font-weight: 700;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+        .product-price .price-retail {
+            font-size: 1.45rem;
         }
 
         @media (max-width: 1080px) {
@@ -613,16 +557,11 @@
     @php
         $productName = (string) data_get($product, 'name', 'สินค้า');
         $productDescription = (string) data_get($product, 'description', '');
-        $firstCategory = $product->categories->first();
-        $categoryName = $firstCategory ? $firstCategory->name : null;
-        $categorySlug = $firstCategory ? $firstCategory->slug : null;
         $selectedRetailPrice = (float) (data_get($selectedVariant, 'retail_price') ?? data_get($product, 'retail_price', 0));
         $selectedWholesalePrice = (float) (data_get($selectedVariant, 'wholesale_price') ?? data_get($product, 'wholesale_price', 0));
         $selectedWholesaleMinQty = (int) (data_get($selectedVariant, 'wholesale_min_qty') ?? data_get($product, 'wholesale_min_qty', 1));
-        $selectedStock = data_get($selectedVariant, 'stock');
         $mainImage = $selectedVariant?->displayImage() ?: $product->displayImage();
         $selectedVariantName = (string) data_get($selectedVariant, 'name', 'สูตรเริ่มต้น');
-        $selectedVariantSku = (string) (data_get($selectedVariant, 'sku') ?: 'สูตรสินค้า');
     @endphp
     <div class="top-strip">
         <div class="top-strip-inner">
@@ -691,8 +630,6 @@
                                     data-variant-retail="{{ number_format($selectedRetailPrice, 2, '.', '') }}"
                                     data-variant-wholesale="{{ number_format($selectedWholesalePrice, 2, '.', '') }}"
                                     data-variant-min-qty="{{ $selectedWholesaleMinQty }}"
-                                    data-variant-stock="{{ $selectedStock }}"
-                                    data-variant-sku=""
                                     data-variant-name="{{ $productName }}">
                                     <img src="{{ url('/media/' . $img) }}" alt="{{ $productName }}">
                                 </button>
@@ -708,8 +645,6 @@
                                 data-variant-retail="{{ number_format($variant->retail_price, 2, '.', '') }}"
                                 data-variant-wholesale="{{ number_format($variant->wholesale_price, 2, '.', '') }}"
                                 data-variant-min-qty="{{ $variant->wholesale_min_qty ?: $product->wholesale_min_qty }}"
-                                data-variant-stock="{{ $variant->stock }}"
-                                data-variant-sku="{{ data_get($variant, 'sku') ?: 'สูตรสินค้า' }}"
                                 data-variant-name="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
                                 @if($imagePath)
                                     <img src="{{ url('/media/' . $imagePath) }}" alt="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
@@ -723,26 +658,6 @@
             </div>
 
             <div class="surface-card detail-card">
-                <div class="breadcrumb">
-                    <a href="{{ route('home') }}">หน้าแรก</a>
-                    <span>/</span>
-                    @if($categoryName)
-                        <a href="{{ route('home') }}{{ $categorySlug ? '#category-' . $categorySlug : '' }}">{{ $categoryName }}</a>
-                        <span>/</span>
-                    @endif
-                    <span>{{ $productName }}</span>
-                </div>
-
-                <div class="product-meta">
-                    @foreach($product->categories as $pc)
-                        <span class="product-badge">{{ $pc->name }}</span>
-                    @endforeach
-                    @if($product->hasVariants())
-                        <span class="product-badge">{{ $product->variants->count() }} สูตร</span>
-                    @endif
-                    <span class="product-badge success" id="stockText">มีสินค้า {{ $selectedStock ?? 'พร้อมขาย' }} ชิ้น</span>
-                </div>
-
                 <h1 class="product-title">{{ $productName }}</h1>
                 @if($productDescription !== '')
                     <p class="product-subtitle">{{ $productDescription }}</p>
@@ -762,12 +677,11 @@
                 </div>
 
                 @if($product->variants->isNotEmpty())
-                    <div class="variant-panel-title">เลือกสูตรสินค้า</div>
+                    <div class="variant-panel-title">ตัวเลือกสินค้า</div>
                     <div class="variant-select-shell">
                         <div class="variant-current">
-                            <div class="variant-current-label">สูตรที่เลือก</div>
+                            <div class="variant-current-label">ตัวเลือกที่เลือก</div>
                             <div class="variant-current-name" id="variantNameText">{{ $selectedVariantName }}</div>
-                            <div class="variant-current-meta" id="variantMetaText">{{ $selectedVariantSku }} · คงเหลือ {{ $selectedStock ?? 0 }} ชิ้น · ส่ง {{ $selectedWholesaleMinQty }} ชิ้น</div>
                         </div>
                         <div class="variant-picker">
                             @foreach($product->variants as $variant)
@@ -827,38 +741,21 @@
             <div class="related-grid">
                 @foreach($relatedProducts as $item)
                     <article class="product-card">
-                        <a href="{{ route('products.show', $item) }}" class="product-image">
-                            @if($item->displayImage())
-                                <img src="{{ url('/media/' . $item->displayImage()) }}" alt="{{ (string) data_get($item, 'name', 'สินค้า') }}">
-                            @else
-                                <span>No Image</span>
-                            @endif
-                        </a>
-                        <div class="product-body">
-                            <div class="product-meta">
-                                @foreach($item->categories as $category)
-                                    <span class="product-badge">{{ $category->name }}</span>
-                                @endforeach
-                                @if($item->hasVariants())
-                                    <span class="product-badge">{{ $item->variants->count() }} สูตร</span>
+                        <a href="{{ route('products.show', $item) }}" aria-label="{{ (string) data_get($item, 'name', 'สินค้า') }}">
+                            <div class="product-image">
+                                @if($item->displayImage())
+                                    <img src="{{ url('/media/' . $item->displayImage()) }}" alt="{{ (string) data_get($item, 'name', 'สินค้า') }}">
+                                @else
+                                    <span>No Image</span>
                                 @endif
                             </div>
-                            <a href="{{ route('products.show', $item) }}"><h3 class="product-name">{{ (string) data_get($item, 'name', 'สินค้า') }}</h3></a>
-                            <p class="product-desc">{{ \Illuminate\Support\Str::limit((string) data_get($item, 'description', ''), 90) }}</p>
-                            <div class="product-footer">
-                                <div>
-                                    <div class="price-retail" style="font-size:1.15rem;">฿{{ number_format((float) $item->displayRetailPrice(), 2) }}</div>
-                                    <div class="price-wholesale">ราคาส่ง {{ $item->displayWholesaleMinQty() }} ชิ้น / ฿{{ number_format((float) $item->displayWholesaleBundlePrice(), 2) }}</div>
+                            <div class="product-body">
+                                <h3 class="product-name">{{ (string) data_get($item, 'name', 'สินค้า') }}</h3>
+                                <div class="product-price">
+                                    <div class="price-retail">฿{{ number_format((float) $item->displayRetailPrice(), 2) }}</div>
                                 </div>
-                                <form method="POST" action="{{ route('cart.add') }}" style="margin:0;">
-                                    @csrf
-                                    <input type="hidden" name="product_id" value="{{ $item->id }}">
-                                    <input type="hidden" name="variant_id" value="{{ data_get($item->defaultVariant(), 'id') }}">
-                                    <input type="hidden" name="quantity" value="1">
-                                    <button type="submit" class="buy-button">ใส่ตะกร้า</button>
-                                </form>
                             </div>
-                        </div>
+                        </a>
                     </article>
                 @endforeach
             </div>
@@ -929,9 +826,7 @@
         const galleryMain = document.getElementById('galleryMain');
         const retailPrice = document.getElementById('retailPrice');
         const wholesalePrice = document.getElementById('wholesalePrice');
-        const stockText = document.getElementById('stockText');
         const variantNameText = document.getElementById('variantNameText');
-        const variantMetaText = document.getElementById('variantMetaText');
         const singleVariantId = document.getElementById('singleVariantId');
         const bulkVariantId = document.getElementById('bulkVariantId');
         const bulkQuantity = document.getElementById('bulkQuantity');
@@ -951,7 +846,6 @@
         function activateVariant(dataset) {
             if (!dataset) return;
             const currentMainImage = document.getElementById('mainImage');
-            const stockLabel = dataset.variantStock ? `${dataset.variantStock} ชิ้น` : 'พร้อมขาย';
             const wholesaleMinQty = Number(dataset.variantMinQty || {{ $selectedWholesaleMinQty }});
 
             if (dataset.variantImage && galleryMain) {
@@ -965,12 +859,8 @@
 
             retailPrice.textContent = `฿${Number(dataset.variantRetail).toFixed(2)}`;
             wholesalePrice.textContent = `฿${Number(dataset.variantWholesale).toFixed(2)}`;
-            stockText.textContent = `มีสินค้า ${stockLabel}`;
             if (variantNameText) {
                 variantNameText.textContent = dataset.variantName || 'สูตรสินค้า';
-            }
-            if (variantMetaText) {
-                variantMetaText.textContent = `${dataset.variantSku || 'สูตรสินค้า'} · คงเหลือ ${dataset.variantStock || 0} ชิ้น · ส่ง ${wholesaleMinQty} ชิ้น`;
             }
             singlePriceText.textContent = `฿${Number(dataset.variantRetail).toFixed(2)}`;
             bulkPriceText.textContent = `฿${Number(dataset.variantWholesale).toFixed(2)}`;

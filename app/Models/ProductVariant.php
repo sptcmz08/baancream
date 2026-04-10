@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Support\MediaPath;
 
 class ProductVariant extends Model
 {
@@ -34,11 +35,12 @@ class ProductVariant extends Model
     public function galleryImages(): array
     {
         $images = collect((array) $this->images)
+            ->map(fn ($path) => MediaPath::normalize($path))
             ->filter()
             ->values();
 
         if ($images->isEmpty() && !empty($this->image)) {
-            $images->push($this->image);
+            $images->push(MediaPath::normalize($this->image));
         }
 
         return $images->unique()->values()->all();
