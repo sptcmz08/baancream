@@ -72,7 +72,7 @@ class StoreController extends Controller
     {
         $product->load(['categories', 'variants']);
 
-        $selectedVariant = $product->defaultVariant();
+        $selectedVariant = null;
         
         $categoryIds = $product->categories->pluck('id')->toArray();
 
@@ -264,7 +264,7 @@ class StoreController extends Controller
             }
         }
 
-        return $product->defaultVariant();
+        return null;
     }
 
     private function cartKey(int $productId, ?int $variantId): string

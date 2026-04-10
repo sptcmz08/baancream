@@ -352,6 +352,19 @@
             gap: 16px;
             margin-bottom: 28px;
         }
+        .variant-select-input {
+            width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 14px 16px;
+            background: white;
+            color: var(--text-dark);
+            outline: none;
+        }
+        .variant-select-input:focus {
+            border-color: rgba(255, 79, 135, 0.35);
+            box-shadow: 0 0 0 4px rgba(255, 79, 135, 0.08);
+        }
         .variant-current {
             border: 1px solid var(--border-color);
             border-radius: 24px;
@@ -407,6 +420,9 @@
             font-weight: 600;
             color: var(--text-soft);
             text-align: center;
+        }
+        .variant-option.is-main {
+            background: linear-gradient(180deg, #fff7ef 0%, #ffffff 100%);
         }
         .cta-stack {
             display: grid;
@@ -572,11 +588,12 @@
             ->values()
             ->all();
         $selectedGalleryUrls = $product->variants->isNotEmpty()
-            ? (!empty($selectedVariantGalleryUrls) ? $selectedVariantGalleryUrls : $productGalleryUrls)
+            ? ($selectedVariant ? $selectedVariantGalleryUrls : $productGalleryUrls)
             : $productGalleryUrls;
         $mainImage = $selectedVariant?->displayImage() ?: $product->displayImage();
         $mainImageUrl = $selectedGalleryUrls[0] ?? $mediaUrl($mainImage);
-        $selectedVariantName = (string) data_get($selectedVariant, 'name', 'สูตรเริ่มต้น');
+        $selectedVariantName = (string) data_get($selectedVariant, 'name', $productName);
+        $selectedOptionKey = $selectedVariant ? 'variant:' . $selectedVariant->id : 'main';
     @endphp
     <div class="top-strip">
         <div class="top-strip-inner">
@@ -669,11 +686,36 @@
                 @if($product->variants->isNotEmpty())
                     <div class="variant-panel-title">ตัวเลือกสินค้า</div>
                     <div class="variant-select-shell">
+                        <select id="variantSelect" class="variant-select-input" aria-label="เลือกสินค้าหรือสูตร">
+                            <option value="main" {{ $selectedOptionKey === 'main' ? 'selected' : '' }}>{{ $productName }} (สินค้าหลัก)</option>
+                            @foreach($product->variants as $variant)
+                                <option value="variant:{{ $variant->id }}" {{ $selectedOptionKey === 'variant:' . $variant->id ? 'selected' : '' }}>
+                                    {{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}
+                                </option>
+                            @endforeach
+                        </select>
                         <div class="variant-current">
                             <div class="variant-current-label">ตัวเลือกที่เลือก</div>
                             <div class="variant-current-name" id="variantNameText">{{ $selectedVariantName }}</div>
                         </div>
                         <div class="variant-picker">
+                            <button type="button" class="variant-option is-main {{ $selectedOptionKey === 'main' ? 'active' : '' }}"
+                                data-variant-option
+                                data-option-key="main"
+                                data-variant-id=""
+                                data-variant-image="{{ $mainImageUrl ?: '' }}"
+                                data-variant-gallery='@json($productGalleryUrls)'
+                                data-variant-retail="{{ number_format($product->retail_price, 2, '.', '') }}"
+                                data-variant-wholesale="{{ number_format($product->wholesale_price, 2, '.', '') }}"
+                                data-variant-min-qty="{{ $product->wholesale_min_qty ?: 1 }}"
+                                data-variant-name="{{ $productName }}">
+                                @if($product->displayImage())
+                                    <img src="{{ route('media.show', ['path' => $product->displayImage()]) }}" alt="{{ $productName }}">
+                                @else
+                                    <img src="https://placehold.co/200x200/f4f7fb/99a4b5?text=No+Image" alt="No Image">
+                                @endif
+                                <span>สินค้าหลัก</span>
+                            </button>
                             @foreach($product->variants as $variant)
                                 @php
                                     $variantGalleryUrls = collect($variant->galleryImages())
@@ -681,21 +723,17 @@
                                         ->filter()
                                         ->values()
                                         ->all();
-                                    if (empty($variantGalleryUrls)) {
-                                        $variantGalleryUrls = $productGalleryUrls;
-                                    }
-                                    $imageUrl = $variantGalleryUrls[0] ?? $mainImageUrl;
+                                    $imageUrl = $variantGalleryUrls[0] ?? null;
                                 @endphp
-                                <button type="button" class="variant-option {{ $selectedVariant && $selectedVariant->id === $variant->id ? 'active' : '' }}"
+                                <button type="button" class="variant-option {{ $selectedOptionKey === 'variant:' . $variant->id ? 'active' : '' }}"
                                     data-variant-option
+                                    data-option-key="variant:{{ $variant->id }}"
                                     data-variant-id="{{ $variant->id }}"
                                     data-variant-image="{{ $imageUrl ?: '' }}"
                                     data-variant-gallery='@json($variantGalleryUrls)'
                                     data-variant-retail="{{ number_format($variant->retail_price, 2, '.', '') }}"
                                     data-variant-wholesale="{{ number_format($variant->wholesale_price, 2, '.', '') }}"
-                                    data-variant-min-qty="{{ $variant->wholesale_min_qty ?: $product->wholesale_min_qty }}"
-                                    data-variant-stock="{{ $variant->stock }}"
-                                    data-variant-sku="{{ data_get($variant, 'sku') ?: 'สูตรสินค้า' }}"
+                                    data-variant-min-qty="{{ $variant->wholesale_min_qty ?: ($product->wholesale_min_qty ?: 1) }}"
                                     data-variant-name="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
                                     @if($imageUrl)
                                         <img src="{{ $imageUrl }}" alt="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
@@ -805,6 +843,7 @@
 
     <script>
         const variantOptions = Array.from(document.querySelectorAll('[data-variant-option]'));
+        const variantSelect = document.getElementById('variantSelect');
         const galleryMain = document.getElementById('galleryMain');
         const galleryThumbRow = document.getElementById('galleryThumbRow');
         const retailPrice = document.getElementById('retailPrice');
@@ -928,7 +967,10 @@
             if (bulkVariantId) bulkVariantId.value = dataset.variantId;
             if (bulkQuantity) bulkQuantity.value = wholesaleMinQty;
 
-            variantOptions.forEach((option) => option.classList.toggle('active', option.dataset.variantId === dataset.variantId));
+            variantOptions.forEach((option) => option.classList.toggle('active', option.dataset.optionKey === dataset.optionKey));
+            if (variantSelect) {
+                variantSelect.value = dataset.optionKey || 'main';
+            }
         }
 
         function openLightbox() {
@@ -956,6 +998,12 @@
         }
 
         variantOptions.forEach((option) => option.addEventListener('click', () => activateVariant(option.dataset)));
+        variantSelect?.addEventListener('change', () => {
+            const selectedOption = variantOptions.find((option) => option.dataset.optionKey === variantSelect.value);
+            if (selectedOption) {
+                activateVariant(selectedOption.dataset);
+            }
+        });
         galleryThumbRow?.addEventListener('click', (event) => {
             const thumb = event.target.closest('[data-gallery-index]');
             if (!thumb) {

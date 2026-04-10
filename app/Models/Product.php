@@ -51,14 +51,12 @@ class Product extends Model
 
     public function displayRetailPrice(): float
     {
-        $variant = $this->defaultVariant();
-        return $variant ? (float) $variant->retail_price : (float) $this->retail_price;
+        return (float) $this->retail_price;
     }
 
     public function displayWholesalePrice(): float
     {
-        $variant = $this->defaultVariant();
-        return $variant ? (float) $variant->wholesale_price : (float) $this->wholesale_price;
+        return (float) $this->wholesale_price;
     }
 
     public function displayWholesaleBundlePrice(): float
@@ -68,9 +66,7 @@ class Product extends Model
 
     public function displayWholesaleMinQty(): int
     {
-        $variant = $this->defaultVariant();
-
-        return max(1, (int) ($variant?->wholesale_min_qty ?? $this->wholesale_min_qty ?? 1));
+        return max(1, (int) ($this->wholesale_min_qty ?? 1));
     }
 
     public function displayWholesaleUnitPrice(): float
@@ -96,10 +92,6 @@ class Product extends Model
 
     public function displayImage(): ?string
     {
-        if ($this->hasVariants() && $this->defaultVariant()?->displayImage()) {
-            return $this->defaultVariant()->displayImage();
-        }
-
         return $this->galleryImages()[0] ?? null;
     }
 }
