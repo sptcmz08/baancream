@@ -560,7 +560,22 @@
         $selectedRetailPrice = (float) (data_get($selectedVariant, 'retail_price') ?? data_get($product, 'retail_price', 0));
         $selectedWholesalePrice = (float) (data_get($selectedVariant, 'wholesale_price') ?? data_get($product, 'wholesale_price', 0));
         $selectedWholesaleMinQty = (int) (data_get($selectedVariant, 'wholesale_min_qty') ?? data_get($product, 'wholesale_min_qty', 1));
+        $mediaUrl = fn (?string $path) => $path ? route('media.show', ['path' => $path]) : null;
+        $productGalleryUrls = collect($product->galleryImages())
+            ->map(fn ($path) => $mediaUrl($path))
+            ->filter()
+            ->values()
+            ->all();
+        $selectedVariantGalleryUrls = collect($selectedVariant?->galleryImages() ?? [])
+            ->map(fn ($path) => $mediaUrl($path))
+            ->filter()
+            ->values()
+            ->all();
+        $selectedGalleryUrls = $product->variants->isNotEmpty()
+            ? (!empty($selectedVariantGalleryUrls) ? $selectedVariantGalleryUrls : $productGalleryUrls)
+            : $productGalleryUrls;
         $mainImage = $selectedVariant?->displayImage() ?: $product->displayImage();
+        $mainImageUrl = $selectedGalleryUrls[0] ?? $mediaUrl($mainImage);
         $selectedVariantName = (string) data_get($selectedVariant, 'name', 'สูตรเริ่มต้น');
     @endphp
     <div class="top-strip">
@@ -612,45 +627,20 @@
         <div class="product-shell">
             <div class="surface-card gallery-card">
                 <div class="gallery-main" id="galleryMain" aria-label="กดเพื่อขยายรูปสินค้า">
-                    @if($mainImage)
-                        <img id="mainImage" src="{{ url('/media/' . $mainImage) }}" alt="{{ $productName }}">
+                    @if($mainImageUrl)
+                        <img id="mainImage" src="{{ $mainImageUrl }}" alt="{{ $productName }}">
                     @else
                         <div class="placeholder" id="mainImage">No Image</div>
                     @endif
                 </div>
 
-                @if($product->variants->isNotEmpty() || !empty($product->galleryImages()))
-                    <div class="thumb-row">
-                        @if(!empty($product->galleryImages()))
-                            @foreach($product->galleryImages() as $index => $img)
-                                <button type="button" class="thumb {{ $index === 0 && !$selectedVariant ? 'active' : '' }}"
-                                    data-variant-thumb
-                                    data-variant-id=""
-                                    data-variant-image="{{ url('/media/' . $img) }}"
-                                    data-variant-retail="{{ number_format($selectedRetailPrice, 2, '.', '') }}"
-                                    data-variant-wholesale="{{ number_format($selectedWholesalePrice, 2, '.', '') }}"
-                                    data-variant-min-qty="{{ $selectedWholesaleMinQty }}"
-                                    data-variant-name="{{ $productName }}">
-                                    <img src="{{ url('/media/' . $img) }}" alt="{{ $productName }}">
-                                </button>
-                            @endforeach
-                        @endif
-
-                        @foreach($product->variants as $variant)
-                            @php $imagePath = $variant->displayImage() ?: $product->displayImage(); @endphp
-                            <button type="button" class="thumb {{ $selectedVariant && $selectedVariant->id === $variant->id ? 'active' : '' }}"
-                                data-variant-thumb
-                                data-variant-id="{{ $variant->id }}"
-                                data-variant-image="{{ $imagePath ? url('/media/' . $imagePath) : '' }}"
-                                data-variant-retail="{{ number_format($variant->retail_price, 2, '.', '') }}"
-                                data-variant-wholesale="{{ number_format($variant->wholesale_price, 2, '.', '') }}"
-                                data-variant-min-qty="{{ $variant->wholesale_min_qty ?: $product->wholesale_min_qty }}"
-                                data-variant-name="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
-                                @if($imagePath)
-                                    <img src="{{ url('/media/' . $imagePath) }}" alt="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
-                                @else
-                                    <img src="https://placehold.co/400x400/f4f7fb/99a4b5?text=No+Image" alt="No Image">
-                                @endif
+                @if(!empty($selectedGalleryUrls))
+                    <div class="thumb-row" id="galleryThumbRow">
+                        @foreach($selectedGalleryUrls as $index => $imageUrl)
+                            <button type="button" class="thumb {{ $index === 0 ? 'active' : '' }}"
+                                data-gallery-index="{{ $index }}"
+                                data-gallery-image="{{ $imageUrl }}">
+                                <img src="{{ $imageUrl }}" alt="{{ $productName }}">
                             </button>
                         @endforeach
                     </div>
@@ -685,19 +675,30 @@
                         </div>
                         <div class="variant-picker">
                             @foreach($product->variants as $variant)
-                                @php $imagePath = $variant->displayImage() ?: $product->displayImage(); @endphp
+                                @php
+                                    $variantGalleryUrls = collect($variant->galleryImages())
+                                        ->map(fn ($path) => $mediaUrl($path))
+                                        ->filter()
+                                        ->values()
+                                        ->all();
+                                    if (empty($variantGalleryUrls)) {
+                                        $variantGalleryUrls = $productGalleryUrls;
+                                    }
+                                    $imageUrl = $variantGalleryUrls[0] ?? $mainImageUrl;
+                                @endphp
                                 <button type="button" class="variant-option {{ $selectedVariant && $selectedVariant->id === $variant->id ? 'active' : '' }}"
                                     data-variant-option
                                     data-variant-id="{{ $variant->id }}"
-                                    data-variant-image="{{ $imagePath ? url('/media/' . $imagePath) : '' }}"
+                                    data-variant-image="{{ $imageUrl ?: '' }}"
+                                    data-variant-gallery='@json($variantGalleryUrls)'
                                     data-variant-retail="{{ number_format($variant->retail_price, 2, '.', '') }}"
                                     data-variant-wholesale="{{ number_format($variant->wholesale_price, 2, '.', '') }}"
                                     data-variant-min-qty="{{ $variant->wholesale_min_qty ?: $product->wholesale_min_qty }}"
                                     data-variant-stock="{{ $variant->stock }}"
                                     data-variant-sku="{{ data_get($variant, 'sku') ?: 'สูตรสินค้า' }}"
                                     data-variant-name="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
-                                    @if($imagePath)
-                                        <img src="{{ url('/media/' . $imagePath) }}" alt="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
+                                    @if($imageUrl)
+                                        <img src="{{ $imageUrl }}" alt="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
                                     @else
                                         <img src="https://placehold.co/200x200/f4f7fb/99a4b5?text=No+Image" alt="No Image">
                                     @endif
@@ -783,36 +784,18 @@
                     <div class="lightbox-title">ซูมรูปสินค้า</div>
                     <button type="button" class="lightbox-close" id="lightboxClose" aria-label="ปิดรูปขยาย">✕</button>
                 </div>
-                <div class="lightbox-thumbs">
-                    @if($product->variants->isNotEmpty() || !empty($product->galleryImages()))
-                        @if(!empty($product->galleryImages()))
-                            @foreach($product->galleryImages() as $index => $img)
-                                <button type="button" class="lightbox-thumb {{ $index === 0 && !$selectedVariant ? 'active' : '' }}"
-                                    data-lightbox-thumb
-                                    data-variant-id=""
-                                    data-variant-image="{{ url('/media/' . $img) }}">
-                                    <img src="{{ url('/media/' . $img) }}" alt="{{ $productName }}">
-                                </button>
-                            @endforeach
-                        @endif
-
-                        @foreach($product->variants as $variant)
-                            @php $imagePath = $variant->displayImage() ?: $product->displayImage(); @endphp
-                            <button type="button"
-                                class="lightbox-thumb {{ $selectedVariant && $selectedVariant->id === $variant->id ? 'active' : '' }}"
-                                data-lightbox-thumb
-                                data-variant-id="{{ $variant->id }}"
-                                data-variant-image="{{ $imagePath ? url('/media/' . $imagePath) : '' }}">
-                                @if($imagePath)
-                                    <img src="{{ url('/media/' . $imagePath) }}" alt="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
-                                @else
-                                    <img src="https://placehold.co/400x400/f4f7fb/99a4b5?text=No+Image" alt="No Image">
-                                @endif
+                <div class="lightbox-thumbs" id="lightboxThumbs">
+                    @if(!empty($selectedGalleryUrls))
+                        @foreach($selectedGalleryUrls as $index => $imageUrl)
+                            <button type="button" class="lightbox-thumb {{ $index === 0 ? 'active' : '' }}"
+                                data-lightbox-index="{{ $index }}"
+                                data-lightbox-image="{{ $imageUrl }}">
+                                <img src="{{ $imageUrl }}" alt="{{ $productName }}">
                             </button>
                         @endforeach
-                    @elseif($mainImage)
-                        <button type="button" class="lightbox-thumb active" data-lightbox-thumb data-variant-id="" data-variant-image="{{ url('/media/' . $mainImage) }}">
-                            <img src="{{ url('/media/' . $mainImage) }}" alt="{{ $productName }}">
+                    @elseif($mainImageUrl)
+                        <button type="button" class="lightbox-thumb active" data-lightbox-index="0" data-lightbox-image="{{ $mainImageUrl }}">
+                            <img src="{{ $mainImageUrl }}" alt="{{ $productName }}">
                         </button>
                     @endif
                 </div>
@@ -822,8 +805,8 @@
 
     <script>
         const variantOptions = Array.from(document.querySelectorAll('[data-variant-option]'));
-        const variantThumbs = Array.from(document.querySelectorAll('[data-variant-thumb]'));
         const galleryMain = document.getElementById('galleryMain');
+        const galleryThumbRow = document.getElementById('galleryThumbRow');
         const retailPrice = document.getElementById('retailPrice');
         const wholesalePrice = document.getElementById('wholesalePrice');
         const variantNameText = document.getElementById('variantNameText');
@@ -837,25 +820,99 @@
         const lightbox = document.getElementById('imageLightbox');
         const lightboxImage = document.getElementById('lightboxImage');
         const lightboxClose = document.getElementById('lightboxClose');
-        const lightboxThumbs = Array.from(document.querySelectorAll('[data-lightbox-thumb]'));
+        const lightboxThumbContainer = document.getElementById('lightboxThumbs');
+        let activeGalleryImages = @json(array_values($selectedGalleryUrls));
+        let activeGalleryIndex = 0;
 
-        function syncLightboxThumbs(variantId) {
-            lightboxThumbs.forEach((thumb) => thumb.classList.toggle('active', thumb.dataset.variantId === variantId));
+        function renderMainImage(imageUrl) {
+            if (!galleryMain) {
+                return;
+            }
+
+            if (imageUrl) {
+                galleryMain.innerHTML = `<img id="mainImage" src="${imageUrl}" alt="">`;
+                document.getElementById('mainImage')?.setAttribute('alt', @json($productName));
+                return;
+            }
+
+            galleryMain.innerHTML = '<div class="placeholder" id="mainImage">No Image</div>';
+        }
+
+        function syncGalleryThumbs(index) {
+            galleryThumbRow?.querySelectorAll('[data-gallery-index]').forEach((thumb) => {
+                thumb.classList.toggle('active', Number(thumb.dataset.galleryIndex) === index);
+            });
+
+            lightboxThumbContainer?.querySelectorAll('[data-lightbox-index]').forEach((thumb) => {
+                thumb.classList.toggle('active', Number(thumb.dataset.lightboxIndex) === index);
+            });
+        }
+
+        function showGalleryImage(index) {
+            if (!Array.isArray(activeGalleryImages) || !activeGalleryImages.length) {
+                return;
+            }
+
+            const safeIndex = Math.max(0, Math.min(index, activeGalleryImages.length - 1));
+            activeGalleryIndex = safeIndex;
+            const imageUrl = activeGalleryImages[safeIndex];
+
+            renderMainImage(imageUrl);
+            syncGalleryThumbs(safeIndex);
+
+            if (lightboxImage && imageUrl) {
+                lightboxImage.src = imageUrl;
+                lightboxImage.alt = @json($productName);
+            }
+        }
+
+        function renderGalleryThumbMarkup(type) {
+            return activeGalleryImages.map((imageUrl, index) => {
+                const attrName = type === 'lightbox' ? 'data-lightbox-index' : 'data-gallery-index';
+                const dataImage = type === 'lightbox' ? 'data-lightbox-image' : 'data-gallery-image';
+                const className = type === 'lightbox' ? 'lightbox-thumb' : 'thumb';
+                const isActive = index === activeGalleryIndex ? ' active' : '';
+
+                return `<button type="button" class="${className}${isActive}" ${attrName}="${index}" ${dataImage}="${imageUrl}"><img src="${imageUrl}" alt=""></button>`;
+            }).join('');
+        }
+
+        function renderGallery(images, preferredImage = null) {
+            activeGalleryImages = Array.isArray(images) ? images.filter(Boolean) : [];
+
+            if (!activeGalleryImages.length) {
+                activeGalleryIndex = 0;
+                renderMainImage('');
+                if (galleryThumbRow) galleryThumbRow.innerHTML = '';
+                if (lightboxThumbContainer) lightboxThumbContainer.innerHTML = '';
+                return;
+            }
+
+            const nextIndex = preferredImage ? activeGalleryImages.indexOf(preferredImage) : 0;
+            activeGalleryIndex = nextIndex >= 0 ? nextIndex : 0;
+
+            if (galleryThumbRow) {
+                galleryThumbRow.innerHTML = renderGalleryThumbMarkup('gallery');
+            }
+            if (lightboxThumbContainer) {
+                lightboxThumbContainer.innerHTML = renderGalleryThumbMarkup('lightbox');
+            }
+
+            showGalleryImage(activeGalleryIndex);
         }
 
         function activateVariant(dataset) {
             if (!dataset) return;
-            const currentMainImage = document.getElementById('mainImage');
             const wholesaleMinQty = Number(dataset.variantMinQty || {{ $selectedWholesaleMinQty }});
+            let variantGallery = [];
 
-            if (dataset.variantImage && galleryMain) {
-                if (currentMainImage && currentMainImage.tagName === 'IMG') {
-                    currentMainImage.src = dataset.variantImage;
-                } else {
-                    galleryMain.innerHTML = `<img id="mainImage" src="${dataset.variantImage}" alt="">`;
-                    document.getElementById('mainImage')?.setAttribute('alt', @json($productName));
-                }
+            try {
+                variantGallery = JSON.parse(dataset.variantGallery || '[]');
+            } catch (error) {
+                variantGallery = [];
             }
+
+            renderGallery(variantGallery, dataset.variantImage || variantGallery[0] || null);
 
             retailPrice.textContent = `฿${Number(dataset.variantRetail).toFixed(2)}`;
             wholesalePrice.textContent = `฿${Number(dataset.variantWholesale).toFixed(2)}`;
@@ -872,13 +929,6 @@
             if (bulkQuantity) bulkQuantity.value = wholesaleMinQty;
 
             variantOptions.forEach((option) => option.classList.toggle('active', option.dataset.variantId === dataset.variantId));
-            variantThumbs.forEach((thumb) => thumb.classList.toggle('active', thumb.dataset.variantId === dataset.variantId));
-            syncLightboxThumbs(dataset.variantId || '');
-
-            if (lightboxImage && dataset.variantImage) {
-                lightboxImage.src = dataset.variantImage;
-                lightboxImage.alt = @json($productName);
-            }
         }
 
         function openLightbox() {
@@ -906,25 +956,24 @@
         }
 
         variantOptions.forEach((option) => option.addEventListener('click', () => activateVariant(option.dataset)));
-        variantThumbs.forEach((thumb) => thumb.addEventListener('click', () => activateVariant(thumb.dataset)));
-        lightboxThumbs.forEach((thumb) => {
-            thumb.addEventListener('click', () => {
-                const variantId = thumb.dataset.variantId;
-                const matchingThumb = variantThumbs.find((item) => item.dataset.variantId === variantId);
-                const matchingOption = variantOptions.find((item) => item.dataset.variantId === variantId);
+        galleryThumbRow?.addEventListener('click', (event) => {
+            const thumb = event.target.closest('[data-gallery-index]');
+            if (!thumb) {
+                return;
+            }
 
-                if (matchingThumb) {
-                    activateVariant(matchingThumb.dataset);
-                } else if (matchingOption) {
-                    activateVariant(matchingOption.dataset);
-                } else if (lightboxImage && thumb.dataset.variantImage) {
-                    lightboxImage.src = thumb.dataset.variantImage;
-                    lightboxImage.alt = @json($productName);
-                    syncLightboxThumbs(variantId || '');
-                }
-            });
+            showGalleryImage(Number(thumb.dataset.galleryIndex));
+        });
+        lightboxThumbContainer?.addEventListener('click', (event) => {
+            const thumb = event.target.closest('[data-lightbox-index]');
+            if (!thumb) {
+                return;
+            }
+
+            showGalleryImage(Number(thumb.dataset.lightboxIndex));
         });
 
+        renderGallery(activeGalleryImages, @json($mainImageUrl));
         galleryMain?.addEventListener('click', openLightbox);
         lightboxClose?.addEventListener('click', closeLightbox);
         lightbox?.addEventListener('click', (event) => {
