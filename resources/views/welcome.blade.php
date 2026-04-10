@@ -9,34 +9,59 @@
         :root {
             --primary-color: #CCA35E;
             --text-dark: #1A1A1A;
-            --bg-color: #FAFAFA;
+            --bg-color: #F8F5F1;
+            --surface-color: rgba(255, 255, 255, 0.92);
+            --border-color: rgba(26, 26, 26, 0.08);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
         body { font-family: 'Prompt', sans-serif; background: var(--bg-color); color: var(--text-dark); }
         h1, h2, h3 { font-family: 'Playfair Display', serif; }
-        
-        /* Navbar */
-        .nav { 
-            position: absolute; top: 0; width: 100%; padding: 30px 60px; 
+
+        /* Header */
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            padding: 18px 40px;
+            background: rgba(248, 245, 241, 0.94);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .nav {
+            max-width: 1280px;
+            margin: 0 auto;
             display: flex; justify-content: space-between; align-items: center;
-            z-index: 10; color: white; 
+            gap: 24px;
         }
-        .nav-brand { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 600; letter-spacing: 1px;}
-        .nav-links a { color: white; text-decoration: none; margin-left: 30px; font-weight: 400; font-size: 1rem; transition: 0.3s; }
-        .nav-links a:hover { color: var(--primary-color); }
-        
-        /* Hero Section */
-        .hero {
-            height: 100vh; 
-            background: url('https://images.unsplash.com/photo-1615397323133-c4547900bba0?q=80&w=1920&auto=format') center/cover;
-            display: flex; align-items: center; justify-content: center; text-align: center; color: white; position: relative;
+        .nav-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
         }
-        .hero-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.25); }
-        .hero-content { position: relative; z-index: 1; max-width: 800px;}
-        .hero-subtitle { font-size: 1.1rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 15px; color: var(--primary-color); font-weight: 500;}
-        .hero h1 { font-size: 4.5rem; margin-bottom: 25px; line-height: 1.1; text-shadow: 1px 1px 10px rgba(0,0,0,0.2); }
-        .hero p { font-size: 1.25rem; margin-bottom: 40px; font-weight: 300; opacity: 0.9;}
-        
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .nav-tab {
+            color: var(--text-dark);
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            font-weight: 500;
+            font-size: 0.98rem;
+            transition: 0.25s ease;
+        }
+        .nav-tab:hover {
+            border-color: rgba(204, 163, 94, 0.35);
+            background: rgba(204, 163, 94, 0.08);
+            color: var(--primary-color);
+        }
         .btn-gold {
             background: var(--primary-color); color: white; padding: 16px 40px; 
             text-decoration: none; border-radius: 50px; font-size: 1.1rem; 
@@ -44,35 +69,69 @@
             box-shadow: 0 4px 15px rgba(204, 163, 94, 0.4);
         }
         .btn-gold:hover { background: #b38a4d; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(204, 163, 94, 0.6); }
+        .main-content {
+            padding: 24px 40px 80px;
+        }
+        .hero-banner {
+            max-width: 1280px;
+            margin: 0 auto 56px;
+        }
+        .hero-banner-frame {
+            overflow: hidden;
+            border-radius: 32px;
+            background: #EDE7DD;
+            box-shadow: 0 18px 60px rgba(63, 40, 16, 0.12);
+            aspect-ratio: 16 / 7;
+        }
+        .hero-banner-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .catalog-section {
+            padding: 0 0 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 900px) {
+            .site-header { padding: 16px 20px; }
+            .main-content { padding: 20px 20px 64px; }
+            .nav { flex-direction: column; align-items: stretch; }
+            .nav-links { justify-content: flex-start; }
+            .nav-brand { font-size: 1.5rem; }
+            .hero-banner { margin-bottom: 40px; }
+            .hero-banner-frame { border-radius: 24px; aspect-ratio: 4 / 3; }
+        }
 
     </style>
 </head>
 <body>
-    <nav class="nav">
-        <div class="nav-brand">บ้านครีม สิงห์บุรี</div>
-        <div class="nav-links">
-            <a href="#">สินค้าทั้งหมด</a>
-            <a href="#">ตรวจสอบสถานะ</a>
-            @auth
-                <a href="{{ route('admin.dashboard') }}">ระบบหลังบ้าน</a>
-            @else
-                <a href="{{ route('login') }}" style="border: 1px solid white; padding: 10px 24px; border-radius: 30px;">เข้าสู่ระบบ</a>
-            @endauth
-        </div>
-    </nav>
+    <header class="site-header">
+        <nav class="nav">
+            <div class="nav-brand">บ้านครีม สิงห์บุรี</div>
+            <div class="nav-links">
+                <a href="#catalog" class="nav-tab">สินค้าทั้งหมด</a>
+                <a href="#" class="nav-tab">ตรวจสอบสถานะ</a>
+                @auth
+                    <a href="{{ route('admin.dashboard') }}" class="nav-tab">ระบบหลังบ้าน</a>
+                @else
+                    <a href="{{ route('login') }}" class="btn-gold" style="padding: 10px 24px; font-size: 1rem;">เข้าสู่ระบบ</a>
+                @endauth
+            </div>
+        </nav>
+    </header>
 
-    <section class="hero">
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
-            <div class="hero-subtitle">Premium Skincare & Beauty</div>
-            <h1>Reveal Your True Radiance</h1>
-            <p>สัมผัสประสบการณ์แห่งความงามเหนือระดับ เพื่อผิวพรรณที่โดดเด่นและเปล่งประกายในแบบของคุณ พร้อมระบบเครดิตสั่งซื้อง่ายๆ ทันใจ</p>
-            <a href="#catalog" class="btn-gold">เลือกดูสินค้า</a>
-        </div>
-    </section>
+    <main class="main-content">
+        <section class="hero-banner" aria-label="แบนเนอร์หลัก">
+            <div class="hero-banner-frame">
+                <img src="https://images.unsplash.com/photo-1615397349754-cfa2066a298e?q=80&w=1920&auto=format" alt="แบนเนอร์บ้านครีม สิงห์บุรี">
+            </div>
+        </section>
 
     <!-- Catalog Section -->
-    <section id="catalog" style="padding: 80px 40px; max-width: 1200px; margin: 0 auto;">
+    <section id="catalog" class="catalog-section">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
             <h2 style="font-size: 2.5rem; color: var(--text-dark);">คอลเลกชั่นสกินแคร์ของเรา</h2>
             <div style="position: relative; width: 300px;">
@@ -106,6 +165,7 @@
             @endforeach
         </div>
     </section>
+    </main>
 
     <script>
         // Real-time search implementation
