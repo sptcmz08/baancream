@@ -43,6 +43,10 @@ class SiteSetting extends Model
     {
         $path = static::getValue($key);
 
-        return $path ? Storage::disk('public')->url($path) : null;
+        if (! $path || ! Storage::disk('public')->exists($path)) {
+            return null;
+        }
+
+        return route('branding.logo');
     }
 }

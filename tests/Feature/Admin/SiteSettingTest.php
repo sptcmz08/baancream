@@ -33,6 +33,7 @@ class SiteSettingTest extends TestCase
 
         $this->assertNotNull($storedPath);
         Storage::disk('public')->assertExists($storedPath);
-        $this->get(route('home'))->assertSee(Storage::disk('public')->url($storedPath));
+        $this->get(route('branding.logo'))->assertOk();
+        $this->get(route('home'))->assertSee(route('branding.logo', absolute: false));
     }
 }

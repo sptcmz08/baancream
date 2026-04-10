@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class SiteSettingController extends Controller
 {
@@ -47,5 +48,17 @@ class SiteSettingController extends Controller
         return redirect()
             ->route('admin.settings.edit')
             ->with('success', 'อัปเดตโลโก้เว็บไซต์สำเร็จ');
+    }
+
+    public function showStorefrontLogo(): BinaryFileResponse
+    {
+        $path = SiteSetting::getValue('storefront_logo');
+
+        abort_unless($path && Storage::disk('public')->exists($path), 404);
+
+        return response()->file(
+            Storage::disk('public')->path($path),
+            ['Cache-Control' => 'public, max-age=86400']
+        );
     }
 }

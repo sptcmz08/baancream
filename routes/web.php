@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [\App\Http\Controllers\StoreController::class, 'index'])->name('home');
 Route::get('/products/{product}', [\App\Http\Controllers\StoreController::class, 'show'])->name('products.show');
 Route::get('/search', [\App\Http\Controllers\StoreController::class, 'search'])->name('store.search');
+Route::get('/branding/logo', [SiteSettingController::class, 'showStorefrontLogo'])->name('branding.logo');
 Route::post('/cart/add', [\App\Http\Controllers\StoreController::class, 'addToCart'])->name('cart.add');
 Route::get('/cart', [\App\Http\Controllers\StoreController::class, 'cart'])->name('cart.index');
 Route::post('/cart/remove', [\App\Http\Controllers\StoreController::class, 'removeFromCart'])->name('cart.remove');
