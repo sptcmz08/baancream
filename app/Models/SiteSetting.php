@@ -47,6 +47,11 @@ class SiteSetting extends Model
             return null;
         }
 
-        return route('branding.logo');
+        try {
+            return route('branding.logo');
+        } catch (\Exception $e) {
+            // Fallback: serve directly via storage URL if route cache is stale
+            return Storage::disk('public')->url($path);
+        }
     }
 }
