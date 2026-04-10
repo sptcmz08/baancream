@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Brand;
 use App\Models\Category;
 use App\Models\CreditCycle;
 use App\Models\Order;
@@ -20,45 +19,50 @@ class StoreController extends Controller
 
     public function index(Request $request): View
     {
-        $categories = Category::with([
-            'products' => fn ($query) => $query->with(['brand', 'variants'])->latest(),
-        ])->whereHas('products')->orderBy('name')->get();
-
-        $brands = Brand::withCount('products')
+        $categories = Category::query()
             ->whereHas('products')
+            ->withCount('products')
             ->orderBy('name')
-            ->get();
+            ->get(['id', 'name', 'slug']);
 
-        $brandCollections = Brand::with([
-            'products' => fn ($query) => $query->with(['category', 'variants'])->latest()->take(8),
-        ])->whereHas('products')->orderBy('name')->get();
-
-        $newArrivals = Product::with(['category', 'brand', 'variants'])
-            ->where('is_new_arrival', true)
+        $catalogProducts = Product::query()
+            ->select([
+                'id',
+                'sku',
+                'name',
+                'description',
+                'retail_price',
+                'wholesale_price',
+                'image',
+                'category_id',
+                'brand_id',
+                'is_new_arrival',
+                'created_at',
+            ])
+            ->with([
+                'category:id,name,slug',
+                'brand:id,name,slug',
+                'variants:id,product_id,name,image,retail_price,wholesale_price,stock,sort_order',
+            ])
             ->latest()
-            ->take(8)
             ->get();
+
+        $newArrivals = $catalogProducts
+            ->where('is_new_arrival', true)
+            ->take(8)
+            ->values();
 
         if ($newArrivals->isEmpty()) {
-            $newArrivals = Product::with(['category', 'brand', 'variants'])->latest()->take(8)->get();
+            $newArrivals = $catalogProducts->take(8)->values();
         }
 
-        $featuredProducts = Product::with(['category', 'brand', 'variants'])
-            ->latest()
-            ->take(12)
-            ->get();
-
-        $catalogProducts = Product::with(['category', 'brand', 'variants'])
-            ->latest()
-            ->get();
+        $featuredProducts = $catalogProducts->take(12)->values();
 
         $cartSummary = $this->cartWithTotals();
         $cartCount = $cartSummary['count'];
 
         return view('welcome', compact(
             'categories',
-            'brands',
-            'brandCollections',
             'newArrivals',
             'featuredProducts',
             'catalogProducts',

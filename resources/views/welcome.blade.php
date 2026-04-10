@@ -410,7 +410,6 @@
         <div class="section-head">
             <div>
                 <h2 class="section-title">เลือกช้อปตามหมวดหมู่</h2>
-                <p class="section-subtitle">เลือกจากหัวข้อด้านล่างได้เลย โดยมีทั้งหมด สินค้ามาใหม่ สินค้าแนะนำ และหมวดหมู่จากหลังบ้าน admin</p>
             </div>
         </div>
         <div class="catalog-toolbar">
@@ -419,13 +418,12 @@
                 <button type="button" class="section-pill" data-filter="new">สินค้ามาใหม่ ({{ count($newArrivalIds) }})</button>
                 <button type="button" class="section-pill" data-filter="featured">สินค้าแนะนำ ({{ count($featuredIds) }})</button>
                 @foreach($categories as $category)
-                    <button type="button" class="section-pill" data-filter="category:{{ $category->slug }}">{{ $category->name }} ({{ $category->products->count() }})</button>
+                    <button type="button" class="section-pill" data-filter="category:{{ $category->slug }}">{{ $category->name }} ({{ $category->products_count }})</button>
                 @endforeach
             </div>
             <div class="catalog-summary">
                 <div>
                     <h3 class="section-title" style="font-size:1.55rem;" id="catalogTitle">ทั้งหมด</h3>
-                    <p class="section-subtitle" style="margin-top:6px;">รายการสินค้าจะเรียงยาวต่อเนื่อง และบนจอใหญ่แสดง 5 ชิ้นต่อแถว</p>
                 </div>
                 <div class="catalog-count" id="catalogCount">ทั้งหมด {{ $catalogProducts->count() }} รายการ</div>
             </div>
