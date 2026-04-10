@@ -34,6 +34,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Account pages
+    Route::get('/account', [\App\Http\Controllers\AccountController::class, 'index'])->name('account.index');
+    Route::get('/account/orders', [\App\Http\Controllers\AccountController::class, 'orders'])->name('account.orders');
+    Route::get('/account/orders/{order}', [\App\Http\Controllers\AccountController::class, 'orderDetail'])->name('account.order');
+    Route::get('/account/notifications', [\App\Http\Controllers\AccountController::class, 'notifications'])->name('account.notifications');
 });
 
 require __DIR__.'/auth.php';

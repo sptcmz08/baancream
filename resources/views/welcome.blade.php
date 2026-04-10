@@ -362,6 +362,42 @@
             }
         }
 
+        /* ── Notification Bell ── */
+        .notif-wrap { position: relative; }
+        .notif-btn {
+            width: 42px; height: 42px; border-radius: 999px;
+            background: white; border: 1px solid var(--border-color);
+            font-size: 1.1rem; cursor: pointer; position: relative;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .notif-btn:hover { border-color: rgba(255,79,135,0.35); }
+        .notif-badge {
+            position: absolute; top: -4px; right: -4px;
+            background: var(--primary-color); color: white;
+            border-radius: 999px; font-size: 0.65rem; font-weight: 700;
+            min-width: 18px; height: 18px; display: flex;
+            align-items: center; justify-content: center; padding: 0 4px;
+            border: 2px solid white;
+        }
+        .notif-dropdown {
+            display: none; position: absolute; top: calc(100% + 10px); right: 0;
+            width: 300px; background: white; border: 1px solid var(--border-color);
+            border-radius: 20px; box-shadow: 0 16px 48px rgba(15,23,42,0.14);
+            overflow: hidden; z-index: 50;
+        }
+        .notif-dropdown.is-open { display: block; }
+        .notif-header { padding: 14px 16px; border-bottom: 1px solid var(--border-color); font-weight: 700; font-size: 0.95rem; }
+        .notif-item {
+            display: flex; gap: 12px; padding: 12px 16px; align-items: flex-start;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-item:hover { background: #f7f8fb; }
+        .notif-dot { width: 10px; height: 10px; border-radius: 999px; flex-shrink:0; margin-top:5px; }
+        .notif-item-title { font-size: 0.88rem; font-weight: 600; margin-bottom: 2px; }
+        .notif-item-sub { font-size: 0.78rem; color: var(--text-soft); }
+        .notif-empty { padding: 24px; text-align: center; color: var(--text-soft); font-size: 0.9rem; }
+
         /* ── User Dropdown ── */
         .user-menu { position: relative; }
         .user-menu-btn {
@@ -463,6 +499,21 @@
                 </label>
                 <button type="button" class="pill-link" data-open-cart style="font-family: inherit; cursor: pointer;">ตะกร้าสินค้า</button>
                 @auth
+                    {{-- Bell notification --}}
+                    <div class="notif-wrap" id="notifWrap">
+                        <button type="button" class="notif-btn" id="notifBtn" aria-label="การแจ้งเตือน">
+                            🔔
+                            <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                        </button>
+                        <div class="notif-dropdown" id="notifDropdown">
+                            <div class="notif-header">การแจ้งเตือน</div>
+                            <div id="notifList" style="min-height:60px;">
+                                <div style="padding:16px;text-align:center;color:var(--text-soft);font-size:0.9rem;">กำลังโหลด...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- User dropdown --}}
                     <div class="user-menu" id="userMenuWrap">
                         <button type="button" class="user-action user-menu-btn" id="userMenuBtn" aria-expanded="false" aria-haspopup="true">
                             <span class="user-avatar">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
@@ -479,14 +530,11 @@
                                     <span>⚙️</span> หลังบ้าน Admin
                                 </a>
                             @endif
-                            <a href="{{ route('profile.edit') }}" class="user-dropdown-item" role="menuitem">
+                            <a href="{{ route('account.index') }}" class="user-dropdown-item" role="menuitem">
                                 <span>👤</span> โปรไฟล์ส่วนตัว
                             </a>
-                            <a href="{{ route('home') }}" class="user-dropdown-item" role="menuitem">
+                            <a href="{{ route('account.orders') }}" class="user-dropdown-item" role="menuitem">
                                 <span>📋</span> ประวัติการสั่งซื้อ
-                            </a>
-                            <a href="{{ route('home') }}" class="user-dropdown-item" role="menuitem">
-                                <span>📦</span> สถานะการสั่งซื้อ
                             </a>
                             <form method="POST" action="{{ route('logout') }}" style="margin:0;">
                                 @csrf
@@ -667,12 +715,66 @@
                 e.stopPropagation();
                 const isOpen = userDropdown.classList.toggle('is-open');
                 userMenuBtn.setAttribute('aria-expanded', String(isOpen));
-            });
-            document.addEventListener('click', () => {
-                userDropdown.classList.remove('is-open');
-                userMenuBtn.setAttribute('aria-expanded', 'false');
+                notifDropdown?.classList.remove('is-open');
             });
         }
+
+        // ── Notification Bell ──
+        const notifBtn = document.getElementById('notifBtn');
+        const notifDropdown = document.getElementById('notifDropdown');
+        const notifBadge = document.getElementById('notifBadge');
+        const notifList = document.getElementById('notifList');
+        let notifLoaded = false;
+
+        async function loadNotifications() {
+            try {
+                const res = await fetch('{{ route('account.notifications') }}', {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const data = await res.json();
+
+                if (notifBadge) {
+                    notifBadge.textContent = data.unread;
+                    notifBadge.style.display = data.unread > 0 ? 'flex' : 'none';
+                }
+
+                if (notifList) {
+                    if (!data.items.length) {
+                        notifList.innerHTML = '<div class="notif-empty">🔕 ยังไม่มีการแจ้งเตือน</div>';
+                    } else {
+                        notifList.innerHTML = data.items.map(item => `
+                            <a href="${item.url}" class="notif-item" style="text-decoration:none;color:inherit;">
+                                <div class="notif-dot" style="background:${item.color};"></div>
+                                <div>
+                                    <div class="notif-item-title">คำสั่งซื้อ #${String(item.id).padStart(5,'0')}</div>
+                                    <div class="notif-item-sub">${item.label} · ฿${item.total} · ${item.created_at}</div>
+                                </div>
+                            </a>
+                        `).join('');
+                    }
+                }
+            } catch(e) {
+                if (notifList) notifList.innerHTML = '<div class="notif-empty">ไม่สามารถโหลดได้</div>';
+            }
+        }
+
+        if (notifBtn && notifDropdown) {
+            notifBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = notifDropdown.classList.toggle('is-open');
+                userDropdown?.classList.remove('is-open');
+                userMenuBtn?.setAttribute('aria-expanded', 'false');
+                if (isOpen && !notifLoaded) { notifLoaded = true; loadNotifications(); }
+            });
+            // Auto-load badge count
+            loadNotifications();
+        }
+
+        document.addEventListener('click', () => {
+            userDropdown?.classList.remove('is-open');
+            userMenuBtn?.setAttribute('aria-expanded', 'false');
+            notifDropdown?.classList.remove('is-open');
+        });
     </script>
 </body>
 </html>
