@@ -361,6 +361,70 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* ── User Dropdown ── */
+        .user-menu { position: relative; }
+        .user-menu-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--primary-color), #6a67ff);
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .user-menu-name { font-weight: 600; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .user-menu-caret { font-size: 0.7rem; color: var(--text-soft); transition: transform 0.2s; }
+        .user-menu-btn[aria-expanded="true"] .user-menu-caret { transform: rotate(180deg); }
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 220px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: 0 16px 48px rgba(15,23,42,0.14);
+            overflow: hidden;
+            z-index: 50;
+        }
+        .user-dropdown.is-open { display: block; }
+        .user-dropdown-header {
+            padding: 14px 16px 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .user-dropdown-label { font-size: 0.78rem; color: var(--text-soft); }
+        .user-dropdown-name { font-weight: 700; font-size: 1rem; margin-top: 2px; }
+        .user-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 12px 16px;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+            font-weight: 500;
+            background: transparent;
+            border: none;
+            font-family: inherit;
+            cursor: pointer;
+            text-align: left;
+        }
+        .user-dropdown-item:hover { background: #f7f8fb; color: var(--primary-color); }
+        .user-dropdown-logout { color: #dc2626 !important; }
+        .user-dropdown-logout:hover { background: #fff1f2 !important; color: #dc2626 !important; }
     </style>
 </head>
 <body>
@@ -399,7 +463,39 @@
                 </label>
                 <button type="button" class="pill-link" data-open-cart style="font-family: inherit; cursor: pointer;">ตะกร้าสินค้า</button>
                 @auth
-                    <a href="{{ auth()->user()->role === 'admin' ? route('admin.dashboard') : route('dashboard') }}" class="user-action">บัญชีของฉัน</a>
+                    <div class="user-menu" id="userMenuWrap">
+                        <button type="button" class="user-action user-menu-btn" id="userMenuBtn" aria-expanded="false" aria-haspopup="true">
+                            <span class="user-avatar">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
+                            <span class="user-menu-name">{{ auth()->user()->username ?? auth()->user()->name }}</span>
+                            <span class="user-menu-caret">▾</span>
+                        </button>
+                        <div class="user-dropdown" id="userDropdown" role="menu">
+                            <div class="user-dropdown-header">
+                                <div class="user-dropdown-label">เข้าสู่ระบบโดย</div>
+                                <div class="user-dropdown-name">{{ auth()->user()->name }}</div>
+                            </div>
+                            @if(auth()->user()->role === 'admin')
+                                <a href="{{ route('admin.dashboard') }}" class="user-dropdown-item" role="menuitem">
+                                    <span>⚙️</span> หลังบ้าน Admin
+                                </a>
+                            @endif
+                            <a href="{{ route('profile.edit') }}" class="user-dropdown-item" role="menuitem">
+                                <span>👤</span> โปรไฟล์ส่วนตัว
+                            </a>
+                            <a href="{{ route('home') }}" class="user-dropdown-item" role="menuitem">
+                                <span>📋</span> ประวัติการสั่งซื้อ
+                            </a>
+                            <a href="{{ route('home') }}" class="user-dropdown-item" role="menuitem">
+                                <span>📦</span> สถานะการสั่งซื้อ
+                            </a>
+                            <form method="POST" action="{{ route('logout') }}" style="margin:0;">
+                                @csrf
+                                <button type="submit" class="user-dropdown-item user-dropdown-logout" role="menuitem">
+                                    <span>↩</span> ออกจากระบบ
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 @else
                     <button type="button" class="user-action" data-open-auth data-auth-mode="login" style="font-family: inherit; cursor: pointer;">เข้าสู่ระบบ</button>
                 @endauth
@@ -562,6 +658,21 @@
         });
 
         applyCatalogFilters();
+
+        // ── User Dropdown ──
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userDropdown = document.getElementById('userDropdown');
+        if (userMenuBtn && userDropdown) {
+            userMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = userDropdown.classList.toggle('is-open');
+                userMenuBtn.setAttribute('aria-expanded', String(isOpen));
+            });
+            document.addEventListener('click', () => {
+                userDropdown.classList.remove('is-open');
+                userMenuBtn.setAttribute('aria-expanded', 'false');
+            });
+        }
     </script>
 </body>
 </html>

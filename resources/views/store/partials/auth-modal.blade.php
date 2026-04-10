@@ -271,8 +271,11 @@
                 <input type="hidden" name="auth_mode" value="login">
 
                 <div class="auth-field">
-                    <label class="auth-label" for="auth_login_email">อีเมล</label>
-                    <input class="auth-input" id="auth_login_email" type="email" name="email" value="{{ old('auth_mode') === 'login' ? old('email') : '' }}" required autocomplete="username">
+                    <label class="auth-label" for="auth_login_username">ชื่อผู้ใช้ (Username)</label>
+                    <input class="auth-input" id="auth_login_username" type="text" name="username" value="{{ old('auth_mode') === 'login' ? old('username') : '' }}" required autocomplete="username" placeholder="กรอก username">
+                    @error('username')
+                        <div class="auth-help">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="auth-field">
@@ -286,9 +289,7 @@
                 </label>
 
                 <div class="auth-actions">
-                    @if (Route::has('password.request'))
-                        <a class="auth-link" href="{{ route('password.request') }}">ลืมรหัสผ่าน?</a>
-                    @endif
+                    <span></span>
                     <button type="submit" class="auth-submit">เข้าสู่ระบบ</button>
                 </div>
 
@@ -303,18 +304,27 @@
                 <input type="hidden" name="auth_mode" value="register">
 
                 <div class="auth-field">
-                    <label class="auth-label" for="auth_register_name">ชื่อ</label>
-                    <input class="auth-input" id="auth_register_name" type="text" name="name" value="{{ old('auth_mode') === 'register' ? old('name') : '' }}" required autocomplete="name">
+                    <label class="auth-label" for="auth_register_name">ชื่อ-นามสกุล</label>
+                    <input class="auth-input" id="auth_register_name" type="text" name="name" value="{{ old('auth_mode') === 'register' ? old('name') : '' }}" required autocomplete="name" placeholder="ชื่อ นามสกุล">
+                    @error('name')
+                        <div class="auth-help">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="auth-field">
-                    <label class="auth-label" for="auth_register_email">อีเมล</label>
-                    <input class="auth-input" id="auth_register_email" type="email" name="email" value="{{ old('auth_mode') === 'register' ? old('email') : '' }}" required autocomplete="username">
+                    <label class="auth-label" for="auth_register_username">Username <span style="color:var(--text-soft);font-weight:400;font-size:0.85rem;">(ภาษาอังกฤษเท่านั้น)</span></label>
+                    <input class="auth-input" id="auth_register_username" type="text" name="username" value="{{ old('auth_mode') === 'register' ? old('username') : '' }}" required autocomplete="off" placeholder="เช่น john_doe" pattern="[a-zA-Z0-9_]+" title="ภาษาอังกฤษ ตัวเลข หรือ _ เท่านั้น">
+                    @error('username')
+                        <div class="auth-help">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="auth-field">
                     <label class="auth-label" for="auth_register_password">รหัสผ่าน</label>
                     <input class="auth-input" id="auth_register_password" type="password" name="password" required autocomplete="new-password">
+                    @error('password')
+                        <div class="auth-help">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="auth-field">
