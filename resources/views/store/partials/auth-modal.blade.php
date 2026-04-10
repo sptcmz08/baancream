@@ -29,12 +29,12 @@
         grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.05fr);
     }
     .auth-panel {
-        padding: 34px 30px;
         background: linear-gradient(145deg, #fff3f7 0%, #eef8ff 100%);
-        color: var(--text-dark);
-        display: grid;
-        align-content: space-between;
-        gap: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        min-height: 360px;
     }
     .auth-panel-title {
         font-size: clamp(2rem, 5vw, 3.4rem);
@@ -45,19 +45,17 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 20px;
+        width: 100%;
         font-size: 2.15rem;
         font-weight: 700;
         letter-spacing: -0.04em;
         color: var(--primary-color);
         line-height: 1;
-        width: 100%;
     }
     .auth-logo-image {
         width: 100%;
-        max-width: 100%;
+        max-width: 340px;
         height: auto;
-        max-height: 260px;
         object-fit: contain;
         display: block;
     }
@@ -242,18 +240,9 @@
     aria-hidden="{{ request('auth') || $authHasErrors ? 'false' : 'true' }}">
     <div class="auth-card">
         <div class="auth-panel">
-            <div>
-                <a href="{{ route('home') }}" class="auth-logo" aria-label="บ้านครีม สิงห์บุรี">
-                    @include('store.partials.site-logo-markup', ['variant' => 'auth'])
-                </a>
-                <h2 class="auth-panel-title">ยินดีต้อนรับ<br>กลับมาช้อปต่อ</h2>
-                <p class="auth-panel-copy">เข้าสู่ระบบหรือสมัครสมาชิกจาก popup เดียวกันได้เลย โดยยังคงอยู่บนหน้าเว็บเดิมของคุณ</p>
-            </div>
-            <div class="auth-panel-pills">
-                <span class="auth-panel-pill">ช้อปต่อได้ทันที</span>
-                <span class="auth-panel-pill">ตะกร้าไม่หาย</span>
-                <span class="auth-panel-pill">สมัครใหม่ได้ในหน้าเดียว</span>
-            </div>
+            <a href="{{ route('home') }}" class="auth-logo" aria-label="บ้านครีม สิงห์บุรี">
+                @include('store.partials.site-logo-markup', ['variant' => 'auth'])
+            </a>
         </div>
 
         <div class="auth-forms">
