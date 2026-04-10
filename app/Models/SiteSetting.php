@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class SiteSetting extends Model
 {
@@ -41,17 +42,16 @@ class SiteSetting extends Model
 
     public static function publicUrl(string $key): ?string
     {
-        $path = static::getValue($key);
-
-        if (! $path || ! Storage::disk('public')->exists($path)) {
-            return null;
-        }
-
         try {
-            return route('branding.logo');
-        } catch (\Exception $e) {
-            // Fallback: serve directly via storage URL if route cache is stale
-            return Storage::disk('public')->url($path);
+            $path = static::getValue($key);
+
+            if (! $path || ! Storage::disk('public')->exists($path)) {
+                return null;
+            }
+
+            return url('/branding/logo');
+        } catch (Throwable) {
+            return null;
         }
     }
 }

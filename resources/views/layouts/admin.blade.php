@@ -24,7 +24,7 @@
                 <li><a href="{{ route('admin.products.index') }}" class="nav-link">รายการสินค้า (SKU)</a></li>
                 <li><a href="{{ route('admin.orders.index') }}" class="nav-link">ตรวจสอบออเดอร์</a></li>
                 <li><a href="{{ route('admin.credits.index') }}" class="nav-link">ระบบเครดิต (Credit)</a></li>
-                <li><a href="{{ route('admin.settings.edit') }}" class="nav-link">ตั้งค่าเว็บ / โลโก้</a></li>
+                <li><a href="{{ url('/admin/settings/branding') }}" class="nav-link">ตั้งค่าเว็บ / โลโก้</a></li>
                 <li style="margin-top: 20px; border-top: 1px solid #eee;">
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf 

@@ -6,6 +6,7 @@ use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
+use Throwable;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,8 +26,12 @@ class AppServiceProvider extends ServiceProvider
         View::composer('*', function ($view): void {
             $storefrontLogoUrl = null;
 
-            if (Schema::hasTable('site_settings')) {
-                $storefrontLogoUrl = SiteSetting::publicUrl('storefront_logo');
+            try {
+                if (Schema::hasTable('site_settings')) {
+                    $storefrontLogoUrl = SiteSetting::publicUrl('storefront_logo');
+                }
+            } catch (Throwable) {
+                $storefrontLogoUrl = null;
             }
 
             $view->with('storefrontLogoUrl', $storefrontLogoUrl);
