@@ -79,6 +79,6 @@ class ProductPageTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('สินค้าทดสอบ');
-        $response->assertSee('เพิ่มลงตะกร้า 1 ชิ้น');
+        $response->assertSee('ใส่ตะกร้า 1 ชิ้น');
     }
 }

@@ -165,6 +165,7 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 16px 44px rgba(29, 41, 76, 0.08);
+            cursor: zoom-in;
         }
         .gallery-main img {
             width: 100%;
@@ -192,6 +193,93 @@
         }
         .thumb.active { border-color: var(--primary-color); }
         .thumb img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+        }
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(17, 24, 39, 0.72);
+            z-index: 80;
+        }
+        .lightbox.is-open {
+            display: flex;
+        }
+        .lightbox-dialog {
+            width: min(1120px, 100%);
+            max-height: calc(100vh - 48px);
+            background: white;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 30px 90px rgba(15, 23, 42, 0.35);
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 180px;
+        }
+        .lightbox-stage {
+            min-height: 0;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .lightbox-stage img {
+            width: 100%;
+            height: auto;
+            max-height: calc(100vh - 120px);
+            object-fit: contain;
+        }
+        .lightbox-sidebar {
+            border-left: 1px solid var(--border-color);
+            padding: 18px;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            gap: 16px;
+            background: white;
+        }
+        .lightbox-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .lightbox-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        .lightbox-close {
+            width: 38px;
+            height: 38px;
+            border: none;
+            border-radius: 999px;
+            background: #f3f6fb;
+            color: var(--text-dark);
+            cursor: pointer;
+        }
+        .lightbox-thumbs {
+            display: grid;
+            gap: 10px;
+            align-content: start;
+            overflow: auto;
+        }
+        .lightbox-thumb {
+            border: 2px solid transparent;
+            border-radius: 16px;
+            overflow: hidden;
+            padding: 0;
+            background: #f8fafc;
+            cursor: pointer;
+        }
+        .lightbox-thumb.active {
+            border-color: var(--primary-color);
+        }
+        .lightbox-thumb img {
             width: 100%;
             aspect-ratio: 1 / 1;
             object-fit: cover;
@@ -465,6 +553,16 @@
             .product-shell {
                 grid-template-columns: 1fr;
             }
+            .lightbox-dialog {
+                grid-template-columns: 1fr;
+            }
+            .lightbox-sidebar {
+                border-left: none;
+                border-top: 1px solid var(--border-color);
+            }
+            .lightbox-thumbs {
+                grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+            }
         }
 
         @media (max-width: 720px) {
@@ -500,9 +598,9 @@
     <div class="top-strip">
         <div class="top-strip-inner">
             <div class="top-strip-badges">
-                <span>เลือกสูตรสินค้าได้จากหน้ารายละเอียด</span>
-                <span>รูปและราคาจะเปลี่ยนตามสูตรที่เลือก</span>
-                <span>เพิ่มลงตะกร้าได้ทันทีจากหน้านี้</span>
+                <span>ซื้อครบตามเงื่อนไข รับโปรพิเศษ</span>
+                <span>อัปเดตสินค้าใหม่จากหลังบ้านได้ตลอด</span>
+                <span>เลือกสูตรและดูรูปสินค้าได้จากหน้านี้</span>
             </div>
             <span>บ้านครีม สิงห์บุรี</span>
         </div>
@@ -515,10 +613,10 @@
             </a>
 
             <nav class="main-links" aria-label="เมนูหลัก">
-                <a href="{{ route('home') }}#categories">หมวดหมู่</a>
-                <a href="{{ route('home') }}#brands">แบรนด์</a>
-                <a href="{{ route('home') }}#new-arrivals">สินค้าใหม่</a>
-                <a href="{{ route('home') }}#all-products">สินค้าทั้งหมด</a>
+                <a href="{{ route('home') }}#catalog">หมวดหมู่</a>
+                <a href="{{ route('home') }}#catalog">สินค้าใหม่</a>
+                <a href="{{ route('home') }}#catalog">สินค้าแนะนำ</a>
+                <a href="{{ route('home') }}#catalog">สินค้าทั้งหมด</a>
             </nav>
 
             <div class="header-tools">
@@ -545,7 +643,7 @@
     <section class="page-section">
         <div class="product-shell">
             <div class="surface-card gallery-card">
-                <div class="gallery-main" id="galleryMain">
+                <div class="gallery-main" id="galleryMain" aria-label="กดเพื่อขยายรูปสินค้า">
                     @if($mainImage)
                         <img id="mainImage" src="{{ asset('storage/' . $mainImage) }}" alt="{{ $productName }}">
                     @else
@@ -650,7 +748,7 @@
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
                         <input type="hidden" name="variant_id" id="singleVariantId" value="{{ data_get($selectedVariant, 'id') }}">
                         <input type="hidden" name="quantity" value="1">
-                        <button type="submit" class="cta-button">เพิ่มลงตะกร้า 1 ชิ้น <span id="singlePriceText">฿{{ number_format($selectedRetailPrice, 2) }}</span></button>
+                        <button type="submit" class="cta-button">ใส่ตะกร้า 1 ชิ้น <span id="singlePriceText">฿{{ number_format($selectedRetailPrice, 2) }}</span></button>
                     </form>
 
                     <form method="POST" action="{{ route('cart.add') }}">
@@ -658,7 +756,7 @@
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
                         <input type="hidden" name="variant_id" id="bulkVariantId" value="{{ data_get($selectedVariant, 'id') }}">
                         <input type="hidden" name="quantity" value="10">
-                        <button type="submit" class="cta-button primary">เพิ่มลงตะกร้า 10 ชิ้น <span id="bulkPriceText">฿{{ number_format($selectedWholesalePrice * 10, 2) }}</span></button>
+                        <button type="submit" class="cta-button primary">ใส่ตะกร้า 10 ชิ้น <span id="bulkPriceText">฿{{ number_format($selectedWholesalePrice * 10, 2) }}</span></button>
                     </form>
                 </div>
             </div>
@@ -670,7 +768,7 @@
             <div>
                 <h2 class="section-title">สินค้าที่คุณอาจชอบ</h2>
             </div>
-            <a href="{{ route('home') }}#all-products" class="section-pill">ดูสินค้าทั้งหมด</a>
+            <a href="{{ route('home') }}#catalog" class="section-pill">ดูสินค้าทั้งหมด</a>
         </div>
 
         @if($relatedProducts->isNotEmpty())
@@ -703,7 +801,13 @@
                                     <div class="price-retail" style="font-size:1.15rem;">฿{{ number_format((float) $item->displayRetailPrice(), 2) }}</div>
                                     <div class="price-wholesale">ราคาส่ง ฿{{ number_format((float) $item->displayWholesalePrice(), 2) }}</div>
                                 </div>
-                                <a href="{{ route('products.show', $item) }}" class="buy-button">เลือกสูตร</a>
+                                <form method="POST" action="{{ route('cart.add') }}" style="margin:0;">
+                                    @csrf
+                                    <input type="hidden" name="product_id" value="{{ $item->id }}">
+                                    <input type="hidden" name="variant_id" value="{{ data_get($item->defaultVariant(), 'id') }}">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="buy-button">ใส่ตะกร้า</button>
+                                </form>
                             </div>
                         </div>
                     </article>
@@ -720,6 +824,42 @@
         'cartTotal' => $cartSummary['total'],
     ])
 
+    <div class="lightbox" id="imageLightbox" aria-hidden="true">
+        <div class="lightbox-dialog">
+            <div class="lightbox-stage">
+                <img id="lightboxImage" src="" alt="">
+            </div>
+            <div class="lightbox-sidebar">
+                <div class="lightbox-head">
+                    <div class="lightbox-title">ซูมรูปสินค้า</div>
+                    <button type="button" class="lightbox-close" id="lightboxClose" aria-label="ปิดรูปขยาย">✕</button>
+                </div>
+                <div class="lightbox-thumbs">
+                    @if($product->variants->isNotEmpty())
+                        @foreach($product->variants as $variant)
+                            @php $imagePath = $variant->image ?: $product->image; @endphp
+                            <button type="button"
+                                class="lightbox-thumb {{ $selectedVariant && $selectedVariant->id === $variant->id ? 'active' : '' }}"
+                                data-lightbox-thumb
+                                data-variant-id="{{ $variant->id }}"
+                                data-variant-image="{{ $imagePath ? asset('storage/' . $imagePath) : '' }}">
+                                @if($imagePath)
+                                    <img src="{{ asset('storage/' . $imagePath) }}" alt="{{ (string) data_get($variant, 'name', 'สูตรสินค้า') }}">
+                                @else
+                                    <img src="https://placehold.co/400x400/f4f7fb/99a4b5?text=No+Image" alt="No Image">
+                                @endif
+                            </button>
+                        @endforeach
+                    @elseif($mainImage)
+                        <button type="button" class="lightbox-thumb active" data-lightbox-thumb data-variant-id="" data-variant-image="{{ asset('storage/' . $mainImage) }}">
+                            <img src="{{ asset('storage/' . $mainImage) }}" alt="{{ $productName }}">
+                        </button>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const variantOptions = Array.from(document.querySelectorAll('[data-variant-option]'));
         const variantThumbs = Array.from(document.querySelectorAll('[data-variant-thumb]'));
@@ -731,6 +871,14 @@
         const bulkVariantId = document.getElementById('bulkVariantId');
         const singlePriceText = document.getElementById('singlePriceText');
         const bulkPriceText = document.getElementById('bulkPriceText');
+        const lightbox = document.getElementById('imageLightbox');
+        const lightboxImage = document.getElementById('lightboxImage');
+        const lightboxClose = document.getElementById('lightboxClose');
+        const lightboxThumbs = Array.from(document.querySelectorAll('[data-lightbox-thumb]'));
+
+        function syncLightboxThumbs(variantId) {
+            lightboxThumbs.forEach((thumb) => thumb.classList.toggle('active', thumb.dataset.variantId === variantId));
+        }
 
         function activateVariant(dataset) {
             if (!dataset) return;
@@ -757,10 +905,70 @@
 
             variantOptions.forEach((option) => option.classList.toggle('active', option.dataset.variantId === dataset.variantId));
             variantThumbs.forEach((thumb) => thumb.classList.toggle('active', thumb.dataset.variantId === dataset.variantId));
+            syncLightboxThumbs(dataset.variantId || '');
+
+            if (lightboxImage && dataset.variantImage) {
+                lightboxImage.src = dataset.variantImage;
+                lightboxImage.alt = @json($productName);
+            }
+        }
+
+        function openLightbox() {
+            const currentMainImage = document.getElementById('mainImage');
+
+            if (!lightbox || !lightboxImage || !currentMainImage || currentMainImage.tagName !== 'IMG') {
+                return;
+            }
+
+            lightboxImage.src = currentMainImage.src;
+            lightboxImage.alt = currentMainImage.alt || @json($productName);
+            lightbox.classList.add('is-open');
+            lightbox.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            if (!lightbox) {
+                return;
+            }
+
+            lightbox.classList.remove('is-open');
+            lightbox.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
         }
 
         variantOptions.forEach((option) => option.addEventListener('click', () => activateVariant(option.dataset)));
         variantThumbs.forEach((thumb) => thumb.addEventListener('click', () => activateVariant(thumb.dataset)));
+        lightboxThumbs.forEach((thumb) => {
+            thumb.addEventListener('click', () => {
+                const variantId = thumb.dataset.variantId;
+                const matchingThumb = variantThumbs.find((item) => item.dataset.variantId === variantId);
+                const matchingOption = variantOptions.find((item) => item.dataset.variantId === variantId);
+
+                if (matchingThumb) {
+                    activateVariant(matchingThumb.dataset);
+                } else if (matchingOption) {
+                    activateVariant(matchingOption.dataset);
+                } else if (lightboxImage && thumb.dataset.variantImage) {
+                    lightboxImage.src = thumb.dataset.variantImage;
+                    lightboxImage.alt = @json($productName);
+                    syncLightboxThumbs(variantId || '');
+                }
+            });
+        });
+
+        galleryMain?.addEventListener('click', openLightbox);
+        lightboxClose?.addEventListener('click', closeLightbox);
+        lightbox?.addEventListener('click', (event) => {
+            if (event.target === lightbox) {
+                closeLightbox();
+            }
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && lightbox?.classList.contains('is-open')) {
+                closeLightbox();
+            }
+        });
     </script>
 </body>
 </html>

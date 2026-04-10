@@ -270,6 +270,9 @@
             justify-content: center;
         }
         .buy-button:hover { transform: translateY(-1px); }
+        .cart-form {
+            margin: 0;
+        }
 
         .catalog-toolbar {
             display: grid;
@@ -477,7 +480,13 @@
                                     <div class="price-retail">฿{{ number_format($product->displayRetailPrice(), 2) }}</div>
                                     <div class="price-wholesale">ราคาส่ง ฿{{ number_format($product->displayWholesalePrice(), 2) }}</div>
                                 </div>
-                                <a href="{{ route('products.show', $product) }}" class="buy-button">เลือกสูตร</a>
+                                <form method="POST" action="{{ route('cart.add') }}" class="cart-form">
+                                    @csrf
+                                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                    <input type="hidden" name="variant_id" value="{{ data_get($product->defaultVariant(), 'id') }}">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="buy-button">ใส่ตะกร้า</button>
+                                </form>
                             </div>
                         </div>
                     </article>
