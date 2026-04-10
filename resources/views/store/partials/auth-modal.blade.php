@@ -41,6 +41,20 @@
         line-height: 1.02;
         margin-bottom: 14px;
     }
+    .auth-logo {
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 18px;
+        font-size: 2.15rem;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        color: var(--primary-color);
+        line-height: 1;
+    }
+    .auth-logo span:nth-child(2) { color: #6a67ff; }
+    .auth-logo span:nth-child(3) { color: #22c1dc; }
+    .auth-logo span:nth-child(4) { color: #f8c64f; }
+    .auth-logo span:nth-child(5) { color: #35c98b; }
     .auth-panel-copy {
         color: var(--text-soft);
         line-height: 1.8;
@@ -219,7 +233,9 @@
     <div class="auth-card">
         <div class="auth-panel">
             <div>
-                <div class="product-badge brand" style="display:inline-flex; margin-bottom:18px;">บ้านครีม สิงห์บุรี</div>
+                <a href="{{ route('home') }}" class="auth-logo" aria-label="บ้านครีม สิงห์บุรี">
+                    <span>b</span><span>a</span><span>a</span><span>n</span><span>cream</span>
+                </a>
                 <h2 class="auth-panel-title">ยินดีต้อนรับ<br>กลับมาช้อปต่อ</h2>
                 <p class="auth-panel-copy">เข้าสู่ระบบหรือสมัครสมาชิกจาก popup เดียวกันได้เลย โดยยังคงอยู่บนหน้าเว็บเดิมของคุณ</p>
             </div>
