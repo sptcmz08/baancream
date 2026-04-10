@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\OrderController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [\App\Http\Controllers\StoreController::class, 'index'])->name('home');
+Route::get('/products/{product}', [\App\Http\Controllers\StoreController::class, 'show'])->name('products.show');
 Route::get('/search', [\App\Http\Controllers\StoreController::class, 'search'])->name('store.search');
 Route::post('/cart/add', [\App\Http\Controllers\StoreController::class, 'addToCart'])->name('cart.add');
 Route::get('/cart', [\App\Http\Controllers\StoreController::class, 'cart'])->name('cart.index');

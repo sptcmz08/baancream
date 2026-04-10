@@ -14,6 +14,7 @@
                 <th>SKU</th>
                 <th>ชื่อสินค้า</th>
                 <th>แบรนด์</th>
+                <th>สูตร</th>
                 <th>ราคาปลีก</th>
                 <th>ราคาส่ง</th>
                 <th>หมวดหมู่</th>
@@ -34,8 +35,9 @@
                 <td style="font-weight: 500;">{{ $product->sku }}</td>
                 <td>{{ $product->name }}</td>
                 <td>{{ $product->brand->name ?? '-' }}</td>
-                <td style="color: var(--primary-color);">฿{{ number_format($product->retail_price, 2) }}</td>
-                <td style="color: #16a34a;">฿{{ number_format($product->wholesale_price, 2) }}</td>
+                <td>{{ $product->variants->count() ?: '-' }}</td>
+                <td style="color: var(--primary-color);">฿{{ number_format($product->displayRetailPrice(), 2) }}</td>
+                <td style="color: #16a34a;">฿{{ number_format($product->displayWholesalePrice(), 2) }}</td>
                 <td>{{ $product->category->name ?? '-' }}</td>
                 <td>{{ $product->is_new_arrival ? 'ใช่' : '-' }}</td>
                 <td style="display: flex; gap: 8px;">
@@ -48,7 +50,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 50px;">
+                <td colspan="10" style="text-align: center; color: var(--text-muted); padding: 50px;">
                     <div style="font-size: 3rem; margin-bottom: 10px;">📦</div>
                     <div>ยังไม่มีรายการสินค้าในระบบ</div>
                 </td>
