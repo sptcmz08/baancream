@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\ProductVariant;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -35,6 +39,11 @@ class ProductController extends Controller
         return redirect()->route('admin.products.index')->with('success', 'เพิ่มสินค้าสำเร็จ');
     }
 
+    public function show(Product $product): RedirectResponse
+    {
+        return redirect()->route('admin.products.edit', $product);
+    }
+
     public function edit(Product $product): View
     {
         $product->load(['variants', 'categories']);
@@ -57,13 +66,11 @@ class ProductController extends Controller
 
     public function destroy(Product $product): RedirectResponse
     {
-        if (is_array($product->images)) {
-            foreach($product->images as $img) {
-                Storage::disk('public')->delete($img);
-            }
+        foreach ((array) $product->images as $image) {
+            Storage::disk('public')->delete($image);
         }
 
-        $product->variants->each(function (ProductVariant $variant) {
+        $product->variants->each(function (ProductVariant $variant): void {
             if ($variant->image) {
                 Storage::disk('public')->delete($variant->image);
             }
@@ -77,16 +84,19 @@ class ProductController extends Controller
     private function validateProduct(Request $request, ?Product $product = null): array
     {
         return $request->validate([
-            'sku' => 'required|unique:products,sku,' . $product?->id,
-            'name' => 'required|string',
+            'sku' => 'required|string|max:255|unique:products,sku,' . $product?->id,
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'retail_price' => 'required|numeric|min:0',
             'wholesale_price' => 'required|numeric|min:0',
             'stock' => 'nullable|integer|min:0',
             'wholesale_min_qty' => 'nullable|integer|min:1',
-            'category_ids' => 'required|array',
+            'category_ids' => 'required|array|min:1',
             'category_ids.*' => 'exists:categories,id',
+            'images' => 'nullable|array',
             'images.*' => 'nullable|image',
             'kept_images' => 'nullable|array',
+            'kept_images.*' => 'string',
             'is_new_arrival' => 'nullable|boolean',
             'variants' => 'nullable|array',
             'variants.*.id' => 'nullable|exists:product_variants,id',
@@ -109,7 +119,10 @@ class ProductController extends Controller
         $data['stock'] = $request->integer('stock', 0);
         $data['wholesale_min_qty'] = $request->integer('wholesale_min_qty', 10);
 
-        $images = $request->input('kept_images', []);
+        $images = collect($request->input('kept_images', []))
+            ->filter(fn ($path) => is_string($path) && $path !== '')
+            ->values()
+            ->all();
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $file) {
@@ -117,11 +130,8 @@ class ProductController extends Controller
             }
         }
 
-        if ($product && is_array($product->images)) {
-            $removed = array_diff($product->images, $images);
-            foreach ($removed as $img) {
-                Storage::disk('public')->delete($img);
-            }
+        foreach (array_diff((array) $product?->images, $images) as $removedImage) {
+            Storage::disk('public')->delete($removedImage);
         }
 
         $data['images'] = $images;
@@ -158,6 +168,7 @@ class ProductController extends Controller
                 if ($variant->exists && $variant->image) {
                     Storage::disk('public')->delete($variant->image);
                 }
+
                 $variant->image = $imageFile->store('products/variants', 'public');
             }
 
@@ -168,10 +179,11 @@ class ProductController extends Controller
         $product->variants()
             ->whereNotIn('id', $keptVariantIds)
             ->get()
-            ->each(function (ProductVariant $variant) {
+            ->each(function (ProductVariant $variant): void {
                 if ($variant->image) {
                     Storage::disk('public')->delete($variant->image);
                 }
+
                 $variant->delete();
             });
     }

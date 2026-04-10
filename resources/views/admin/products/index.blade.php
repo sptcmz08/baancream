@@ -13,7 +13,6 @@
                 <th>รูปภาพ</th>
                 <th>SKU</th>
                 <th>ชื่อสินค้า</th>
-                <th>แบรนด์</th>
                 <th>สูตร</th>
                 <th>ราคาปลีก</th>
                 <th>ราคาส่ง</th>
@@ -26,19 +25,19 @@
             @forelse($products ?? [] as $product)
             <tr>
                 <td>
-                    @if($product->image)
-                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                    @php($displayImage = $product->displayImage())
+                    @if($displayImage)
+                        <img src="{{ asset('storage/' . $displayImage) }}" alt="{{ $product->name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
                     @else
                         <div style="width: 50px; height: 50px; background: #eee; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #aaa;">No Img</div>
                     @endif
                 </td>
                 <td style="font-weight: 500;">{{ $product->sku }}</td>
                 <td>{{ $product->name }}</td>
-                <td>{{ $product->brand->name ?? '-' }}</td>
                 <td>{{ $product->variants->count() ?: '-' }}</td>
                 <td style="color: var(--primary-color);">฿{{ number_format($product->displayRetailPrice(), 2) }}</td>
                 <td style="color: #16a34a;">฿{{ number_format($product->displayWholesalePrice(), 2) }}</td>
-                <td>{{ $product->category->name ?? '-' }}</td>
+                <td>{{ $product->categories->pluck('name')->join(', ') ?: '-' }}</td>
                 <td>{{ $product->is_new_arrival ? 'ใช่' : '-' }}</td>
                 <td style="display: flex; gap: 8px;">
                     <a href="{{ route('admin.products.edit', $product) }}" class="btn" style="background:#f3f4f6; color: #4b5563; padding: 6px 12px; font-size:0.8rem; text-decoration:none;">แก้ไข</a>
@@ -50,7 +49,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="10" style="text-align: center; color: var(--text-muted); padding: 50px;">
+                <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 50px;">
                     <div style="font-size: 3rem; margin-bottom: 10px;">📦</div>
                     <div>ยังไม่มีรายการสินค้าในระบบ</div>
                 </td>
