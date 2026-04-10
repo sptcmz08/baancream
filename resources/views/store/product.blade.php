@@ -649,7 +649,7 @@
                 @auth
                     <a href="{{ auth()->user()->role === 'admin' ? route('admin.dashboard') : route('dashboard') }}" class="user-action">บัญชีของฉัน</a>
                 @else
-                    <a href="{{ route('login') }}" class="user-action">เข้าสู่ระบบ</a>
+                    <button type="button" class="user-action" data-open-auth data-auth-mode="login" style="font-family: inherit; cursor: pointer;">เข้าสู่ระบบ</button>
                 @endauth
             </div>
         </div>
@@ -851,6 +851,9 @@
         'cartItems' => $cartSummary['items'],
         'cartTotal' => $cartSummary['total'],
     ])
+    @guest
+        @include('store.partials.auth-modal')
+    @endguest
 
     <div class="lightbox" id="imageLightbox" aria-hidden="true">
         <div class="lightbox-dialog">
