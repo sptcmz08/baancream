@@ -84,13 +84,15 @@
         @php
             $statusMap = [
                 'pending'    => ['label' => 'รอชำระเงิน',     'bg' => '#fff7ed', 'color' => '#c2410c'],
+                'confirmed'  => ['label' => 'ยืนยันแล้ว',     'bg' => '#ecfeff', 'color' => '#0e7490'],
+                'paid_wait_shipping' => ['label' => 'เตรียมจัดส่ง', 'bg' => '#eff6ff', 'color' => '#1d4ed8'],
                 'processing' => ['label' => 'กำลังดำเนินการ', 'bg' => '#eff6ff', 'color' => '#1d4ed8'],
                 'shipped'    => ['label' => 'จัดส่งแล้ว',      'bg' => '#f5f3ff', 'color' => '#6d28d9'],
                 'completed'  => ['label' => 'สำเร็จ',         'bg' => '#ecfdf5', 'color' => '#065f46'],
                 'cancelled'  => ['label' => 'ยกเลิก',         'bg' => '#fff1f2', 'color' => '#be123c'],
             ];
             $s = $statusMap[$order->status] ?? ['label' => $order->status, 'bg' => '#f3f4f6', 'color' => '#374151'];
-            $steps = ['pending', 'processing', 'shipped', 'completed'];
+            $steps = ['pending', 'paid_wait_shipping', 'shipped', 'completed'];
             $currentIdx = array_search($order->status, $steps);
         @endphp
 
@@ -109,7 +111,7 @@
             {{-- Status Tracker --}}
             @if($order->status !== 'cancelled')
                 <div class="status-tracker">
-                    @foreach(['pending' => '💳', 'processing' => '📦', 'shipped' => '🚚', 'completed' => '✅'] as $step => $icon)
+                    @foreach(['pending' => '💳', 'paid_wait_shipping' => '📦', 'shipped' => '🚚', 'completed' => '✅'] as $step => $icon)
                         @php
                             $stepIdx = array_search($step, $steps);
                             $cls = 'status-step';
@@ -124,6 +126,11 @@
                         </div>
                     @endforeach
                 </div>
+                @if($order->tracking_number)
+                    <div style="margin-top:8px; padding:12px 16px; background:#f5f3ff; border-radius:12px; font-size:0.92rem;">
+                        🚚 เลขพัสดุ: <strong style="color:#6d28d9;">{{ $order->tracking_number }}</strong>
+                    </div>
+                @endif
             @else
                 <div style="margin-top:16px; padding:12px 16px; background:#fff1f2; border-radius:12px; color:#be123c; font-weight:600;">
                     ❌ คำสั่งซื้อนี้ถูกยกเลิกแล้ว
@@ -167,8 +174,8 @@
             </table>
 
             <div style="margin-top:16px;">
-                <div class="total-row"><span>ค่าสินค้า</span><span>฿{{ number_format($order->total_amount, 2) }}</span></div>
-                <div class="total-row"><span>ค่าจัดส่ง</span><span style="color:#10b981;">ฟรี</span></div>
+                <div class="total-row"><span>ค่าสินค้า</span><span>฿{{ number_format($order->total_amount - ($order->shipping_cost ?? 0), 2) }}</span></div>
+                <div class="total-row"><span>ค่าจัดส่ง</span><span style="color:#10b981;">{{ ($order->shipping_cost ?? 0) > 0 ? '฿' . number_format($order->shipping_cost, 2) : 'ฟรี' }}</span></div>
                 <div class="total-row grand"><span>ยอดรวมทั้งหมด</span><span>฿{{ number_format($order->total_amount, 2) }}</span></div>
             </div>
         </div>

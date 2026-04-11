@@ -19,16 +19,18 @@
                 @endif
             </div>
             <ul class="nav-menu">
-                <li><a href="{{ route('admin.dashboard') }}" class="nav-link">ภาพรวม (Dashboard)</a></li>
-                <li><a href="{{ route('admin.categories.index') }}" class="nav-link">หมวดหมู่สินค้า</a></li>
-                <li><a href="{{ route('admin.products.index') }}" class="nav-link">รายการสินค้า (SKU)</a></li>
-                <li><a href="{{ route('admin.orders.index') }}" class="nav-link">ตรวจสอบออเดอร์</a></li>
-                <li><a href="{{ route('admin.credits.index') }}" class="nav-link">ระบบเครดิต (Credit)</a></li>
-                <li><a href="{{ url('/admin/settings/branding') }}" class="nav-link">ตั้งค่าเว็บ / โลโก้</a></li>
+                <li><a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">📊 ภาพรวม (Dashboard)</a></li>
+                <li><a href="{{ route('admin.categories.index') }}" class="nav-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">📁 หมวดหมู่สินค้า</a></li>
+                <li><a href="{{ route('admin.products.index') }}" class="nav-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">🛍️ รายการสินค้า (SKU)</a></li>
+                <li><a href="{{ route('admin.orders.index') }}" class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">📦 ตรวจสอบออเดอร์</a></li>
+                <li><a href="{{ route('admin.credits.index') }}" class="nav-link {{ request()->routeIs('admin.credits.*') ? 'active' : '' }}">💳 ระบบเครดิต</a></li>
+                <li><a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">👥 จัดการผู้ใช้</a></li>
+                <li><a href="{{ route('admin.banners.index') }}" class="nav-link {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">🖼️ จัดการแบนเนอร์</a></li>
+                <li><a href="{{ url('/admin/settings/branding') }}" class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">⚙️ ตั้งค่าเว็บ / โลโก้</a></li>
                 <li style="margin-top: 20px; border-top: 1px solid #eee;">
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf 
-                        <button type="submit" class="nav-link" style="border:none;background:none;width:100%;text-align:left;cursor:pointer;color:#dc2626;">ออกจากระบบ</button>
+                        <button type="submit" class="nav-link" style="border:none;background:none;width:100%;text-align:left;cursor:pointer;color:#dc2626;">🚪 ออกจากระบบ</button>
                     </form>
                 </li>
             </ul>
@@ -45,6 +47,11 @@
                 @if(session('success'))
                     <div style="background: #22c55e15; color: #16a34a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #22c55e40;">
                         {{ session('success') }}
+                    </div>
+                @endif
+                @if(session('error'))
+                    <div style="background: #fee2e2; color: #dc2626; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fecaca;">
+                        {{ session('error') }}
                     </div>
                 @endif
                 @yield('content')

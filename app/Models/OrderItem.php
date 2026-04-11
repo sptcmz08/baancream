@@ -14,15 +14,25 @@ class OrderItem extends Model
         'quantity',
         'price_per_unit',
         'total',
+        'items_per_set',
+    ];
+
+    protected $casts = [
+        'items_per_set' => 'integer',
     ];
 
     public function product()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class)->withTrashed();
     }
 
     public function variant()
     {
         return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
     }
 }

@@ -24,7 +24,9 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'default_credit_limit'
+        'default_credit_limit',
+        'is_credit_enabled',
+        'credit_due_date',
     ];
 
     /**
@@ -47,6 +49,29 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_credit_enabled' => 'boolean',
+            'credit_due_date' => 'date',
         ];
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function addresses()
+    {
+        return $this->hasMany(Address::class);
+    }
+
+    public function primaryAddress(): ?Address
+    {
+        return $this->addresses()->where('is_primary', true)->first()
+            ?? $this->addresses()->first();
+    }
+
+    public function creditCycles()
+    {
+        return $this->hasMany(CreditCycle::class);
     }
 }

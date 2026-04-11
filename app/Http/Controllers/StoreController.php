@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Banner;
 use App\Models\Category;
 use App\Models\CreditCycle;
 use App\Models\Order;
@@ -15,6 +16,26 @@ use Illuminate\View\View;
 
 class StoreController extends Controller
 {
+    /**
+     * Shipping cost tiers (programmatic formula).
+     */
+    private function calculateShipping(int $totalQty): float
+    {
+        if ($totalQty <= 0) return 0;
+        if ($totalQty <= 5) return 40;
+        if ($totalQty <= 10) return 50;
+        if ($totalQty <= 20) return 70;
+        return 90;
+    }
+
+    /**
+     * COD service fee: 3% of subtotal.
+     */
+    private function calculateCodFee(float $subtotal): float
+    {
+        return round($subtotal * 0.03, 2);
+    }
+
     public function index(Request $request): View
     {
         $categories = Category::query()
@@ -55,6 +76,8 @@ class StoreController extends Controller
 
         $featuredProducts = $catalogProducts->take(12)->values();
 
+        $banners = Banner::active()->get();
+
         $cartSummary = $this->cartWithTotals();
         $cartCount = $cartSummary['count'];
 
@@ -64,7 +87,8 @@ class StoreController extends Controller
             'featuredProducts',
             'catalogProducts',
             'cartCount',
-            'cartSummary'
+            'cartSummary',
+            'banners'
         ));
     }
 
@@ -184,12 +208,24 @@ class StoreController extends Controller
                 ->first();
         }
 
+        // Calculate shipping and fees
+        $shippingCost = $this->calculateShipping($cart['count']);
+        $codFee = $this->calculateCodFee($cart['total']);
+
+        // Load user's saved addresses
+        $addresses = $user->addresses()->orderByDesc('is_primary')->orderByDesc('id')->get();
+        $primaryAddress = $user->primaryAddress();
+
         return view('store.checkout', [
             'cart' => $cart['items'],
             'credit' => $credit,
             'cartCount' => $cart['count'],
             'cartTotal' => $cart['total'],
-            'customerName' => old('recipient_name', $user->name),
+            'shippingCost' => $shippingCost,
+            'codFee' => $codFee,
+            'customerName' => old('recipient_name', $primaryAddress->recipient_name ?? $user->name),
+            'addresses' => $addresses,
+            'primaryAddress' => $primaryAddress,
         ]);
     }
 
@@ -209,14 +245,28 @@ class StoreController extends Controller
             'province' => ['required', 'string', 'max:255'],
             'postal_code' => ['required', 'string', 'max:20'],
             'order_note' => ['nullable', 'string'],
-            'payment_type' => ['required', 'in:promptpay,credit'],
+            'payment_type' => ['required', 'in:promptpay,credit,cod,pickup'],
             'slip_image' => ['nullable', 'image'],
         ]);
 
-        $totalAmount = $cart['total'];
+        $subtotal = $cart['total'];
         $paymentType = $validated['payment_type'];
         $type = $paymentType === 'credit' ? 'credit' : 'normal';
         $status = 'pending';
+
+        // Calculate dynamic shipping cost
+        $shippingCost = 0;
+        if (!in_array($paymentType, ['pickup'])) {
+            $shippingCost = $this->calculateShipping($cart['count']);
+        }
+
+        // Calculate COD fee
+        $codFee = 0;
+        if ($paymentType === 'cod') {
+            $codFee = $this->calculateCodFee($subtotal);
+        }
+
+        $totalAmount = $subtotal + $shippingCost + $codFee;
 
         if ($paymentType === 'promptpay' && !$request->hasFile('slip_image')) {
             return back()->withInput()->with('error', 'กรุณาแนบสลิปการโอนผ่าน PromptPay');
@@ -259,6 +309,7 @@ class StoreController extends Controller
             'province' => $validated['province'],
             'postal_code' => $validated['postal_code'],
             'order_note' => $validated['order_note'] ?? null,
+            'shipping_cost' => $shippingCost,
         ]);
 
         foreach ($cart['items'] as $item) {
@@ -270,7 +321,15 @@ class StoreController extends Controller
                 'quantity' => $item['quantity'],
                 'price_per_unit' => $item['unit_price'],
                 'total' => $item['subtotal'],
+                'items_per_set' => max(1, (int) ($item['wholesale_min_qty'] ?? 1)),
             ]);
+
+            // Reduce stock
+            if ($item['variant_id']) {
+                ProductVariant::where('id', $item['variant_id'])->decrement('stock', $item['quantity']);
+            } else {
+                Product::where('id', $item['product_id'])->decrement('stock', $item['quantity']);
+            }
         }
 
         session()->forget('cart');

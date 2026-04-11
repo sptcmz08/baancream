@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ยืนยันการชำระเงิน | บ้านครีม สิงห์บุรี</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         :root {
             --primary-color: #ff4f87;
@@ -29,7 +30,7 @@
         }
         a { color: inherit; text-decoration: none; }
         img { display: block; max-width: 100%; }
-        button, input, textarea { font: inherit; }
+        button, input, textarea, select { font: inherit; }
 
         .container {
             max-width: 1240px;
@@ -130,6 +131,47 @@
             color: #dc2626;
             font-size: 0.85rem;
         }
+
+        /* Address Book */
+        .address-selector {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .address-card {
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .address-card:hover {
+            border-color: rgba(255, 79, 135, 0.3);
+        }
+        .address-card.selected {
+            border-color: var(--primary-color);
+            background: rgba(255, 79, 135, 0.03);
+        }
+        .address-card .addr-name {
+            font-weight: 600;
+        }
+        .address-card .addr-detail {
+            color: var(--text-soft);
+            font-size: 0.88rem;
+            margin-top: 4px;
+            line-height: 1.6;
+        }
+        .address-card .addr-badge {
+            display: inline-block;
+            background: #eef8ff;
+            color: #2563eb;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+
         .payment-option {
             border: 1px solid var(--border-color);
             border-radius: 20px;
@@ -226,6 +268,15 @@
             color: var(--success-color);
             padding-top: 8px;
         }
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.92rem;
+            padding: 4px 0;
+        }
+        .summary-line.muted {
+            color: var(--text-soft);
+        }
         .alert {
             padding: 14px 16px;
             border-radius: 18px;
@@ -243,6 +294,14 @@
             color: var(--success-color);
             font-size: 0.92rem;
             line-height: 1.7;
+        }
+        .fee-info {
+            padding: 10px 14px;
+            border-radius: 14px;
+            background: #fff7ed;
+            color: #c2410c;
+            font-size: 0.88rem;
+            margin-top: 8px;
         }
 
         @media (max-width: 980px) {
@@ -290,62 +349,98 @@
             <div class="alert error" style="margin-bottom:20px;">{{ session('error') }}</div>
         @endif
 
-        <form action="{{ route('checkout.process') }}" method="POST" enctype="multipart/form-data" class="layout">
+        <form action="{{ route('checkout.process') }}" method="POST" enctype="multipart/form-data" class="layout" id="checkoutForm">
             @csrf
 
             <div class="card main-card">
+                {{-- Section 1: Address Book + Shipping --}}
                 <div class="section-card">
                     <div class="section-title">
                         <span class="section-icon">1</span>
                         <span>ข้อมูลจัดส่งสินค้า</span>
                     </div>
 
+                    {{-- Saved Addresses --}}
+                    @if($addresses->isNotEmpty())
+                    <div class="address-selector" id="addressSelector">
+                        @foreach($addresses as $addr)
+                        <div class="address-card {{ $addr->is_primary ? 'selected' : '' }}"
+                             data-address-id="{{ $addr->id }}"
+                             data-name="{{ $addr->recipient_name }}"
+                             data-phone="{{ $addr->phone }}"
+                             data-address="{{ $addr->address_line }}"
+                             data-subdistrict="{{ $addr->subdistrict }}"
+                             data-district="{{ $addr->district }}"
+                             data-province="{{ $addr->province }}"
+                             data-postal="{{ $addr->postal_code }}"
+                             onclick="selectAddress(this)">
+                            <div>
+                                <span class="addr-name">{{ $addr->recipient_name }}</span>
+                                @if($addr->is_primary)
+                                    <span class="addr-badge">ที่อยู่หลัก</span>
+                                @endif
+                                @if($addr->label)
+                                    <span class="addr-badge" style="background:#f3f4f6; color:#6b7280;">{{ $addr->label }}</span>
+                                @endif
+                            </div>
+                            <div class="addr-detail">
+                                {{ $addr->phone }}<br>
+                                {{ $addr->address_line }} {{ $addr->subdistrict }} {{ $addr->district }} {{ $addr->province }} {{ $addr->postal_code }}
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    <div style="font-size:0.85rem; color:var(--text-soft); margin-bottom:8px;">
+                        หรือกรอกที่อยู่ใหม่ด้านล่าง
+                    </div>
+                    @endif
+
                     <div class="field-grid">
                         <div class="field">
                             <label for="recipient_name">ชื่อ - นามสกุล</label>
-                            <input id="recipient_name" class="input" type="text" name="recipient_name" value="{{ old('recipient_name', $customerName) }}" required>
+                            <input id="recipient_name" class="input" type="text" name="recipient_name" value="{{ old('recipient_name', $primaryAddress->recipient_name ?? $customerName) }}" required>
                             @error('recipient_name')
                                 <div class="field-help">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="field">
                             <label for="phone">เบอร์โทรศัพท์</label>
-                            <input id="phone" class="input" type="text" name="phone" value="{{ old('phone') }}" required>
+                            <input id="phone" class="input" type="text" name="phone" value="{{ old('phone', $primaryAddress->phone ?? '') }}" required>
                             @error('phone')
                                 <div class="field-help">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="field full">
                             <label for="address_line">รายละเอียดที่อยู่</label>
-                            <textarea id="address_line" class="textarea" name="address_line" required>{{ old('address_line') }}</textarea>
+                            <textarea id="address_line" class="textarea" name="address_line" required>{{ old('address_line', $primaryAddress->address_line ?? '') }}</textarea>
                             @error('address_line')
                                 <div class="field-help">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="field">
                             <label for="subdistrict">ตำบล / แขวง</label>
-                            <input id="subdistrict" class="input" type="text" name="subdistrict" value="{{ old('subdistrict') }}" required>
+                            <input id="subdistrict" class="input" type="text" name="subdistrict" value="{{ old('subdistrict', $primaryAddress->subdistrict ?? '') }}" required>
                             @error('subdistrict')
                                 <div class="field-help">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="field">
                             <label for="district">อำเภอ / เขต</label>
-                            <input id="district" class="input" type="text" name="district" value="{{ old('district') }}" required>
+                            <input id="district" class="input" type="text" name="district" value="{{ old('district', $primaryAddress->district ?? '') }}" required>
                             @error('district')
                                 <div class="field-help">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="field">
                             <label for="province">จังหวัด</label>
-                            <input id="province" class="input" type="text" name="province" value="{{ old('province') }}" required>
+                            <input id="province" class="input" type="text" name="province" value="{{ old('province', $primaryAddress->province ?? '') }}" required>
                             @error('province')
                                 <div class="field-help">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="field">
                             <label for="postal_code">รหัสไปรษณีย์</label>
-                            <input id="postal_code" class="input" type="text" name="postal_code" value="{{ old('postal_code') }}" required>
+                            <input id="postal_code" class="input" type="text" name="postal_code" value="{{ old('postal_code', $primaryAddress->postal_code ?? '') }}" required>
                             @error('postal_code')
                                 <div class="field-help">{{ $message }}</div>
                             @enderror
@@ -360,19 +455,21 @@
                     </div>
                 </div>
 
+                {{-- Section 2: Payment Methods --}}
                 <div class="section-card">
                     <div class="section-title">
                         <span class="section-icon">2</span>
                         <span>วิธีชำระเงิน</span>
                     </div>
 
+                    {{-- PromptPay --}}
                     <label class="payment-option {{ old('payment_type', 'promptpay') === 'promptpay' ? 'active' : '' }}" data-payment-option>
                         <div class="payment-head">
                             <input type="radio" name="payment_type" value="promptpay" {{ old('payment_type', 'promptpay') === 'promptpay' ? 'checked' : '' }}>
-                            <span>โอนเงิน / PromptPay</span>
+                            <span>💳 โอนเงิน / PromptPay</span>
                         </div>
                         <div class="payment-meta">
-                            ชำระผ่าน PromptPay แล้วแนบสลิปเพื่อยืนยันการชำระเงิน ระบบจะบันทึกคำสั่งซื้อและส่งให้หลังบ้านตรวจสอบต่อทันที
+                            ชำระผ่าน PromptPay แล้วแนบสลิปเพื่อยืนยันการชำระเงิน
                         </div>
                         <div class="slip-box" id="promptpaySlipBox" {{ old('payment_type', 'promptpay') === 'credit' ? 'hidden' : '' }}>
                             <div style="font-weight:700;">แนบสลิปการโอน</div>
@@ -383,11 +480,37 @@
                         </div>
                     </label>
 
+                    {{-- COD --}}
+                    <label class="payment-option {{ old('payment_type') === 'cod' ? 'active' : '' }}" data-payment-option>
+                        <div class="payment-head">
+                            <input type="radio" name="payment_type" value="cod" {{ old('payment_type') === 'cod' ? 'checked' : '' }}>
+                            <span>📦 เก็บเงินปลายทาง (COD)</span>
+                        </div>
+                        <div class="payment-meta">
+                            ชำระเงินเมื่อได้รับสินค้า
+                        </div>
+                        <div class="fee-info" id="codFeeInfo" {{ old('payment_type') !== 'cod' ? 'hidden' : '' }}>
+                            ⚠️ มีค่าบริการ COD 3% ของยอดสินค้า = <strong>฿{{ number_format($codFee, 2) }}</strong>
+                        </div>
+                    </label>
+
+                    {{-- Pickup --}}
+                    <label class="payment-option {{ old('payment_type') === 'pickup' ? 'active' : '' }}" data-payment-option>
+                        <div class="payment-head">
+                            <input type="radio" name="payment_type" value="pickup" {{ old('payment_type') === 'pickup' ? 'checked' : '' }}>
+                            <span>🏪 รับหน้าร้าน</span>
+                        </div>
+                        <div class="payment-meta">
+                            มารับสินค้าที่ร้านด้วยตัวเอง ไม่มีค่าจัดส่ง
+                        </div>
+                    </label>
+
+                    {{-- Credit --}}
                     @if(in_array(auth()->user()->role, ['customer', 'vip']))
                         <label class="payment-option {{ old('payment_type') === 'credit' ? 'active' : '' }}" data-payment-option>
                             <div class="payment-head">
                                 <input type="radio" name="payment_type" value="credit" {{ old('payment_type') === 'credit' ? 'checked' : '' }}>
-                                <span>ชำระด้วยเครดิต</span>
+                                <span>💰 ชำระด้วยเครดิต</span>
                             </div>
                             @if($credit)
                                 <div class="credit-note">
@@ -405,6 +528,7 @@
                 <button type="submit" class="submit-button">ยืนยันการสั่งซื้อ</button>
             </div>
 
+            {{-- Summary Sidebar --}}
             <aside class="card summary-card">
                 <div class="summary-title">สรุปรายการ</div>
 
@@ -426,9 +550,24 @@
                     </div>
                 @endforeach
 
+                <div style="padding-top:8px; display:grid; gap:4px;">
+                    <div class="summary-line">
+                        <span>ค่าสินค้า</span>
+                        <span>฿{{ number_format($cartTotal, 2) }}</span>
+                    </div>
+                    <div class="summary-line muted" id="shippingLine">
+                        <span>ค่าจัดส่ง</span>
+                        <span id="shippingDisplay">฿{{ number_format($shippingCost, 2) }}</span>
+                    </div>
+                    <div class="summary-line muted" id="codFeeLine" style="display:none;">
+                        <span>ค่าบริการ COD (3%)</span>
+                        <span>฿{{ number_format($codFee, 2) }}</span>
+                    </div>
+                </div>
+
                 <div class="summary-total">
                     <span>ยอดรวมสุทธิ</span>
-                    <span>฿{{ number_format($cartTotal, 2) }}</span>
+                    <span id="grandTotalDisplay">฿{{ number_format($cartTotal + $shippingCost, 2) }}</span>
                 </div>
             </aside>
         </form>
@@ -439,6 +578,15 @@
             const options = Array.from(document.querySelectorAll('[data-payment-option]'));
             const radios = Array.from(document.querySelectorAll('input[name="payment_type"]'));
             const promptpaySlipBox = document.getElementById('promptpaySlipBox');
+            const codFeeInfo = document.getElementById('codFeeInfo');
+            const codFeeLine = document.getElementById('codFeeLine');
+            const shippingLine = document.getElementById('shippingLine');
+            const shippingDisplay = document.getElementById('shippingDisplay');
+            const grandTotalDisplay = document.getElementById('grandTotalDisplay');
+
+            const cartTotal = {{ $cartTotal }};
+            const shippingCost = {{ $shippingCost }};
+            const codFee = {{ $codFee }};
 
             const syncPaymentState = () => {
                 const activeValue = radios.find((radio) => radio.checked)?.value || 'promptpay';
@@ -451,6 +599,27 @@
                 if (promptpaySlipBox) {
                     promptpaySlipBox.hidden = activeValue !== 'promptpay';
                 }
+                if (codFeeInfo) {
+                    codFeeInfo.hidden = activeValue !== 'cod';
+                }
+                if (codFeeLine) {
+                    codFeeLine.style.display = activeValue === 'cod' ? 'flex' : 'none';
+                }
+
+                // Update shipping display
+                const isPickup = activeValue === 'pickup';
+                if (shippingDisplay) {
+                    shippingDisplay.textContent = isPickup ? 'ฟรี (รับหน้าร้าน)' : '฿' + shippingCost.toLocaleString('th-TH', {minimumFractionDigits: 2});
+                }
+
+                // Calculate grand total
+                let grand = cartTotal;
+                if (!isPickup) grand += shippingCost;
+                if (activeValue === 'cod') grand += codFee;
+
+                if (grandTotalDisplay) {
+                    grandTotalDisplay.textContent = '฿' + grand.toLocaleString('th-TH', {minimumFractionDigits: 2});
+                }
             };
 
             radios.forEach((radio) => {
@@ -459,6 +628,20 @@
 
             syncPaymentState();
         })();
+
+        // Address Book selector
+        function selectAddress(el) {
+            document.querySelectorAll('.address-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+
+            document.getElementById('recipient_name').value = el.dataset.name || '';
+            document.getElementById('phone').value = el.dataset.phone || '';
+            document.getElementById('address_line').value = el.dataset.address || '';
+            document.getElementById('subdistrict').value = el.dataset.subdistrict || '';
+            document.getElementById('district').value = el.dataset.district || '';
+            document.getElementById('province').value = el.dataset.province || '';
+            document.getElementById('postal_code').value = el.dataset.postal || '';
+        }
     </script>
 </body>
 </html>

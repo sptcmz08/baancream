@@ -3,6 +3,29 @@
 <div class="header-actions">
     <h2>รายการสั่งซื้อทั้งหมด (Orders)</h2>
 </div>
+
+{{-- Payment Method Tabs --}}
+<div style="display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;">
+    @php
+        $tabs = [
+            'all' => ['label' => 'ทั้งหมด', 'icon' => '📋'],
+            'transfer' => ['label' => 'โอนเงิน', 'icon' => '💳'],
+            'cod' => ['label' => 'COD', 'icon' => '📦'],
+            'pickup' => ['label' => 'รับหน้าร้าน', 'icon' => '🏪'],
+            'credit' => ['label' => 'เครดิต', 'icon' => '💰'],
+        ];
+    @endphp
+    @foreach($tabs as $key => $t)
+        <a href="{{ route('admin.orders.index', ['tab' => $key]) }}"
+           style="display:inline-flex; align-items:center; gap:6px; padding:10px 18px; border-radius:10px; font-size:0.9rem; font-weight:500; text-decoration:none; transition:all 0.2s;
+                  {{ $tab === $key ? 'background:var(--primary-color); color:white; box-shadow:0 4px 12px rgba(204,163,94,0.3);' : 'background:var(--surface-color); color:var(--text-dark); border:1px solid var(--border-color);' }}">
+            <span>{{ $t['icon'] }}</span>
+            <span>{{ $t['label'] }}</span>
+            <span style="background:{{ $tab === $key ? 'rgba(255,255,255,0.25)' : '#f3f4f6' }}; padding:2px 8px; border-radius:99px; font-size:0.78rem;">{{ $counts[$key] ?? 0 }}</span>
+        </a>
+    @endforeach
+</div>
+
 <div class="card">
     <table class="table">
         <thead>
@@ -13,64 +36,89 @@
                 <th>จัดส่งถึง</th>
                 <th>ยอดรวม</th>
                 <th>วิธีชำระเงิน</th>
-                <th>สถานะการจัดส่ง</th>
-                <th>จัดการสถานะ</th>
+                <th>สถานะ</th>
+                <th>จัดการ</th>
             </tr>
         </thead>
         <tbody>
             @forelse($orders as $order)
             <tr>
-                <td style="font-weight:500;">#ORD-{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}</td>
+                <td>
+                    <a href="{{ route('admin.orders.show', $order) }}" style="font-weight:600; color:var(--primary-color); text-decoration:none;">
+                        #ORD-{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}
+                    </a>
+                </td>
                 <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
                 <td>{{ $order->user->name ?? 'Unknown' }}</td>
-                <td style="min-width:220px;">
+                <td style="min-width:200px;">
                     <div style="font-weight:600;">{{ $order->recipient_name ?: '-' }}</div>
                     @if($order->phone)
                         <div style="color:var(--text-muted); font-size:0.85rem;">{{ $order->phone }}</div>
                     @endif
                     @if($order->address_line)
                         <div style="color:var(--text-muted); font-size:0.82rem; margin-top:4px; line-height:1.55;">
-                            {{ $order->address_line }}
-                            @if($order->subdistrict || $order->district || $order->province || $order->postal_code)
-                                <br>
-                                {{ collect([$order->subdistrict, $order->district, $order->province, $order->postal_code])->filter()->implode(' ') }}
-                            @endif
+                            {{ Str::limit($order->fullAddress(), 80) }}
                         </div>
                     @endif
                 </td>
-                <td style="color:var(--primary-color);">฿{{ number_format($order->total_amount, 2) }}</td>
+                <td style="color:var(--primary-color); font-weight:600;">฿{{ number_format($order->total_amount, 2) }}</td>
                 <td>
                     @if($order->payment_method === 'credit' || $order->type == 'credit')
-                        <span style="background:#3b82f615; color:#2563eb; padding:4px 8px; border-radius:4px; font-size:0.8rem;">เครดิต</span>
-                    @else 
-                        <span style="background:#f3f4f6; color:#4b5563; padding:4px 8px; border-radius:4px; font-size:0.8rem;">PromptPay / โอนเงิน</span>
+                        <span style="background:#3b82f615; color:#2563eb; padding:4px 10px; border-radius:6px; font-size:0.8rem; font-weight:500;">💰 เครดิต</span>
+                    @elseif($order->payment_method === 'cod')
+                        <span style="background:#f59e0b15; color:#d97706; padding:4px 10px; border-radius:6px; font-size:0.8rem; font-weight:500;">📦 COD</span>
+                    @elseif($order->payment_method === 'pickup')
+                        <span style="background:#10b98115; color:#059669; padding:4px 10px; border-radius:6px; font-size:0.8rem; font-weight:500;">🏪 รับหน้าร้าน</span>
+                    @else
+                        <span style="background:#f3f4f6; color:#4b5563; padding:4px 10px; border-radius:6px; font-size:0.8rem; font-weight:500;">💳 โอนเงิน</span>
                     @endif
                     @if($order->slip_image)
                         <div style="margin-top:6px;">
                             <a href="{{ route('media.show', ['path' => $order->slip_image]) }}" target="_blank" style="font-size:0.82rem; color:var(--primary-color); text-decoration:none;">
-                                ดูสลิป
+                                📄 ดูสลิป
                             </a>
                         </div>
                     @endif
                 </td>
                 <td>
-                    <!-- Status display logic -->
-                    @if($order->status == 'pending') <span style="background:#f59e0b15; color:#d97706; padding:4px 8px; border-radius:4px; font-size:0.8rem;">รอตรวจสอบ</span>
-                    @elseif($order->status == 'paid_wait_shipping') <span style="background:#3b82f615; color:#2563eb; padding:4px 8px; border-radius:4px; font-size:0.8rem;">เตรียมจัดส่ง</span>
-                    @elseif($order->status == 'shipped') <span style="background:#22c55e15; color:#16a34a; padding:4px 8px; border-radius:4px; font-size:0.8rem;">จัดส่งสำเร็จ</span>
-                    @else <span style="background:#fee2e2; color:#dc2626; padding:4px 8px; border-radius:4px; font-size:0.8rem;">ยกเลิก</span> @endif
+                    @php
+                        $statusStyles = [
+                            'pending' => 'background:#f59e0b15; color:#d97706;',
+                            'confirmed' => 'background:#06b6d415; color:#0891b2;',
+                            'paid_wait_shipping' => 'background:#3b82f615; color:#2563eb;',
+                            'shipped' => 'background:#22c55e15; color:#16a34a;',
+                            'completed' => 'background:#10b98115; color:#059669;',
+                            'cancelled' => 'background:#fee2e2; color:#dc2626;',
+                        ];
+                        $statusLabels = [
+                            'pending' => 'รอตรวจสอบ',
+                            'confirmed' => 'ยืนยันแล้ว',
+                            'paid_wait_shipping' => 'เตรียมจัดส่ง',
+                            'shipped' => 'จัดส่งแล้ว',
+                            'completed' => 'สำเร็จ',
+                            'cancelled' => 'ยกเลิก',
+                        ];
+                    @endphp
+                    <span style="{{ $statusStyles[$order->status] ?? '' }} padding:4px 10px; border-radius:6px; font-size:0.8rem; font-weight:500;">
+                        {{ $statusLabels[$order->status] ?? $order->status }}
+                    </span>
+                    @if($order->tracking_number)
+                        <div style="margin-top:4px; font-size:0.78rem; color:var(--text-muted);">
+                            🚚 {{ $order->tracking_number }}
+                        </div>
+                    @endif
                 </td>
                 <td>
-                    <form action="{{ route('admin.orders.update', $order) }}" method="POST" style="display:flex; gap:5px;">
-                        @csrf @method('PUT')
-                        <select name="status" style="padding:6px; border-radius:4px; border:1px solid var(--border-color); font-size:0.8rem;">
-                            <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>รอตรวจสอบ</option>
-                            <option value="paid_wait_shipping" {{ $order->status == 'paid_wait_shipping' ? 'selected' : '' }}>เตรียมจัดส่ง</option>
-                            <option value="shipped" {{ $order->status == 'shipped' ? 'selected' : '' }}>จัดส่งแล้ว</option>
-                            <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>ยกเลิก</option>
-                        </select>
-                        <button type="submit" class="btn btn-primary" style="padding:6px 10px; font-size:0.8rem;">อัปเดต</button>
-                    </form>
+                    <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                        <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-primary" style="padding:6px 12px; font-size:0.8rem;">ดูรายละเอียด</a>
+                        @if($order->status === 'pending')
+                            <form action="{{ route('admin.orders.quick-action', $order) }}" method="POST" style="display:inline;">
+                                @csrf
+                                <input type="hidden" name="action" value="confirm">
+                                <button type="submit" style="padding:6px 10px; font-size:0.78rem; background:#22c55e; color:white; border:none; border-radius:6px; cursor:pointer;">✓ ยืนยัน</button>
+                            </form>
+                        @endif
+                    </div>
                 </td>
             </tr>
             @empty

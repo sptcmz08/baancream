@@ -16,7 +16,12 @@ class AccountController extends Controller
             ->latest()
             ->get();
 
-        return view('store.account.index', compact('user', 'orders'));
+        // Count unread notifications
+        $unreadCount = Order::where('user_id', $user->id)
+            ->where('user_read_status', false)
+            ->count();
+
+        return view('store.account.index', compact('user', 'orders', 'unreadCount'));
     }
 
     public function orders()
@@ -27,7 +32,11 @@ class AccountController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('store.account.orders', compact('user', 'orders'));
+        $unreadCount = Order::where('user_id', $user->id)
+            ->where('user_read_status', false)
+            ->count();
+
+        return view('store.account.orders', compact('user', 'orders', 'unreadCount'));
     }
 
     public function orderDetail(Order $order)
@@ -36,6 +45,9 @@ class AccountController extends Controller
         abort_unless($order->user_id === Auth::id(), 403);
 
         $order->load(['items.product', 'items.variant']);
+
+        // Mark as read when customer views the order detail
+        $order->markAsRead();
 
         return view('store.account.order-detail', compact('order'));
     }
@@ -49,13 +61,14 @@ class AccountController extends Controller
             ->get();
 
         return response()->json([
-            'unread' => $orders->whereIn('status', ['pending', 'processing'])->count(),
+            'unread' => $orders->where('user_read_status', false)->count(),
             'items'  => $orders->map(fn($o) => [
                 'id'         => $o->id,
                 'status'     => $o->status,
                 'label'      => $this->statusLabel($o->status),
                 'color'      => $this->statusColor($o->status),
                 'total'      => number_format($o->total_amount, 2),
+                'is_read'    => $o->user_read_status,
                 'created_at' => $o->created_at->diffForHumans(),
                 'url'        => route('account.order', $o->id),
             ]),
@@ -66,6 +79,8 @@ class AccountController extends Controller
     {
         return match ($status) {
             'pending'    => 'รอชำระเงิน',
+            'confirmed'  => 'ยืนยันแล้ว',
+            'paid_wait_shipping' => 'เตรียมจัดส่ง',
             'processing' => 'กำลังดำเนินการ',
             'shipped'    => 'จัดส่งแล้ว',
             'completed'  => 'สำเร็จ',
@@ -78,6 +93,8 @@ class AccountController extends Controller
     {
         return match ($status) {
             'pending'    => '#f59e0b',
+            'confirmed'  => '#06b6d4',
+            'paid_wait_shipping' => '#3b82f6',
             'processing' => '#3b82f6',
             'shipped'    => '#8b5cf6',
             'completed'  => '#10b981',

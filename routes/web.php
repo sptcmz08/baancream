@@ -2,12 +2,15 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\CreditController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\SiteSettingController;
+use App\Http\Controllers\Admin\BannerController;
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [\App\Http\Controllers\StoreController::class, 'index'])->name('home');
@@ -41,6 +44,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/account/orders', [\App\Http\Controllers\AccountController::class, 'orders'])->name('account.orders');
     Route::get('/account/orders/{order}', [\App\Http\Controllers\AccountController::class, 'orderDetail'])->name('account.order');
     Route::get('/account/notifications', [\App\Http\Controllers\AccountController::class, 'notifications'])->name('account.notifications');
+
+    // Address Book API
+    Route::get('/api/addresses', [AddressController::class, 'index'])->name('addresses.index');
+    Route::post('/api/addresses', [AddressController::class, 'store'])->name('addresses.store');
+    Route::put('/api/addresses/{address}', [AddressController::class, 'update'])->name('addresses.update');
+    Route::delete('/api/addresses/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
+    Route::post('/api/addresses/{address}/primary', [AddressController::class, 'setPrimary'])->name('addresses.primary');
 });
 
 require __DIR__.'/auth.php';
@@ -50,7 +60,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::resource('categories', CategoryController::class);
     Route::resource('products', ProductController::class);
     Route::resource('credits', CreditController::class);
+    Route::post('orders/confirm-all-credit', [OrderController::class, 'confirmAllCredit'])->name('orders.confirm-all-credit');
     Route::resource('orders', OrderController::class);
+    Route::post('orders/{order}/quick-action', [OrderController::class, 'quickAction'])->name('orders.quick-action');
+    Route::resource('banners', BannerController::class)->except(['create', 'show', 'edit']);
+    Route::resource('users', UserController::class)->except(['create', 'store', 'show', 'edit']);
     Route::get('settings/branding', [SiteSettingController::class, 'edit'])->name('settings.edit');
     Route::put('settings/branding', [SiteSettingController::class, 'update'])->name('settings.update');
 });
