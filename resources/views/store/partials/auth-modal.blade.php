@@ -273,8 +273,8 @@
                 <input type="hidden" name="redirect_to" value="{{ $initialAuthRedirect }}" data-auth-redirect-input>
 
                 <div class="auth-field">
-                    <label class="auth-label" for="auth_login_email">อีเมล</label>
-                    <input class="auth-input" id="auth_login_email" type="email" name="email" value="{{ old('auth_mode') === 'login' ? old('email') : '' }}" required autocomplete="email" placeholder="กรอกอีเมล">
+                    <label class="auth-label" for="auth_login_email">อีเมล หรือ ชื่อผู้ใช้งาน</label>
+                    <input class="auth-input" id="auth_login_email" type="text" name="email" value="{{ old('auth_mode') === 'login' ? old('email') : '' }}" required autocomplete="username" placeholder="อีเมล หรือ ชื่อผู้ใช้งาน">
                     @error('email')
                         <div class="auth-help">{{ $message }}</div>
                     @enderror
