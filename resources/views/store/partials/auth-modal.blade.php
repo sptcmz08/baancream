@@ -273,9 +273,9 @@
                 <input type="hidden" name="redirect_to" value="{{ $initialAuthRedirect }}" data-auth-redirect-input>
 
                 <div class="auth-field">
-                    <label class="auth-label" for="auth_login_email">อีเมล หรือ ชื่อผู้ใช้งาน</label>
-                    <input class="auth-input" id="auth_login_email" type="text" name="email" value="{{ old('auth_mode') === 'login' ? old('email') : '' }}" required autocomplete="username" placeholder="อีเมล หรือ ชื่อผู้ใช้งาน">
-                    @error('email')
+                    <label class="auth-label" for="auth_login_username">อีเมล หรือ ชื่อผู้ใช้งาน</label>
+                    <input class="auth-input" id="auth_login_username" type="text" name="username" value="{{ old('auth_mode') === 'login' ? old('username') : '' }}" required autocomplete="username" placeholder="อีเมล หรือ ชื่อผู้ใช้งาน">
+                    @error('username')
                         <div class="auth-help">{{ $message }}</div>
                     @enderror
                 </div>
@@ -315,9 +315,9 @@
                 </div>
 
                 <div class="auth-field">
-                    <label class="auth-label" for="auth_register_email">อีเมล</label>
-                    <input class="auth-input" id="auth_register_email" type="email" name="email" value="{{ old('auth_mode') === 'register' ? old('email') : '' }}" required autocomplete="email" placeholder="กรอกอีเมล">
-                    @error('email')
+                    <label class="auth-label" for="auth_register_username">ชื่อผู้ใช้งาน (Username)</label>
+                    <input class="auth-input" id="auth_register_username" type="text" name="username" value="{{ old('auth_mode') === 'register' ? old('username') : '' }}" required autocomplete="username" placeholder="กรอกชื่อผู้ใช้งานที่ใช้ล็อกอิน">
+                    @error('username')
                         <div class="auth-help">{{ $message }}</div>
                     @enderror
                 </div>

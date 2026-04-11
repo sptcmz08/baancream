@@ -28,7 +28,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string'],
+            'username' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
@@ -37,14 +37,14 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        $loginField = $this->string('email')->toString();
-        $fieldType = filter_var($loginField, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
+        $loginInput = $this->string('username')->toString();
 
-        if (! Auth::attempt([$fieldType => $loginField, 'password' => $this->password], $this->boolean('remember'))) {
+        if (! Auth::attempt(['username' => $loginInput, 'password' => $this->password], $this->boolean('remember')) &&
+            ! Auth::attempt(['name' => $loginInput, 'password' => $this->password], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => 'ข้อมูลเข้าสู่ระบบไม่ถูกต้อง',
+                'username' => 'ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง',
             ]);
         }
 
@@ -71,6 +71,6 @@ class LoginRequest extends FormRequest
 
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        return Str::transliterate(Str::lower($this->string('username')).'|'.$this->ip());
     }
 }
