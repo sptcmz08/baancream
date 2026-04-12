@@ -320,6 +320,7 @@
             height: 100%;
             object-fit: contain;
             padding: 4px;
+            mix-blend-mode: multiply;
         }
         .summary-name {
             font-weight: 600;

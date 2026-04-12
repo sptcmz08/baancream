@@ -181,6 +181,7 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
+            mix-blend-mode: multiply;
         }
         .gallery-main .placeholder {
             color: #9aa7bd;
@@ -209,6 +210,7 @@
             width: 100%;
             aspect-ratio: 1 / 1;
             object-fit: contain;
+            mix-blend-mode: multiply;
         }
         .lightbox {
             position: fixed;
@@ -296,6 +298,7 @@
             width: 100%;
             aspect-ratio: 1 / 1;
             object-fit: contain;
+            mix-blend-mode: multiply;
         }
 
         .detail-card {
@@ -402,6 +405,7 @@
             height: 86px;
             object-fit: contain;
             background: transparent;
+            mix-blend-mode: multiply;
         }
         .variant-option span {
             display: none;
@@ -489,6 +493,7 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
+            mix-blend-mode: multiply;
         }
         .product-image span {
             color: #9aa7bd;
