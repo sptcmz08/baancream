@@ -61,7 +61,7 @@
         .header-main {
             min-height: 96px;
             display: grid;
-            grid-template-columns: minmax(320px, auto) minmax(420px, 620px) auto;
+            grid-template-columns: auto minmax(520px, 720px) auto;
             align-items: center;
             gap: 24px;
         }
@@ -89,20 +89,6 @@
         .brand-logo span:nth-child(3) { color: #22c1dc; }
         .brand-logo span:nth-child(4) { color: #f8c64f; }
         .brand-logo span:nth-child(5) { color: #35c98b; }
-        .main-links {
-            display: flex;
-            gap: 28px;
-            align-items: center;
-            justify-content: flex-start;
-            font-weight: 500;
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-        .main-links a {
-            padding: 10px 0;
-            color: var(--text-dark);
-        }
-        .main-links a:hover { color: var(--primary-color); }
         .header-search {
             width: 100%;
             justify-self: center;
@@ -318,7 +304,7 @@
             gap: 26px;
         }
         .carousel-section {
-            padding-top: 44px;
+            padding-top: 24px;
         }
         .auto-carousel {
             overflow: hidden;
@@ -387,19 +373,8 @@
 
         .catalog-toolbar {
             display: grid;
-            gap: 18px;
-            margin-bottom: 26px;
-        }
-        .catalog-summary {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-        .catalog-count {
-            color: var(--text-soft);
-            font-weight: 500;
+            gap: 0;
+            margin-bottom: 0;
         }
         .catalog-empty {
             background: white;
@@ -443,9 +418,6 @@
             .header-left {
                 width: 100%;
                 gap: 24px;
-            }
-            .main-links {
-                justify-content: flex-start;
             }
             .header-search { width: 100%; }
             .header-tools {
@@ -616,11 +588,6 @@
                 <a href="{{ route('home') }}" class="brand-logo" aria-label="บ้านครีม สิงห์บุรี">
                     @include('store.partials.site-logo-markup')
                 </a>
-
-                <nav class="main-links" aria-label="เมนูหลัก">
-                    <a href="#new-arrivals">สินค้ามาใหม่</a>
-                    <a href="#featured-products">สินค้าแนะนำ</a>
-                </nav>
             </div>
 
             <div class="header-search">
@@ -718,19 +685,13 @@
         @endforeach
     </section>
 
-    <section class="page-section" id="catalog" style="padding-top: 26px; padding-bottom: 20px;">
+    <section class="page-section" id="catalog" style="padding-top: 26px; padding-bottom: 0;">
         <div class="catalog-toolbar">
             <div class="section-scroll" id="catalogFilters">
                 <button type="button" class="section-pill" data-filter="all">ทั้งหมด ({{ $catalogProducts->count() }})</button>
                 @foreach($categories as $category)
                     <button type="button" class="section-pill" data-filter="category:{{ $category->slug }}">{{ $category->name }} ({{ $category->products_count }})</button>
                 @endforeach
-            </div>
-            <div class="catalog-summary">
-                <div>
-                    <h3 class="section-title" style="font-size:1.55rem;" id="catalogTitle">เลือกหมวดหมู่</h3>
-                </div>
-                <div class="catalog-count" id="catalogCount">เลือกหมวดหมู่เพื่อดูสินค้าเพิ่มเติม</div>
             </div>
         </div>
     </section>
@@ -868,8 +829,6 @@
         const searchResults = document.getElementById('searchResults');
         const productCards = Array.from(document.querySelectorAll('[data-card]'));
         const filterButtons = Array.from(document.querySelectorAll('#catalogFilters [data-filter]'));
-        const catalogTitle = document.getElementById('catalogTitle');
-        const catalogCount = document.getElementById('catalogCount');
         const categoryProductsSection = document.getElementById('categoryProductsSection');
         const searchProducts = @json($searchProducts);
         let activeFilter = null;
@@ -914,13 +873,8 @@
             searchResults.classList.add('is-open');
         }
 
-        function currentFilterLabel() {
-            return filterButtons.find((button) => button.dataset.filter === activeFilter)?.textContent?.replace(/\s*\(\d+\)\s*$/, '') || 'เลือกหมวดหมู่';
-        }
-
         function applyCatalogFilters() {
             const query = searchInput?.value.trim().toLowerCase() || '';
-            let visibleCount = 0;
             const hasActiveFilter = Boolean(activeFilter);
 
             productCards.forEach((card) => {
@@ -931,20 +885,7 @@
                 const visible = matchesFilter && matchesSearch;
 
                 card.style.display = visible ? '' : 'none';
-                if (visible) {
-                    visibleCount += 1;
-                }
             });
-
-            if (catalogTitle) {
-                catalogTitle.textContent = currentFilterLabel();
-            }
-
-            if (catalogCount) {
-                catalogCount.textContent = hasActiveFilter
-                    ? `${currentFilterLabel()} ${visibleCount} รายการ`
-                    : 'เลือกหมวดหมู่เพื่อดูสินค้าเพิ่มเติม';
-            }
 
             if (categoryProductsSection) {
                 categoryProductsSection.classList.toggle('is-empty', !hasActiveFilter);
