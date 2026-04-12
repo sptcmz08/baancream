@@ -17,16 +17,11 @@ use Illuminate\View\View;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(): View
     {
-        try {
-            $products = Product::with(['categories', 'variants'])->latest()->get();
+        $products = Product::with(['categories', 'variants'])->latest()->get();
 
-            $html = view('admin.products.index', compact('products'))->render();
-            return $html;
-        } catch (\Throwable $e) {
-            dd($e->getMessage(), $e->getFile(), $e->getLine());
-        }
+        return view('admin.products.index', compact('products'));
     }
 
     public function create(): View
@@ -215,7 +210,7 @@ class ProductController extends Controller
         $candidate = $base;
         $counter = 2;
 
-        while (Product::withTrashed()->where('sku', $candidate)->exists()) {
+        while (Product::where('sku', $candidate)->exists()) {
             $suffix = '-' . $counter++;
             $candidate = mb_substr($base, 0, 255 - mb_strlen($suffix)) . $suffix;
         }
