@@ -61,7 +61,7 @@
         .header-main {
             min-height: 96px;
             display: grid;
-            grid-template-columns: auto 1fr;
+            grid-template-columns: auto minmax(0, 1fr) auto;
             align-items: center;
             gap: 24px;
         }
@@ -86,9 +86,14 @@
             display: flex;
             gap: 28px;
             align-items: center;
+            justify-content: center;
             font-weight: 500;
             overflow-x: auto;
             white-space: nowrap;
+        }
+        .main-links a {
+            padding: 10px 0;
+            color: var(--text-dark);
         }
         .main-links a:hover { color: var(--primary-color); }
         .header-tools {
@@ -424,6 +429,10 @@
                 padding-top: 16px;
                 padding-bottom: 16px;
             }
+            .main-links {
+                justify-content: flex-start;
+                width: 100%;
+            }
             .header-tools {
                 flex-wrap: wrap;
                 justify-content: flex-start;
@@ -591,6 +600,11 @@
                 @include('store.partials.site-logo-markup')
             </a>
 
+            <nav class="main-links" aria-label="เมนูหลัก">
+                <a href="#new-arrivals">สินค้ามาใหม่</a>
+                <a href="#featured-products">สินค้าแนะนำ</a>
+            </nav>
+
             <div class="header-tools">
                 <div class="search-shell" id="searchShell">
                     <label class="search-box" for="searchInput">
@@ -686,6 +700,7 @@
     <section class="page-section" id="catalog" style="padding-top: 26px; padding-bottom: 20px;">
         <div class="catalog-toolbar">
             <div class="section-scroll" id="catalogFilters">
+                <button type="button" class="section-pill" data-filter="all">ทั้งหมด ({{ $catalogProducts->count() }})</button>
                 @foreach($categories as $category)
                     <button type="button" class="section-pill" data-filter="category:{{ $category->slug }}">{{ $category->name }} ({{ $category->products_count }})</button>
                 @endforeach
@@ -700,7 +715,7 @@
     </section>
 
     @if($newArrivals->isNotEmpty())
-        <section class="page-section carousel-section" aria-label="สินค้าใหม่">
+        <section class="page-section carousel-section" id="new-arrivals" aria-label="สินค้าใหม่">
             <div class="section-head">
                 <div>
                     <h2 class="section-title">สินค้าใหม่</h2>
@@ -738,7 +753,7 @@
     @endif
 
     @if($featuredProducts->isNotEmpty())
-        <section class="page-section carousel-section" aria-label="สินค้าแนะนำ">
+        <section class="page-section carousel-section" id="featured-products" aria-label="สินค้าแนะนำ">
             <div class="section-head">
                 <div>
                     <h2 class="section-title">สินค้าแนะนำ</h2>
@@ -887,12 +902,12 @@
         function applyCatalogFilters() {
             const query = searchInput?.value.trim().toLowerCase() || '';
             let visibleCount = 0;
-            const hasCategoryFilter = Boolean(activeFilter);
+            const hasActiveFilter = Boolean(activeFilter);
 
             productCards.forEach((card) => {
                 const haystack = card.dataset.search || '';
                 const tags = (card.dataset.filterTags || '').split('|');
-                const matchesFilter = hasCategoryFilter && tags.includes(activeFilter);
+                const matchesFilter = activeFilter === 'all' || (hasActiveFilter && tags.includes(activeFilter));
                 const matchesSearch = !query || haystack.includes(query);
                 const visible = matchesFilter && matchesSearch;
 
@@ -907,13 +922,13 @@
             }
 
             if (catalogCount) {
-                catalogCount.textContent = hasCategoryFilter
+                catalogCount.textContent = hasActiveFilter
                     ? `${currentFilterLabel()} ${visibleCount} รายการ`
                     : 'เลือกหมวดหมู่เพื่อดูสินค้าเพิ่มเติม';
             }
 
             if (categoryProductsSection) {
-                categoryProductsSection.classList.toggle('is-empty', !hasCategoryFilter);
+                categoryProductsSection.classList.toggle('is-empty', !hasActiveFilter);
             }
         }
 
