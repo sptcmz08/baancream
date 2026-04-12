@@ -21,6 +21,7 @@
         <table class="table" style="min-width: 900px;">
             <thead>
                 <tr>
+                    <th style="width: 60px; text-align: center;">ลำดับ</th>
                     <th style="width: 70px;">รูปภาพ</th>
                     <th style="width: 120px;">SKU</th>
                     <th>ชื่อสินค้า</th>
@@ -35,6 +36,7 @@
             <tbody>
                 @forelse($products ?? [] as $product)
                 <tr>
+                    <td style="text-align: center; color: var(--text-muted);">{{ ($products->currentPage() - 1) * $products->perPage() + $loop->iteration }}</td>
                     <td>
                         @php($displayImage = $product->displayImage())
                         @if($displayImage)

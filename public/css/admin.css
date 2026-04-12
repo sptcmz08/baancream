@@ -44,3 +44,10 @@ body {
 .btn-primary { background: var(--primary-color); color: white; }
 .btn-primary:hover { background: #B38E50; shadow: var(--shadow); }
 .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+
+/* Pagination Styling */
+.pagination { display: flex; padding-left: 0; list-style: none; border-radius: 8px; justify-content: center; gap: 4px; margin: 0; flex-wrap: wrap; }
+.pagination .page-item .page-link { position: relative; display: block; padding: 0.5rem 0.85rem; color: #4b5563; text-decoration: none; background-color: #fff; border: 1px solid #e5e7eb; border-radius: 8px; transition: 0.2s ease; font-size: 0.9rem;}
+.pagination .page-item.active .page-link { z-index: 3; color: #fff; background-color: var(--primary-color); border-color: var(--primary-color); font-weight: 500;}
+.pagination .page-item.disabled .page-link { color: #9ca3af; pointer-events: none; background-color: #f9fafb; border-color: #e5e7eb; }
+.pagination .page-item .page-link:hover { z-index: 2; color: var(--primary-color); background-color: #f3f4f6; border-color: #d1d5db; }
