@@ -382,12 +382,12 @@
             width: 112px;
             min-width: 112px;
             border: 2px solid transparent;
-            border-radius: 18px;
-            background: white;
+            border-radius: 12px;
+            background: transparent;
             padding: 0;
             overflow: hidden;
             cursor: pointer;
-            box-shadow: 0 10px 24px rgba(29, 41, 76, 0.08);
+            box-shadow: none;
             transition: 0.2s ease;
         }
         .variant-option:hover {
@@ -395,19 +395,19 @@
         }
         .variant-option.active {
             border-color: var(--primary-color);
-            box-shadow: 0 14px 28px rgba(233, 53, 116, 0.12);
+            box-shadow: none;
         }
         .variant-option img {
             width: 100%;
             height: 86px;
             object-fit: contain;
-            background: #f8fafc;
+            background: transparent;
         }
         .variant-option span {
             display: none;
         }
         .variant-option.is-main {
-            background: linear-gradient(180deg, #fff7ef 0%, #ffffff 100%);
+            background: transparent;
         }
         .cta-stack {
             display: grid;
