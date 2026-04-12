@@ -61,9 +61,16 @@
         .header-main {
             min-height: 96px;
             display: grid;
-            grid-template-columns: auto minmax(0, 1fr) auto;
+            grid-template-columns: minmax(320px, auto) minmax(420px, 620px) auto;
             align-items: center;
             gap: 24px;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 34px;
+            min-width: 0;
+            justify-self: start;
         }
         .brand-logo {
             display: inline-flex;
@@ -86,7 +93,7 @@
             display: flex;
             gap: 28px;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             font-weight: 500;
             overflow-x: auto;
             white-space: nowrap;
@@ -96,6 +103,10 @@
             color: var(--text-dark);
         }
         .main-links a:hover { color: var(--primary-color); }
+        .header-search {
+            width: 100%;
+            justify-self: center;
+        }
         .header-tools {
             display: flex;
             align-items: center;
@@ -104,7 +115,7 @@
         }
         .search-shell {
             position: relative;
-            width: min(360px, 42vw);
+            width: 100%;
         }
         .search-box {
             width: 100%;
@@ -429,13 +440,18 @@
                 padding-top: 16px;
                 padding-bottom: 16px;
             }
+            .header-left {
+                width: 100%;
+                gap: 24px;
+            }
             .main-links {
                 justify-content: flex-start;
-                width: 100%;
             }
+            .header-search { width: 100%; }
             .header-tools {
                 flex-wrap: wrap;
                 justify-content: flex-start;
+                justify-self: start;
             }
             .search-shell { width: 100%; }
             .search-box { width: 100%; }
@@ -596,16 +612,18 @@
 
     <header class="header-shell">
         <div class="header-main">
-            <a href="{{ route('home') }}" class="brand-logo" aria-label="บ้านครีม สิงห์บุรี">
-                @include('store.partials.site-logo-markup')
-            </a>
+            <div class="header-left">
+                <a href="{{ route('home') }}" class="brand-logo" aria-label="บ้านครีม สิงห์บุรี">
+                    @include('store.partials.site-logo-markup')
+                </a>
 
-            <nav class="main-links" aria-label="เมนูหลัก">
-                <a href="#new-arrivals">สินค้ามาใหม่</a>
-                <a href="#featured-products">สินค้าแนะนำ</a>
-            </nav>
+                <nav class="main-links" aria-label="เมนูหลัก">
+                    <a href="#new-arrivals">สินค้ามาใหม่</a>
+                    <a href="#featured-products">สินค้าแนะนำ</a>
+                </nav>
+            </div>
 
-            <div class="header-tools">
+            <div class="header-search">
                 <div class="search-shell" id="searchShell">
                     <label class="search-box" for="searchInput">
                         <span>🔍</span>
@@ -613,6 +631,9 @@
                     </label>
                     <div class="search-results" id="searchResults" aria-live="polite"></div>
                 </div>
+            </div>
+
+            <div class="header-tools">
                 <button type="button" class="cart-icon-link" data-open-cart aria-label="ตะกร้าสินค้า">
                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M7 8h13l-1.2 6.6a2 2 0 0 1-2 1.6H9.1a2 2 0 0 1-2-1.7L5.8 5.8H3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
