@@ -9,6 +9,7 @@ use App\Models\ProductVariant;
 use App\Support\MediaPath;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -33,9 +34,18 @@ class ProductController extends Controller
         $validated = $this->validateProduct($request);
         $data = $this->extractProductData($request, $validated);
 
-        $product = Product::create($data);
-        $product->categories()->sync($request->input('category_ids', []));
-        $this->syncVariants($request, $product);
+        try {
+            $product = Product::create($data);
+            $product->categories()->sync($request->input('category_ids', []));
+            $this->syncVariants($request, $product);
+        } catch (\Throwable $e) {
+            Log::error('Admin product create failed', [
+                'message' => $e->getMessage(),
+                'sku' => $request->input('sku'),
+            ]);
+
+            return back()->withInput()->with('error', 'บันทึกสินค้าไม่สำเร็จ: ' . $e->getMessage());
+        }
 
         return redirect()->route('admin.products.index')->with('success', 'เพิ่มสินค้าสำเร็จ');
     }
@@ -58,9 +68,19 @@ class ProductController extends Controller
         $validated = $this->validateProduct($request, $product);
         $data = $this->extractProductData($request, $validated, $product);
 
-        $product->update($data);
-        $product->categories()->sync($request->input('category_ids', []));
-        $this->syncVariants($request, $product);
+        try {
+            $product->update($data);
+            $product->categories()->sync($request->input('category_ids', []));
+            $this->syncVariants($request, $product);
+        } catch (\Throwable $e) {
+            Log::error('Admin product update failed', [
+                'message' => $e->getMessage(),
+                'product_id' => $product->id,
+                'sku' => $request->input('sku'),
+            ]);
+
+            return back()->withInput()->with('error', 'บันทึกสินค้าไม่สำเร็จ: ' . $e->getMessage());
+        }
 
         return redirect()->route('admin.products.index')->with('success', 'อัปเดตสินค้าสำเร็จ');
     }
@@ -157,7 +177,7 @@ class ProductController extends Controller
             $retailPrice = $variantInput['retail_price'] ?? null;
             $wholesalePrice = $variantInput['wholesale_price'] ?? null;
 
-            if ($name === '' && $retailPrice === null && $wholesalePrice === null) {
+            if ($name === '' && ($retailPrice === null || $retailPrice === '') && ($wholesalePrice === null || $wholesalePrice === '')) {
                 continue;
             }
 

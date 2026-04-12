@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('sku')->nullable();
+            $table->text('description')->nullable();
             $table->string('image')->nullable();
             $table->decimal('retail_price', 10, 2);
             $table->decimal('wholesale_price', 10, 2);

@@ -9,14 +9,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('order_items', function (Blueprint $table) {
-            $table->integer('items_per_set')->default(1)->after('total');
+            if (!Schema::hasColumn('order_items', 'items_per_set')) {
+                $table->integer('items_per_set')->default(1)->after('total');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('order_items', function (Blueprint $table) {
-            $table->dropColumn('items_per_set');
+            if (Schema::hasColumn('order_items', 'items_per_set')) {
+                $table->dropColumn('items_per_set');
+            }
         });
     }
 };

@@ -9,6 +9,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('product_variants', function (Blueprint $table) {
+            if (! Schema::hasColumn('product_variants', 'description')) {
+                $table->text('description')->nullable()->after('name');
+            }
+
             if (! Schema::hasColumn('product_variants', 'wholesale_min_qty')) {
                 $table->unsignedInteger('wholesale_min_qty')->default(10)->after('wholesale_price');
             }
@@ -28,6 +32,10 @@ return new class extends Migration
 
             if (Schema::hasColumn('product_variants', 'wholesale_min_qty')) {
                 $table->dropColumn('wholesale_min_qty');
+            }
+
+            if (Schema::hasColumn('product_variants', 'description')) {
+                $table->dropColumn('description');
             }
         });
     }
