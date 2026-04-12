@@ -149,7 +149,7 @@
         }
         .product-shell {
             display: grid;
-            grid-template-columns: minmax(360px, 620px) minmax(340px, 1fr);
+            grid-template-columns: minmax(300px, 520px) minmax(340px, 1fr);
             gap: 28px;
             align-items: start;
         }
@@ -162,12 +162,15 @@
         .gallery-card {
             padding: 22px;
             background: linear-gradient(135deg, #fff2f6 0%, #f2f9ff 100%);
+            max-width: 560px;
+            width: 100%;
         }
         .gallery-main {
             background: white;
             border-radius: 28px;
             overflow: hidden;
             aspect-ratio: 1 / 1;
+            max-height: 540px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -177,7 +180,7 @@
         .gallery-main img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
         }
         .gallery-main .placeholder {
             color: #9aa7bd;
@@ -185,11 +188,14 @@
         }
         .thumb-row {
             margin-top: 16px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+            display: flex;
             gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 6px;
         }
         .thumb {
+            width: 82px;
+            min-width: 82px;
             border-radius: 18px;
             overflow: hidden;
             border: 2px solid transparent;
@@ -370,13 +376,13 @@
             display: flex;
             gap: 12px;
             overflow-x: auto;
-            padding-bottom: 4px;
+            padding-bottom: 8px;
         }
         .variant-option {
-            width: 88px;
-            min-width: 88px;
+            width: 112px;
+            min-width: 112px;
             border: 2px solid transparent;
-            border-radius: 22px;
+            border-radius: 18px;
             background: white;
             padding: 0;
             overflow: hidden;
@@ -393,12 +399,18 @@
         }
         .variant-option img {
             width: 100%;
-            height: 88px;
-            object-fit: cover;
+            height: 86px;
+            object-fit: contain;
             background: #f8fafc;
         }
         .variant-option span {
-            display: none;
+            display: block;
+            padding: 8px 8px 10px;
+            color: var(--text-dark);
+            font-size: 0.78rem;
+            font-weight: 600;
+            line-height: 1.35;
+            min-height: 44px;
         }
         .variant-option.is-main {
             background: linear-gradient(180deg, #fff7ef 0%, #ffffff 100%);
@@ -520,6 +532,9 @@
             .product-shell {
                 grid-template-columns: 1fr;
             }
+            .gallery-card {
+                justify-self: center;
+            }
             .lightbox-dialog {
                 grid-template-columns: 1fr;
             }
@@ -540,6 +555,17 @@
             .brand-logo { font-size: 2rem; }
             .detail-card,
             .gallery-card { padding: 18px; }
+            .gallery-main {
+                max-height: min(420px, 76vw);
+            }
+            .thumb {
+                width: 70px;
+                min-width: 70px;
+            }
+            .variant-option {
+                width: 100px;
+                min-width: 100px;
+            }
             .product-title { font-size: 2.3rem; }
             .section-title { font-size: 1.6rem; }
             .price-main,
@@ -698,14 +724,15 @@
                                         ->filter()
                                         ->values()
                                         ->all();
-                                    $imageUrl = $variantGalleryUrls[0] ?? null;
+                                    $variantDisplayGalleryUrls = !empty($variantGalleryUrls) ? $variantGalleryUrls : $productGalleryUrls;
+                                    $imageUrl = $variantDisplayGalleryUrls[0] ?? null;
                                 @endphp
                                 <button type="button" class="variant-option {{ $selectedOptionKey === 'variant:' . $variant->id ? 'active' : '' }}"
                                     data-variant-option
                                     data-option-key="variant:{{ $variant->id }}"
                                     data-variant-id="{{ $variant->id }}"
                                     data-variant-image="{{ $imageUrl ?: '' }}"
-                                    data-variant-gallery='@json($variantGalleryUrls)'
+                                    data-variant-gallery='@json($variantDisplayGalleryUrls)'
                                     data-variant-retail="{{ number_format($variant->retail_price, 2, '.', '') }}"
                                     data-variant-wholesale="{{ number_format($variant->wholesale_price, 2, '.', '') }}"
                                     data-variant-min-qty="{{ $variant->wholesale_min_qty ?: ($product->wholesale_min_qty ?: 1) }}"
@@ -898,7 +925,7 @@
 
             if (!activeGalleryImages.length) {
                 activeGalleryIndex = 0;
-                renderMainImage('');
+                renderMainImage(@json($mainImageUrl));
                 if (galleryThumbRow) galleryThumbRow.innerHTML = '';
                 if (lightboxThumbContainer) lightboxThumbContainer.innerHTML = '';
                 return;
