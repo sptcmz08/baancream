@@ -404,13 +404,7 @@
             background: #f8fafc;
         }
         .variant-option span {
-            display: block;
-            padding: 8px 8px 10px;
-            color: var(--text-dark);
-            font-size: 0.78rem;
-            font-weight: 600;
-            line-height: 1.35;
-            min-height: 44px;
+            display: none;
         }
         .variant-option.is-main {
             background: linear-gradient(180deg, #fff7ef 0%, #ffffff 100%);
