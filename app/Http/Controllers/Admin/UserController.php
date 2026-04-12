@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Order;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -20,19 +19,20 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        $role = $request->input('role');
+        if ($role === 'user') {
+            $request->merge(['role' => 'customer']);
+        }
+
         $validated = $request->validate([
-            'role' => 'nullable|in:customer,vip,admin',
-            'is_credit_enabled' => 'nullable|boolean',
-            'credit_due_date' => 'nullable|date',
-            'default_credit_limit' => 'nullable|numeric|min:0',
+            'role' => 'required|in:customer,admin',
         ]);
 
-        $user->fill([
-            'role' => $validated['role'] ?? $user->role,
-            'is_credit_enabled' => $request->boolean('is_credit_enabled'),
-            'credit_due_date' => $validated['credit_due_date'] ?? $user->credit_due_date,
-            'default_credit_limit' => $validated['default_credit_limit'] ?? $user->default_credit_limit,
-        ]);
+        if ($user->id === auth()->id() && $validated['role'] !== 'admin') {
+            return back()->with('error', 'ไม่สามารถลดสิทธิ์แอดมินของบัญชีที่กำลังใช้งานอยู่ได้');
+        }
+
+        $user->role = $validated['role'];
         $user->save();
 
         return back()->with('success', "อัปเดตข้อมูลผู้ใช้ {$user->name} สำเร็จ");
