@@ -36,30 +36,31 @@
             position: sticky;
             top: 0;
             z-index: 20;
-            background: rgba(255, 255, 255, 0.96);
-            backdrop-filter: blur(16px);
-            box-shadow: 0 12px 30px rgba(40, 58, 100, 0.06);
+            background: rgba(255, 255, 255, 0.98);
+            border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(14px);
         }
         .header-main {
             max-width: 1240px;
-            min-height: 82px;
+            min-height: 74px;
             margin: 0 auto;
             padding: 0 20px;
-            display: grid;
-            grid-template-columns: auto 1fr auto;
+            display: flex;
             align-items: center;
-            gap: 24px;
+            justify-content: space-between;
+            gap: 18px;
         }
         .brand-logo {
             display: inline-flex;
             align-items: center;
-            font-size: 2.35rem;
+            font-size: 2rem;
             font-weight: 700;
             color: var(--primary-color);
             letter-spacing: -0.04em;
+            flex: 0 0 auto;
         }
         .brand-logo-image {
-            height: 56px;
+            height: 48px;
             width: auto;
             object-fit: contain;
         }
@@ -69,24 +70,30 @@
         .brand-logo span:nth-child(5) { color: #35c98b; }
         .main-links {
             display: flex;
-            gap: 28px;
+            gap: 18px;
             align-items: center;
-            font-weight: 500;
+            justify-content: center;
+            font-size: 0.92rem;
+            font-weight: 600;
             overflow-x: auto;
             white-space: nowrap;
+            color: var(--text-soft);
         }
         .main-links a:hover { color: var(--primary-color); }
         .header-tools {
             display: flex;
             align-items: center;
-            gap: 14px;
+            justify-content: flex-end;
+            gap: 10px;
+            flex: 0 0 auto;
         }
         .user-action,
         .pill-link {
             border: 1px solid var(--border-color);
             border-radius: 999px;
-            padding: 10px 18px;
-            font-weight: 500;
+            padding: 9px 14px;
+            font-size: 0.92rem;
+            font-weight: 600;
             background: white;
         }
         .user-action:hover,
@@ -95,7 +102,7 @@
             color: var(--primary-color);
         }
         .checkout-page {
-            padding: 40px 20px;
+            padding: 28px 20px 44px;
         }
         .container {
             max-width: 1240px;
@@ -282,11 +289,11 @@
             cursor: pointer;
         }
         .summary-card {
-            padding: 22px;
+            padding: 20px;
             display: grid;
-            gap: 18px;
+            gap: 16px;
             position: sticky;
-            top: 24px;
+            top: 96px;
         }
         .summary-title {
             font-size: 1.2rem;
@@ -294,23 +301,25 @@
         }
         .summary-item {
             display: grid;
-            grid-template-columns: 58px 1fr auto;
-            gap: 12px;
+            grid-template-columns: 46px 1fr auto;
+            gap: 10px;
             align-items: start;
-            padding-bottom: 14px;
+            padding-bottom: 12px;
             border-bottom: 1px solid var(--border-color);
         }
         .summary-thumb {
-            width: 58px;
-            height: 58px;
-            border-radius: 16px;
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
             overflow: hidden;
-            background: #f3f6fb;
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
         }
         .summary-thumb img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
+            padding: 4px;
         }
         .summary-name {
             font-weight: 600;
@@ -371,9 +380,14 @@
 
         @media (max-width: 980px) {
             .header-main {
-                grid-template-columns: 1fr;
+                align-items: flex-start;
+                flex-direction: column;
                 padding-top: 16px;
                 padding-bottom: 16px;
+            }
+            .main-links {
+                justify-content: flex-start;
+                width: 100%;
             }
             .header-tools {
                 flex-wrap: wrap;
@@ -389,7 +403,7 @@
 
         @media (max-width: 640px) {
             .checkout-page {
-                padding: 24px 14px;
+                padding: 22px 14px 34px;
             }
             .header-main {
                 padding-left: 14px;
@@ -407,7 +421,11 @@
                 font-size: 1.85rem;
             }
             .summary-item {
-                grid-template-columns: 52px 1fr;
+                grid-template-columns: 42px 1fr;
+            }
+            .summary-thumb {
+                width: 42px;
+                height: 42px;
             }
             .summary-price {
                 grid-column: 2;
@@ -423,10 +441,9 @@
             </a>
 
             <nav class="main-links" aria-label="เมนูหลัก">
-                <a href="{{ route('home') }}#catalog">หมวดหมู่</a>
-                <a href="{{ route('home') }}#catalog">สินค้าใหม่</a>
-                <a href="{{ route('home') }}#catalog">สินค้าแนะนำ</a>
-                <a href="{{ route('home') }}#catalog">สินค้าทั้งหมด</a>
+                <a href="{{ route('home') }}">หน้าแรก</a>
+                <a href="{{ route('home') }}#catalog">เลือกสินค้าเพิ่ม</a>
+                <a href="{{ route('cart.index') }}">ตะกร้าสินค้า</a>
             </nav>
 
             <div class="header-tools">
