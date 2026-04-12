@@ -66,9 +66,7 @@ class StoreController extends Controller
         if ($newArrivals->isEmpty()) {
             $newArrivals = $catalogProducts->take(10)->values();
         }
-
-        $featuredProducts = $catalogProducts->values();
-
+        $featuredProducts = $catalogProducts->where('is_featured', true)->values();
         $banners = Banner::active()->get();
 
         $cartSummary = $this->cartWithTotals();

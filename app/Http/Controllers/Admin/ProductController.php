@@ -177,6 +177,7 @@ class ProductController extends Controller
             'kept_images' => 'nullable|array',
             'kept_images.*' => 'string',
             'is_new_arrival' => 'nullable|boolean',
+            'is_featured' => 'nullable|boolean',
             'variants' => 'nullable|array',
             'variants.*.id' => 'nullable|exists:product_variants,id',
             'variants.*.name' => 'required_with:variants.*.retail_price,variants.*.wholesale_price|string|max:255',
@@ -264,8 +265,8 @@ class ProductController extends Controller
         $data = collect($validated)
             ->except(['images', 'kept_images', 'variants', 'category_ids'])
             ->toArray();
-
         $data['is_new_arrival'] = $request->boolean('is_new_arrival');
+        $data['is_featured'] = $request->boolean('is_featured');
         $data['stock'] = $request->integer('stock', 0);
         $data['wholesale_min_qty'] = $request->integer('wholesale_min_qty', 10);
 

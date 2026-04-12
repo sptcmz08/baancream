@@ -20,10 +20,12 @@ class Product extends Model
         'wholesale_min_qty',
         'images',
         'is_new_arrival',
+        'is_featured',
     ];
 
     protected $casts = [
         'is_new_arrival' => 'boolean',
+        'is_featured' => 'boolean',
         'images' => 'array',
         'wholesale_min_qty' => 'integer',
         'stock' => 'integer',

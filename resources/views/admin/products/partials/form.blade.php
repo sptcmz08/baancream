@@ -130,10 +130,14 @@
                 <label style="display:block; margin-bottom:10px; font-weight:500;">รายละเอียดสินค้า</label>
                 <textarea name="description" rows="4" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">{{ old('description', $product?->description) }}</textarea>
             </div>
-            <div style="grid-column: 1 / -1;">
-                <label style="display:flex; align-items:center; gap:10px; font-weight:500;">
+            <div style="grid-column: 1 / -1; display: flex; gap: 24px; flex-wrap: wrap;">
+                <label style="display:flex; align-items:center; gap:10px; font-weight:500; margin-bottom: 8px;">
                     <input type="checkbox" name="is_new_arrival" value="1" {{ old('is_new_arrival', $product?->is_new_arrival) ? 'checked' : '' }}>
                     แสดงในหมวดสินค้าใหม่
+                </label>
+                <label style="display:flex; align-items:center; gap:10px; font-weight:500; margin-bottom: 8px;">
+                    <input type="checkbox" name="is_featured" value="1" {{ old('is_featured', $product?->is_featured) ? 'checked' : '' }}>
+                    แสดงในหมวดสินค้าแนะนำ
                 </label>
             </div>
         </div>
