@@ -308,18 +308,43 @@
         }
         .auto-carousel {
             overflow: hidden;
+            width: 100%;
         }
-        .carousel-track {
+        .marquee-track {
             display: flex;
-            transition: transform 0.65s ease;
-            will-change: transform;
+            width: max-content;
+            animation: marquee 35s linear infinite;
+            padding: 10px 0 20px;
         }
-        .carousel-page {
-            min-width: 100%;
-            display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            grid-auto-rows: 1fr;
-            gap: 26px;
+        .marquee-track:hover {
+            animation-play-state: paused;
+        }
+        .marquee-content {
+            display: flex;
+            gap: 24px;
+            padding-right: 24px;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .marquee-item {
+            width: 260px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: stretch;
+        }
+        .marquee-item .product-card {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .marquee-item .product-body {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         .product-card {
             background: var(--surface-color);
@@ -431,9 +456,6 @@
             .product-grid {
                 grid-template-columns: repeat(3, minmax(0, 1fr));
             }
-            .carousel-page {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-            }
         }
 
         @media (max-width: 720px) {
@@ -445,9 +467,6 @@
             .brand-logo-image { height: 62px; }
             .section-title { font-size: 1.6rem; }
             .product-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-            .carousel-page {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
@@ -703,11 +722,11 @@
                     <h2 class="section-title">สินค้าใหม่</h2>
                 </div>
             </div>
-            <div class="auto-carousel" data-auto-carousel>
-                <div class="carousel-track">
-                    @foreach($newArrivals->chunk(10) as $page)
-                        <div class="carousel-page">
-                            @foreach($page as $product)
+            <div class="auto-carousel" dir="ltr">
+                <div class="marquee-track">
+                    <div class="marquee-content">
+                        @foreach($newArrivals as $product)
+                            <div class="marquee-item">
                                 <article class="product-card">
                                     <a href="{{ route('products.show', $product) }}" aria-label="{{ $product->name }}">
                                         <div class="product-image">
@@ -725,9 +744,32 @@
                                         </div>
                                     </a>
                                 </article>
-                            @endforeach
-                        </div>
-                    @endforeach
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="marquee-content" aria-hidden="true">
+                        @foreach($newArrivals as $product)
+                            <div class="marquee-item">
+                                <article class="product-card">
+                                    <a href="{{ route('products.show', $product) }}" aria-label="{{ $product->name }}">
+                                        <div class="product-image">
+                                            @if($product->displayImage())
+                                                <img src="{{ route('media.show', ['path' => $product->displayImage()]) }}" alt="{{ $product->name }}">
+                                            @else
+                                                <span>No Image</span>
+                                            @endif
+                                        </div>
+                                        <div class="product-body">
+                                            <h3 class="product-name">{{ $product->name }}</h3>
+                                            <div class="product-price">
+                                                <div class="price-retail">฿{{ number_format($product->displayRetailPrice(), 2) }}</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </article>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </section>
@@ -740,11 +782,11 @@
                     <h2 class="section-title">สินค้าแนะนำ</h2>
                 </div>
             </div>
-            <div class="auto-carousel" data-auto-carousel>
-                <div class="carousel-track">
-                    @foreach($featuredProducts->chunk(10) as $page)
-                        <div class="carousel-page">
-                            @foreach($page as $product)
+            <div class="auto-carousel" dir="ltr">
+                <div class="marquee-track">
+                    <div class="marquee-content">
+                        @foreach($featuredProducts as $product)
+                            <div class="marquee-item">
                                 <article class="product-card">
                                     <a href="{{ route('products.show', $product) }}" aria-label="{{ $product->name }}">
                                         <div class="product-image">
@@ -762,9 +804,32 @@
                                         </div>
                                     </a>
                                 </article>
-                            @endforeach
-                        </div>
-                    @endforeach
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="marquee-content" aria-hidden="true">
+                        @foreach($featuredProducts as $product)
+                            <div class="marquee-item">
+                                <article class="product-card">
+                                    <a href="{{ route('products.show', $product) }}" aria-label="{{ $product->name }}">
+                                        <div class="product-image">
+                                            @if($product->displayImage())
+                                                <img src="{{ route('media.show', ['path' => $product->displayImage()]) }}" alt="{{ $product->name }}">
+                                            @else
+                                                <span>No Image</span>
+                                            @endif
+                                        </div>
+                                        <div class="product-body">
+                                            <h3 class="product-name">{{ $product->name }}</h3>
+                                            <div class="product-price">
+                                                <div class="price-retail">฿{{ number_format($product->displayRetailPrice(), 2) }}</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </article>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </section>
@@ -921,20 +986,7 @@
             }, 4500);
         }
 
-        document.querySelectorAll('[data-auto-carousel]').forEach((carousel) => {
-            const track = carousel.querySelector('.carousel-track');
-            const pages = Array.from(carousel.querySelectorAll('.carousel-page'));
 
-            if (!track || pages.length <= 1) {
-                return;
-            }
-
-            let pageIndex = 0;
-            setInterval(() => {
-                pageIndex = (pageIndex + 1) % pages.length;
-                track.style.transform = `translateX(-${pageIndex * 100}%)`;
-            }, 4200);
-        });
 
         // ── User Dropdown ──
         const userMenuBtn = document.getElementById('userMenuBtn');
