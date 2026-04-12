@@ -719,7 +719,6 @@
             <div class="section-head">
                 <div>
                     <h2 class="section-title">สินค้าใหม่</h2>
-                    <p class="section-subtitle">อัปเดตจากรายการที่ตั้งค่าไว้ในหลังบ้าน</p>
                 </div>
             </div>
             <div class="auto-carousel" data-auto-carousel>
@@ -757,7 +756,6 @@
             <div class="section-head">
                 <div>
                     <h2 class="section-title">สินค้าแนะนำ</h2>
-                    <p class="section-subtitle">รายการขายดีและสินค้าที่เหมาะสำหรับเลือกเพิ่ม</p>
                 </div>
             </div>
             <div class="auto-carousel" data-auto-carousel>
