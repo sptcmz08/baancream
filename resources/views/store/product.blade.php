@@ -58,24 +58,24 @@
         }
         .header-main {
             max-width: 1440px;
-            min-height: 82px;
+            min-height: 96px;
             margin: 0 auto;
             padding: 0 24px;
             display: grid;
-            grid-template-columns: auto 1fr auto;
+            grid-template-columns: auto 1fr;
             align-items: center;
             gap: 24px;
         }
         .brand-logo {
             display: inline-flex;
             align-items: center;
-            font-size: 2.35rem;
+            font-size: 2.8rem;
             font-weight: 700;
             color: var(--primary-color);
             letter-spacing: -0.04em;
         }
         .brand-logo-image {
-            height: 56px;
+            height: 78px;
             width: auto;
             object-fit: contain;
         }
@@ -96,6 +96,7 @@
             display: flex;
             align-items: center;
             gap: 14px;
+            justify-self: end;
         }
         .search-box {
             width: min(340px, 36vw);
@@ -553,6 +554,7 @@
             .notice,
             .page-section { padding-left: 16px; padding-right: 16px; }
             .brand-logo { font-size: 2rem; }
+            .brand-logo-image { height: 62px; }
             .detail-card,
             .gallery-card { padding: 18px; }
             .gallery-main {
@@ -617,13 +619,6 @@
             <a href="{{ route('home') }}" class="brand-logo" aria-label="บ้านครีม สิงห์บุรี">
                 @include('store.partials.site-logo-markup')
             </a>
-
-            <nav class="main-links" aria-label="เมนูหลัก">
-                <a href="{{ route('home') }}#catalog">หมวดหมู่</a>
-                <a href="{{ route('home') }}#catalog">สินค้าใหม่</a>
-                <a href="{{ route('home') }}#catalog">สินค้าแนะนำ</a>
-                <a href="{{ route('home') }}#catalog">สินค้าทั้งหมด</a>
-            </nav>
 
             <div class="header-tools">
                 <label class="search-box" for="searchDisplay">

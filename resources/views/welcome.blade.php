@@ -59,22 +59,22 @@
             padding: 0 24px;
         }
         .header-main {
-            min-height: 82px;
+            min-height: 96px;
             display: grid;
-            grid-template-columns: auto 1fr auto;
+            grid-template-columns: auto 1fr;
             align-items: center;
             gap: 24px;
         }
         .brand-logo {
             display: inline-flex;
             align-items: center;
-            font-size: 2.35rem;
+            font-size: 2.8rem;
             font-weight: 700;
             color: var(--primary-color);
             letter-spacing: -0.04em;
         }
         .brand-logo-image {
-            height: 56px;
+            height: 78px;
             width: auto;
             object-fit: contain;
         }
@@ -95,6 +95,7 @@
             display: flex;
             align-items: center;
             gap: 14px;
+            justify-self: end;
         }
         .search-shell {
             position: relative;
@@ -190,6 +191,28 @@
         .pill-link:hover {
             border-color: rgba(255, 79, 135, 0.35);
             color: var(--primary-color);
+        }
+        .cart-icon-link {
+            width: 46px;
+            height: 46px;
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            background: white;
+            color: var(--text-dark);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+        .cart-icon-link:hover {
+            border-color: rgba(255, 79, 135, 0.35);
+            color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+        .cart-icon-link svg {
+            width: 21px;
+            height: 21px;
         }
         .hero {
             width: 100%;
@@ -376,7 +399,8 @@
             .header-main,
             .page-section,
             .notice { padding-left: 16px; padding-right: 16px; }
-            .brand-logo { font-size: 2rem; }
+            .brand-logo { font-size: 2.25rem; }
+            .brand-logo-image { height: 62px; }
             .section-title { font-size: 1.6rem; }
             .product-grid {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -519,13 +543,6 @@
                 @include('store.partials.site-logo-markup')
             </a>
 
-            <nav class="main-links" aria-label="เมนูหลัก">
-                <a href="#catalog">หมวดหมู่</a>
-                <a href="#catalog">สินค้าใหม่</a>
-                <a href="#catalog">สินค้าแนะนำ</a>
-                <a href="#catalog">สินค้าทั้งหมด</a>
-            </nav>
-
             <div class="header-tools">
                 <div class="search-shell" id="searchShell">
                     <label class="search-box" for="searchInput">
@@ -534,7 +551,12 @@
                     </label>
                     <div class="search-results" id="searchResults" aria-live="polite"></div>
                 </div>
-                <button type="button" class="pill-link" data-open-cart style="font-family: inherit; cursor: pointer;">ตะกร้าสินค้า</button>
+                <button type="button" class="cart-icon-link" data-open-cart aria-label="ตะกร้าสินค้า">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M7 8h13l-1.2 6.6a2 2 0 0 1-2 1.6H9.1a2 2 0 0 1-2-1.7L5.8 5.8H3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9.4 20.2h.1M17 20.2h.1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+                    </svg>
+                </button>
                 @auth
                     {{-- Bell notification --}}
                     <div class="notif-wrap" id="notifWrap">

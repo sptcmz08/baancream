@@ -42,7 +42,7 @@
         }
         .header-main {
             max-width: 1240px;
-            min-height: 74px;
+            min-height: 92px;
             margin: 0 auto;
             padding: 0 20px;
             display: flex;
@@ -53,14 +53,14 @@
         .brand-logo {
             display: inline-flex;
             align-items: center;
-            font-size: 2rem;
+            font-size: 2.7rem;
             font-weight: 700;
             color: var(--primary-color);
             letter-spacing: -0.04em;
             flex: 0 0 auto;
         }
         .brand-logo-image {
-            height: 48px;
+            height: 74px;
             width: auto;
             object-fit: contain;
         }
@@ -86,6 +86,7 @@
             justify-content: flex-end;
             gap: 10px;
             flex: 0 0 auto;
+            margin-left: auto;
         }
         .user-action,
         .pill-link {
@@ -100,6 +101,27 @@
         .pill-link:hover {
             border-color: rgba(255, 79, 135, 0.35);
             color: var(--primary-color);
+        }
+        .cart-icon-link {
+            width: 44px;
+            height: 44px;
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            background: white;
+            color: var(--text-dark);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s ease;
+        }
+        .cart-icon-link:hover {
+            border-color: rgba(255, 79, 135, 0.35);
+            color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+        .cart-icon-link svg {
+            width: 21px;
+            height: 21px;
         }
         .checkout-page {
             padding: 28px 20px 44px;
@@ -410,7 +432,8 @@
                 padding-left: 14px;
                 padding-right: 14px;
             }
-            .brand-logo { font-size: 2rem; }
+            .brand-logo { font-size: 2.25rem; }
+            .brand-logo-image { height: 62px; }
             .main-card,
             .summary-card {
                 padding: 18px;
@@ -441,14 +464,13 @@
                 @include('store.partials.site-logo-markup')
             </a>
 
-            <nav class="main-links" aria-label="เมนูหลัก">
-                <a href="{{ route('home') }}">หน้าแรก</a>
-                <a href="{{ route('home') }}#catalog">เลือกสินค้าเพิ่ม</a>
-                <a href="{{ route('cart.index') }}">ตะกร้าสินค้า</a>
-            </nav>
-
             <div class="header-tools">
-                <a href="{{ route('cart.index') }}" class="pill-link">ตะกร้า {{ $cartCount }} ชิ้น</a>
+                <a href="{{ route('cart.index') }}" class="cart-icon-link" aria-label="ตะกร้าสินค้า">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M7 8h13l-1.2 6.6a2 2 0 0 1-2 1.6H9.1a2 2 0 0 1-2-1.7L5.8 5.8H3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9.4 20.2h.1M17 20.2h.1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+                    </svg>
+                </a>
                 <a href="{{ auth()->user()->role === 'admin' ? route('admin.dashboard') : route('account.index') }}" class="user-action">บัญชีของฉัน</a>
             </div>
         </div>
