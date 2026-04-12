@@ -99,6 +99,42 @@ class ProductController extends Controller
         return redirect()->route('admin.products.index')->with('success', 'อัปเดตสินค้าสำเร็จ');
     }
 
+    public function copy(Product $product): RedirectResponse
+    {
+        $product->load(['categories', 'variants']);
+
+        try {
+            $newProduct = DB::transaction(function () use ($product): Product {
+                $copy = $product->replicate();
+                $copy->sku = $this->duplicateSku($product->sku);
+                $copy->name = mb_substr($product->name, 0, 248) . ' (Copy)';
+                $copy->save();
+
+                $copy->categories()->sync($product->categories->pluck('id')->all());
+
+                foreach ($product->variants as $variant) {
+                    $variantCopy = $variant->replicate();
+                    $variantCopy->product_id = $copy->id;
+                    $variantCopy->save();
+                }
+
+                return $copy;
+            });
+        } catch (\Throwable $e) {
+            Log::error('Admin product copy failed', [
+                'message' => $e->getMessage(),
+                'product_id' => $product->id,
+                'sku' => $product->sku,
+            ]);
+
+            return back()->with('error', 'คัดลอกสินค้าไม่สำเร็จ: ' . $e->getMessage());
+        }
+
+        return redirect()
+            ->route('admin.products.edit', $newProduct)
+            ->with('success', "คัดลอกสินค้า {$product->sku} สำเร็จ กรุณาตรวจสอบ SKU ใหม่ก่อนเผยแพร่");
+    }
+
     public function destroy(Product $product): RedirectResponse
     {
         foreach ((array) $product->images as $image) {
@@ -166,6 +202,20 @@ class ProductController extends Controller
             'variants.*.wholesale_min_qty' => 'จำนวนขั้นต่ำราคาส่งสูตร',
             'variants.*.stock' => 'สต็อกสูตร',
         ]);
+    }
+
+    private function duplicateSku(string $sku): string
+    {
+        $base = mb_substr($sku . '-COPY', 0, 245);
+        $candidate = $base;
+        $counter = 2;
+
+        while (Product::withTrashed()->where('sku', $candidate)->exists()) {
+            $suffix = '-' . $counter++;
+            $candidate = mb_substr($base, 0, 255 - mb_strlen($suffix)) . $suffix;
+        }
+
+        return $candidate;
     }
 
     private function prepareProductInput(Request $request): void

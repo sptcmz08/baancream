@@ -39,8 +39,12 @@
                 <td style="color: #16a34a;">{{ $product->displayWholesaleMinQty() }} ชิ้น / ฿{{ number_format($product->displayWholesaleBundlePrice(), 2) }}</td>
                 <td>{{ $product->categories->pluck('name')->join(', ') ?: '-' }}</td>
                 <td>{{ $product->is_new_arrival ? 'ใช่' : '-' }}</td>
-                <td style="display: flex; gap: 8px;">
+                <td style="display: flex; gap: 8px; flex-wrap: wrap;">
                     <a href="{{ route('admin.products.edit', $product) }}" class="btn" style="background:#f3f4f6; color: #4b5563; padding: 6px 12px; font-size:0.8rem; text-decoration:none;">แก้ไข</a>
+                    <form action="{{ route('admin.products.copy', $product) }}" method="POST" onsubmit="return confirm('คัดลอกสินค้า {{ $product->sku }}?');">
+                        @csrf
+                        <button type="submit" class="btn" style="background:#e0f2fe; color:#0369a1; padding: 6px 12px; font-size:0.8rem;">Copy</button>
+                    </form>
                     <form action="{{ route('admin.products.destroy', $product) }}" method="POST" onsubmit="return confirm('ยืนยันการลบสินค้า {{ $product->sku }}?');">
                         @csrf @method('DELETE')
                         <button type="submit" class="btn" style="background:#fee2e2; color:#dc2626; padding: 6px 12px; font-size:0.8rem;">ลบ</button>

@@ -58,6 +58,7 @@ require __DIR__.'/auth.php';
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('categories', CategoryController::class);
+    Route::post('products/{product}/copy', [ProductController::class, 'copy'])->name('products.copy');
     Route::resource('products', ProductController::class);
     Route::resource('credits', CreditController::class);
     Route::post('orders/confirm-all-credit', [OrderController::class, 'confirmAllCredit'])->name('orders.confirm-all-credit');
