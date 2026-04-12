@@ -17,11 +17,19 @@ use Illuminate\View\View;
 
 class ProductController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $products = Product::with(['categories', 'variants'])->latest()->get();
+        $search = $request->input('search');
+        
+        $products = Product::with(['categories', 'variants'])
+            ->when($search, function ($query, $search) {
+                return $query->where('name', 'like', "%{$search}%")
+                             ->orWhere('sku', 'like', "%{$search}%");
+            })
+            ->latest()
+            ->paginate(10);
 
-        return view('admin.products.index', compact('products'));
+        return view('admin.products.index', compact('products', 'search'));
     }
 
     public function create(): View
