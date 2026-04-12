@@ -54,6 +54,16 @@
                         {{ session('error') }}
                     </div>
                 @endif
+                @if($errors->any())
+                    <div style="background: #fff7ed; color: #9a3412; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fed7aa;">
+                        <strong>กรุณาตรวจสอบข้อมูลต่อไปนี้</strong>
+                        <ul style="margin: 10px 0 0 20px; padding: 0;">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
                 @yield('content')
             </section>
         </main>

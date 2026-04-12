@@ -9,8 +9,10 @@ use App\Models\ProductVariant;
 use App\Support\MediaPath;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class ProductController extends Controller
@@ -31,13 +33,19 @@ class ProductController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $this->validateProduct($request);
-        $data = $this->extractProductData($request, $validated);
+        $this->prepareProductInput($request);
 
         try {
-            $product = Product::create($data);
-            $product->categories()->sync($request->input('category_ids', []));
-            $this->syncVariants($request, $product);
+            $validated = $this->validateProduct($request);
+            $data = $this->extractProductData($request, $validated);
+
+            DB::transaction(function () use ($request, $data): void {
+                $product = Product::create($data);
+                $product->categories()->sync($request->input('category_ids', []));
+                $this->syncVariants($request, $product);
+            });
+        } catch (ValidationException $e) {
+            return $this->validationErrorResponse($e);
         } catch (\Throwable $e) {
             Log::error('Admin product create failed', [
                 'message' => $e->getMessage(),
@@ -65,13 +73,19 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product): RedirectResponse
     {
-        $validated = $this->validateProduct($request, $product);
-        $data = $this->extractProductData($request, $validated, $product);
+        $this->prepareProductInput($request);
 
         try {
-            $product->update($data);
-            $product->categories()->sync($request->input('category_ids', []));
-            $this->syncVariants($request, $product);
+            $validated = $this->validateProduct($request, $product);
+            $data = $this->extractProductData($request, $validated, $product);
+
+            DB::transaction(function () use ($request, $product, $data): void {
+                $product->update($data);
+                $product->categories()->sync($request->input('category_ids', []));
+                $this->syncVariants($request, $product);
+            });
+        } catch (ValidationException $e) {
+            return $this->validationErrorResponse($e);
         } catch (\Throwable $e) {
             Log::error('Admin product update failed', [
                 'message' => $e->getMessage(),
@@ -131,7 +145,60 @@ class ProductController extends Controller
             'variants.*.images.*' => 'nullable|image',
             'variants.*.kept_images' => 'nullable|array',
             'variants.*.kept_images.*' => 'string',
+        ], [
+            'sku.unique' => 'SKU นี้มีอยู่ในระบบแล้ว',
+            'category_ids.required' => 'กรุณาเลือกหมวดหมู่อย่างน้อย 1 หมวด',
+            'category_ids.min' => 'กรุณาเลือกหมวดหมู่อย่างน้อย 1 หมวด',
+            'images.*.image' => 'ไฟล์รูปสินค้าต้องเป็นรูปภาพเท่านั้น',
+            'variants.*.images.*.image' => 'ไฟล์รูปสูตรสินค้าต้องเป็นรูปภาพเท่านั้น',
+            'variants.*.name.required_with' => 'กรุณากรอกชื่อสูตรเมื่อระบุราคาสูตร',
+        ], [
+            'sku' => 'SKU รหัสสินค้า',
+            'name' => 'ชื่อสินค้า',
+            'retail_price' => 'ราคาปลีกหลัก',
+            'wholesale_price' => 'ราคารวมราคาส่งหลัก',
+            'wholesale_min_qty' => 'จำนวนขั้นต่ำราคาส่งหลัก',
+            'stock' => 'สต็อกสินค้าหลัก',
+            'category_ids' => 'หมวดหมู่',
+            'variants.*.name' => 'ชื่อสูตรสินค้า',
+            'variants.*.retail_price' => 'ราคาปลีกสูตร',
+            'variants.*.wholesale_price' => 'ราคารวมราคาส่งสูตร',
+            'variants.*.wholesale_min_qty' => 'จำนวนขั้นต่ำราคาส่งสูตร',
+            'variants.*.stock' => 'สต็อกสูตร',
         ]);
+    }
+
+    private function prepareProductInput(Request $request): void
+    {
+        $variants = [];
+        $variantFiles = $request->file('variants', []);
+
+        foreach ($request->input('variants', []) as $index => $variantInput) {
+            $variantImages = $variantFiles[$index]['images'] ?? [];
+            $hasVariantImage = !empty(array_filter((array) $variantImages));
+            $hasContent = trim((string) ($variantInput['id'] ?? '')) !== ''
+                || trim((string) ($variantInput['name'] ?? '')) !== ''
+                || trim((string) ($variantInput['description'] ?? '')) !== ''
+                || trim((string) ($variantInput['retail_price'] ?? '')) !== ''
+                || trim((string) ($variantInput['wholesale_price'] ?? '')) !== ''
+                || trim((string) ($variantInput['stock'] ?? '')) !== ''
+                || !empty($variantInput['kept_images'] ?? [])
+                || $hasVariantImage;
+
+            if ($hasContent) {
+                $variants[$index] = $variantInput;
+            }
+        }
+
+        $request->merge(['variants' => $variants]);
+    }
+
+    private function validationErrorResponse(ValidationException $e): RedirectResponse
+    {
+        return back()
+            ->withErrors($e->validator)
+            ->withInput()
+            ->with('error', 'บันทึกสินค้าไม่สำเร็จ กรุณาตรวจสอบข้อมูลที่กรอก');
     }
 
     private function extractProductData(Request $request, array $validated, ?Product $product = null): array
