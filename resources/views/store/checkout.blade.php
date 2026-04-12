@@ -620,30 +620,7 @@
                         </div>
                     </label>
 
-                    {{-- COD --}}
-                    <label class="payment-option {{ old('payment_type') === 'cod' ? 'active' : '' }}" data-payment-option>
-                        <div class="payment-head">
-                            <input type="radio" name="payment_type" value="cod" {{ old('payment_type') === 'cod' ? 'checked' : '' }}>
-                            <span>📦 เก็บเงินปลายทาง (COD)</span>
-                        </div>
-                        <div class="payment-meta">
-                            ชำระเงินเมื่อได้รับสินค้า
-                        </div>
-                        <div class="fee-info" id="codFeeInfo" {{ old('payment_type') !== 'cod' ? 'hidden' : '' }}>
-                            ⚠️ มีค่าบริการ COD 3% ของยอดสินค้า = <strong>฿{{ number_format($codFee, 2) }}</strong>
-                        </div>
-                    </label>
 
-                    {{-- Pickup --}}
-                    <label class="payment-option {{ old('payment_type') === 'pickup' ? 'active' : '' }}" data-payment-option>
-                        <div class="payment-head">
-                            <input type="radio" name="payment_type" value="pickup" {{ old('payment_type') === 'pickup' ? 'checked' : '' }}>
-                            <span>🏪 รับหน้าร้าน</span>
-                        </div>
-                        <div class="payment-meta">
-                            มารับสินค้าที่ร้านด้วยตัวเอง ไม่มีค่าจัดส่ง
-                        </div>
-                    </label>
 
                     {{-- Credit --}}
                     @if(in_array(auth()->user()->role, ['customer', 'vip']))
@@ -699,10 +676,6 @@
                         <span>ค่าจัดส่ง</span>
                         <span id="shippingDisplay">฿{{ number_format($shippingCost, 2) }}</span>
                     </div>
-                    <div class="summary-line muted" id="codFeeLine" style="display:none;">
-                        <span>ค่าบริการ COD (3%)</span>
-                        <span>฿{{ number_format($codFee, 2) }}</span>
-                    </div>
                 </div>
 
                 <div class="summary-total">
@@ -719,15 +692,12 @@
             const options = Array.from(document.querySelectorAll('[data-payment-option]'));
             const radios = Array.from(document.querySelectorAll('input[name="payment_type"]'));
             const promptpaySlipBox = document.getElementById('promptpaySlipBox');
-            const codFeeInfo = document.getElementById('codFeeInfo');
-            const codFeeLine = document.getElementById('codFeeLine');
             const shippingLine = document.getElementById('shippingLine');
             const shippingDisplay = document.getElementById('shippingDisplay');
             const grandTotalDisplay = document.getElementById('grandTotalDisplay');
 
             const cartTotal = {{ $cartTotal }};
             const shippingCost = {{ $shippingCost }};
-            const codFee = {{ $codFee }};
 
             const syncPaymentState = () => {
                 const activeValue = radios.find((radio) => radio.checked)?.value || 'promptpay';
@@ -740,23 +710,14 @@
                 if (promptpaySlipBox) {
                     promptpaySlipBox.hidden = activeValue !== 'promptpay';
                 }
-                if (codFeeInfo) {
-                    codFeeInfo.hidden = activeValue !== 'cod';
-                }
-                if (codFeeLine) {
-                    codFeeLine.style.display = activeValue === 'cod' ? 'flex' : 'none';
-                }
 
                 // Update shipping display
-                const isPickup = activeValue === 'pickup';
                 if (shippingDisplay) {
-                    shippingDisplay.textContent = isPickup ? 'ฟรี (รับหน้าร้าน)' : '฿' + shippingCost.toLocaleString('th-TH', {minimumFractionDigits: 2});
+                    shippingDisplay.textContent = '฿' + shippingCost.toLocaleString('th-TH', {minimumFractionDigits: 2});
                 }
 
                 // Calculate grand total
-                let grand = cartTotal;
-                if (!isPickup) grand += shippingCost;
-                if (activeValue === 'cod') grand += codFee;
+                let grand = cartTotal + shippingCost;
 
                 if (grandTotalDisplay) {
                     grandTotalDisplay.textContent = '฿' + grand.toLocaleString('th-TH', {minimumFractionDigits: 2});

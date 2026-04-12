@@ -28,13 +28,7 @@ class StoreController extends Controller
         return 90;
     }
 
-    /**
-     * COD service fee: 3% of subtotal.
-     */
-    private function calculateCodFee(float $subtotal): float
-    {
-        return round($subtotal * 0.03, 2);
-    }
+
 
     public function index(Request $request): View
     {
@@ -209,7 +203,6 @@ class StoreController extends Controller
 
         // Calculate shipping and fees
         $shippingCost = $this->calculateShipping($cart['count']);
-        $codFee = $this->calculateCodFee($cart['total']);
 
         // Load user's saved addresses
         $addresses = $user->addresses()->orderByDesc('is_primary')->orderByDesc('id')->get();
@@ -221,7 +214,6 @@ class StoreController extends Controller
             'cartCount' => $cart['count'],
             'cartTotal' => $cart['total'],
             'shippingCost' => $shippingCost,
-            'codFee' => $codFee,
             'customerName' => old('recipient_name', $primaryAddress->recipient_name ?? $user->name),
             'addresses' => $addresses,
             'primaryAddress' => $primaryAddress,
@@ -244,7 +236,7 @@ class StoreController extends Controller
             'province' => ['required', 'string', 'max:255'],
             'postal_code' => ['required', 'string', 'max:20'],
             'order_note' => ['nullable', 'string'],
-            'payment_type' => ['required', 'in:promptpay,credit,cod,pickup'],
+            'payment_type' => ['required', 'in:promptpay,credit'],
             'slip_image' => ['nullable', 'image'],
         ]);
 
@@ -254,18 +246,9 @@ class StoreController extends Controller
         $status = 'pending';
 
         // Calculate dynamic shipping cost
-        $shippingCost = 0;
-        if (!in_array($paymentType, ['pickup'])) {
-            $shippingCost = $this->calculateShipping($cart['count']);
-        }
+        $shippingCost = $this->calculateShipping($cart['count']);
 
-        // Calculate COD fee
-        $codFee = 0;
-        if ($paymentType === 'cod') {
-            $codFee = $this->calculateCodFee($subtotal);
-        }
-
-        $totalAmount = $subtotal + $shippingCost + $codFee;
+        $totalAmount = $subtotal + $shippingCost;
 
         if ($paymentType === 'promptpay' && !$request->hasFile('slip_image')) {
             return back()->withInput()->with('error', 'กรุณาแนบสลิปการโอนผ่าน PromptPay');
