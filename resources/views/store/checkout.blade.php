@@ -23,7 +23,7 @@
         * { box-sizing: border-box; }
         body {
             margin: 0;
-            padding: 40px 20px;
+            padding: 0;
             font-family: 'Prompt', sans-serif;
             background: var(--page-color);
             color: var(--text-dark);
@@ -32,6 +32,71 @@
         img { display: block; max-width: 100%; }
         button, input, textarea, select { font: inherit; }
 
+        .header-shell {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 12px 30px rgba(40, 58, 100, 0.06);
+        }
+        .header-main {
+            max-width: 1240px;
+            min-height: 82px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 24px;
+        }
+        .brand-logo {
+            display: inline-flex;
+            align-items: center;
+            font-size: 2.35rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            letter-spacing: -0.04em;
+        }
+        .brand-logo-image {
+            height: 56px;
+            width: auto;
+            object-fit: contain;
+        }
+        .brand-logo span:nth-child(2) { color: #6a67ff; }
+        .brand-logo span:nth-child(3) { color: #22c1dc; }
+        .brand-logo span:nth-child(4) { color: #f8c64f; }
+        .brand-logo span:nth-child(5) { color: #35c98b; }
+        .main-links {
+            display: flex;
+            gap: 28px;
+            align-items: center;
+            font-weight: 500;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .main-links a:hover { color: var(--primary-color); }
+        .header-tools {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .user-action,
+        .pill-link {
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-weight: 500;
+            background: white;
+        }
+        .user-action:hover,
+        .pill-link:hover {
+            border-color: rgba(255, 79, 135, 0.35);
+            color: var(--primary-color);
+        }
+        .checkout-page {
+            padding: 40px 20px;
+        }
         .container {
             max-width: 1240px;
             margin: 0 auto;
@@ -305,6 +370,15 @@
         }
 
         @media (max-width: 980px) {
+            .header-main {
+                grid-template-columns: 1fr;
+                padding-top: 16px;
+                padding-bottom: 16px;
+            }
+            .header-tools {
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
             .layout {
                 grid-template-columns: 1fr;
             }
@@ -314,9 +388,14 @@
         }
 
         @media (max-width: 640px) {
-            body {
+            .checkout-page {
                 padding: 24px 14px;
             }
+            .header-main {
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+            .brand-logo { font-size: 2rem; }
             .main-card,
             .summary-card {
                 padding: 18px;
@@ -337,6 +416,27 @@
     </style>
 </head>
 <body>
+    <header class="header-shell">
+        <div class="header-main">
+            <a href="{{ route('home') }}" class="brand-logo" aria-label="บ้านครีม สิงห์บุรี">
+                @include('store.partials.site-logo-markup')
+            </a>
+
+            <nav class="main-links" aria-label="เมนูหลัก">
+                <a href="{{ route('home') }}#catalog">หมวดหมู่</a>
+                <a href="{{ route('home') }}#catalog">สินค้าใหม่</a>
+                <a href="{{ route('home') }}#catalog">สินค้าแนะนำ</a>
+                <a href="{{ route('home') }}#catalog">สินค้าทั้งหมด</a>
+            </nav>
+
+            <div class="header-tools">
+                <a href="{{ route('cart.index') }}" class="pill-link">ตะกร้า {{ $cartCount }} ชิ้น</a>
+                <a href="{{ auth()->user()->role === 'admin' ? route('admin.dashboard') : route('account.index') }}" class="user-action">บัญชีของฉัน</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="checkout-page">
     <div class="container">
         <div class="page-head">
             <div>
@@ -571,6 +671,7 @@
                 </div>
             </aside>
         </form>
+    </div>
     </div>
 
     <script>
