@@ -680,6 +680,23 @@
         @endforeach
     </section>
 
+    <section class="page-section" id="catalog" style="padding-top: 26px; padding-bottom: 20px;">
+        <div class="catalog-toolbar">
+            <div class="section-scroll" id="catalogFilters">
+                <button type="button" class="section-pill active" data-filter="all">ทั้งหมด ({{ $catalogProducts->count() }})</button>
+                @foreach($categories as $category)
+                    <button type="button" class="section-pill" data-filter="category:{{ $category->slug }}">{{ $category->name }} ({{ $category->products_count }})</button>
+                @endforeach
+            </div>
+            <div class="catalog-summary">
+                <div>
+                    <h3 class="section-title" style="font-size:1.55rem;" id="catalogTitle">ทั้งหมด</h3>
+                </div>
+                <div class="catalog-count" id="catalogCount">ทั้งหมด {{ $catalogProducts->count() }} รายการ</div>
+            </div>
+        </div>
+    </section>
+
     @if($newArrivals->isNotEmpty())
         <section class="page-section carousel-section" aria-label="สินค้าใหม่">
             <div class="section-head">
@@ -756,27 +773,7 @@
         </section>
     @endif
 
-    <section class="page-section" id="catalog" style="padding-top: 26px;">
-        <div class="section-head">
-            <div>
-                <h2 class="section-title">เลือกช้อปตามหมวดหมู่</h2>
-            </div>
-        </div>
-        <div class="catalog-toolbar">
-            <div class="section-scroll" id="catalogFilters">
-                <button type="button" class="section-pill active" data-filter="all">ทั้งหมด ({{ $catalogProducts->count() }})</button>
-                @foreach($categories as $category)
-                    <button type="button" class="section-pill" data-filter="category:{{ $category->slug }}">{{ $category->name }} ({{ $category->products_count }})</button>
-                @endforeach
-            </div>
-            <div class="catalog-summary">
-                <div>
-                    <h3 class="section-title" style="font-size:1.55rem;" id="catalogTitle">ทั้งหมด</h3>
-                </div>
-                <div class="catalog-count" id="catalogCount">ทั้งหมด {{ $catalogProducts->count() }} รายการ</div>
-            </div>
-        </div>
-
+    <section class="page-section" style="padding-top: 10px;">
         @if($catalogProducts->isEmpty())
             <div class="catalog-empty">ยังไม่มีสินค้าในระบบ</div>
         @else
