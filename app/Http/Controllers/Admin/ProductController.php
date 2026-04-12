@@ -17,11 +17,16 @@ use Illuminate\View\View;
 
 class ProductController extends Controller
 {
-    public function index(): View
+    public function index()
     {
-        $products = Product::with(['categories', 'variants'])->latest()->get();
+        try {
+            $products = Product::with(['categories', 'variants'])->latest()->get();
 
-        return view('admin.products.index', compact('products'));
+            $html = view('admin.products.index', compact('products'))->render();
+            return $html;
+        } catch (\Throwable $e) {
+            dd($e->getMessage(), $e->getFile(), $e->getLine());
+        }
     }
 
     public function create(): View
