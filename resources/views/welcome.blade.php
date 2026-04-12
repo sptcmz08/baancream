@@ -414,6 +414,9 @@
             text-align: center;
             color: var(--text-soft);
         }
+        .category-products-section.is-empty {
+            display: none;
+        }
 
         @media (max-width: 1080px) {
             .header-main {
@@ -683,16 +686,15 @@
     <section class="page-section" id="catalog" style="padding-top: 26px; padding-bottom: 20px;">
         <div class="catalog-toolbar">
             <div class="section-scroll" id="catalogFilters">
-                <button type="button" class="section-pill active" data-filter="all">ทั้งหมด ({{ $catalogProducts->count() }})</button>
                 @foreach($categories as $category)
                     <button type="button" class="section-pill" data-filter="category:{{ $category->slug }}">{{ $category->name }} ({{ $category->products_count }})</button>
                 @endforeach
             </div>
             <div class="catalog-summary">
                 <div>
-                    <h3 class="section-title" style="font-size:1.55rem;" id="catalogTitle">ทั้งหมด</h3>
+                    <h3 class="section-title" style="font-size:1.55rem;" id="catalogTitle">เลือกหมวดหมู่</h3>
                 </div>
-                <div class="catalog-count" id="catalogCount">ทั้งหมด {{ $catalogProducts->count() }} รายการ</div>
+                <div class="catalog-count" id="catalogCount">เลือกหมวดหมู่เพื่อดูสินค้าเพิ่มเติม</div>
             </div>
         </div>
     </section>
@@ -773,7 +775,7 @@
         </section>
     @endif
 
-    <section class="page-section" style="padding-top: 10px;">
+    <section class="page-section category-products-section is-empty" id="categoryProductsSection" style="padding-top: 10px;">
         @if($catalogProducts->isEmpty())
             <div class="catalog-empty">ยังไม่มีสินค้าในระบบ</div>
         @else
@@ -834,8 +836,9 @@
         const filterButtons = Array.from(document.querySelectorAll('#catalogFilters [data-filter]'));
         const catalogTitle = document.getElementById('catalogTitle');
         const catalogCount = document.getElementById('catalogCount');
+        const categoryProductsSection = document.getElementById('categoryProductsSection');
         const searchProducts = @json($searchProducts);
-        let activeFilter = 'all';
+        let activeFilter = null;
 
         function closeSearchResults() {
             searchResults?.classList.remove('is-open');
@@ -878,17 +881,18 @@
         }
 
         function currentFilterLabel() {
-            return filterButtons.find((button) => button.dataset.filter === activeFilter)?.textContent?.replace(/\s*\(\d+\)\s*$/, '') || 'ทั้งหมด';
+            return filterButtons.find((button) => button.dataset.filter === activeFilter)?.textContent?.replace(/\s*\(\d+\)\s*$/, '') || 'เลือกหมวดหมู่';
         }
 
         function applyCatalogFilters() {
             const query = searchInput?.value.trim().toLowerCase() || '';
             let visibleCount = 0;
+            const hasCategoryFilter = Boolean(activeFilter);
 
             productCards.forEach((card) => {
                 const haystack = card.dataset.search || '';
                 const tags = (card.dataset.filterTags || '').split('|');
-                const matchesFilter = activeFilter === 'all' || tags.includes(activeFilter);
+                const matchesFilter = hasCategoryFilter && tags.includes(activeFilter);
                 const matchesSearch = !query || haystack.includes(query);
                 const visible = matchesFilter && matchesSearch;
 
@@ -903,13 +907,19 @@
             }
 
             if (catalogCount) {
-                catalogCount.textContent = `${currentFilterLabel()} ${visibleCount} รายการ`;
+                catalogCount.textContent = hasCategoryFilter
+                    ? `${currentFilterLabel()} ${visibleCount} รายการ`
+                    : 'เลือกหมวดหมู่เพื่อดูสินค้าเพิ่มเติม';
+            }
+
+            if (categoryProductsSection) {
+                categoryProductsSection.classList.toggle('is-empty', !hasCategoryFilter);
             }
         }
 
         filterButtons.forEach((button) => {
             button.addEventListener('click', () => {
-                activeFilter = button.dataset.filter || 'all';
+                activeFilter = button.dataset.filter || null;
                 filterButtons.forEach((item) => item.classList.toggle('active', item === button));
                 applyCatalogFilters();
             });
