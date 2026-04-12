@@ -216,11 +216,15 @@
         }
         .hero {
             width: 100%;
-            min-height: 74vh;
+            min-height: clamp(380px, 54vw, 760px);
+            position: relative;
+            overflow: hidden;
+            background: #f1f4f9;
+        }
+        .hero.is-fallback {
             background:
                 linear-gradient(180deg, rgba(11, 24, 58, 0.08), rgba(11, 24, 58, 0.08)),
                 url('https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=2200&auto=format&fit=crop') center/cover;
-            position: relative;
         }
         .hero::after {
             content: '';
@@ -228,6 +232,23 @@
             inset: auto 0 0 0;
             height: 160px;
             background: linear-gradient(180deg, rgba(246, 248, 252, 0) 0%, rgba(246, 248, 252, 1) 100%);
+            pointer-events: none;
+            z-index: 3;
+        }
+        .hero-banner-slide {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 0.75s ease;
+        }
+        .hero-banner-slide.is-active {
+            opacity: 1;
+            z-index: 1;
+        }
+        .hero-banner-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         .page-section {
             max-width: 1440px;
@@ -278,6 +299,24 @@
         .product-grid {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 26px;
+        }
+        .carousel-section {
+            padding-top: 44px;
+        }
+        .auto-carousel {
+            overflow: hidden;
+        }
+        .carousel-track {
+            display: flex;
+            transition: transform 0.65s ease;
+            will-change: transform;
+        }
+        .carousel-page {
+            min-width: 100%;
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            grid-auto-rows: 1fr;
             gap: 26px;
         }
         .product-card {
@@ -392,6 +431,9 @@
             .product-grid {
                 grid-template-columns: repeat(3, minmax(0, 1fr));
             }
+            .carousel-page {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
         }
 
         @media (max-width: 720px) {
@@ -403,6 +445,9 @@
             .brand-logo-image { height: 62px; }
             .section-title { font-size: 1.6rem; }
             .product-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .carousel-page {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
@@ -617,7 +662,99 @@
         </div>
     @endif
 
-    <section class="hero" aria-label="แบนเนอร์หลัก"></section>
+    <section class="hero {{ $banners->isEmpty() ? 'is-fallback' : '' }}" aria-label="แบนเนอร์หลัก">
+        @foreach($banners as $index => $banner)
+            @php
+                $bannerImage = $banner->displayImage();
+                $bannerImageUrl = $bannerImage ? route('media.show', ['path' => $bannerImage]) : null;
+                $bannerTag = $banner->link ? 'a' : 'div';
+            @endphp
+            @if($bannerImageUrl)
+                <{{ $bannerTag }}
+                    class="hero-banner-slide {{ $index === 0 ? 'is-active' : '' }}"
+                    data-banner-slide
+                    @if($banner->link) href="{{ $banner->link }}" @endif>
+                    <img src="{{ $bannerImageUrl }}" alt="{{ $banner->title ?: 'แบนเนอร์ร้านค้า' }}">
+                </{{ $bannerTag }}>
+            @endif
+        @endforeach
+    </section>
+
+    @if($newArrivals->isNotEmpty())
+        <section class="page-section carousel-section" aria-label="สินค้าใหม่">
+            <div class="section-head">
+                <div>
+                    <h2 class="section-title">สินค้าใหม่</h2>
+                    <p class="section-subtitle">อัปเดตจากรายการที่ตั้งค่าไว้ในหลังบ้าน</p>
+                </div>
+            </div>
+            <div class="auto-carousel" data-auto-carousel>
+                <div class="carousel-track">
+                    @foreach($newArrivals->chunk(10) as $page)
+                        <div class="carousel-page">
+                            @foreach($page as $product)
+                                <article class="product-card">
+                                    <a href="{{ route('products.show', $product) }}" aria-label="{{ $product->name }}">
+                                        <div class="product-image">
+                                            @if($product->displayImage())
+                                                <img src="{{ route('media.show', ['path' => $product->displayImage()]) }}" alt="{{ $product->name }}">
+                                            @else
+                                                <span>No Image</span>
+                                            @endif
+                                        </div>
+                                        <div class="product-body">
+                                            <h3 class="product-name">{{ $product->name }}</h3>
+                                            <div class="product-price">
+                                                <div class="price-retail">฿{{ number_format($product->displayRetailPrice(), 2) }}</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </article>
+                            @endforeach
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    @if($featuredProducts->isNotEmpty())
+        <section class="page-section carousel-section" aria-label="สินค้าแนะนำ">
+            <div class="section-head">
+                <div>
+                    <h2 class="section-title">สินค้าแนะนำ</h2>
+                    <p class="section-subtitle">รายการขายดีและสินค้าที่เหมาะสำหรับเลือกเพิ่ม</p>
+                </div>
+            </div>
+            <div class="auto-carousel" data-auto-carousel>
+                <div class="carousel-track">
+                    @foreach($featuredProducts->chunk(10) as $page)
+                        <div class="carousel-page">
+                            @foreach($page as $product)
+                                <article class="product-card">
+                                    <a href="{{ route('products.show', $product) }}" aria-label="{{ $product->name }}">
+                                        <div class="product-image">
+                                            @if($product->displayImage())
+                                                <img src="{{ route('media.show', ['path' => $product->displayImage()]) }}" alt="{{ $product->name }}">
+                                            @else
+                                                <span>No Image</span>
+                                            @endif
+                                        </div>
+                                        <div class="product-body">
+                                            <h3 class="product-name">{{ $product->name }}</h3>
+                                            <div class="product-price">
+                                                <div class="price-retail">฿{{ number_format($product->displayRetailPrice(), 2) }}</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </article>
+                            @endforeach
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
 
     <section class="page-section" id="catalog" style="padding-top: 26px;">
         <div class="section-head">
@@ -628,8 +765,6 @@
         <div class="catalog-toolbar">
             <div class="section-scroll" id="catalogFilters">
                 <button type="button" class="section-pill active" data-filter="all">ทั้งหมด ({{ $catalogProducts->count() }})</button>
-                <button type="button" class="section-pill" data-filter="new">สินค้ามาใหม่ ({{ count($newArrivalIds) }})</button>
-                <button type="button" class="section-pill" data-filter="featured">สินค้าแนะนำ ({{ count($featuredIds) }})</button>
                 @foreach($categories as $category)
                     <button type="button" class="section-pill" data-filter="category:{{ $category->slug }}">{{ $category->name }} ({{ $category->products_count }})</button>
                 @endforeach
@@ -793,6 +928,31 @@
         });
 
         applyCatalogFilters();
+
+        const bannerSlides = Array.from(document.querySelectorAll('[data-banner-slide]'));
+        if (bannerSlides.length > 1) {
+            let bannerIndex = 0;
+            setInterval(() => {
+                bannerSlides[bannerIndex]?.classList.remove('is-active');
+                bannerIndex = (bannerIndex + 1) % bannerSlides.length;
+                bannerSlides[bannerIndex]?.classList.add('is-active');
+            }, 4500);
+        }
+
+        document.querySelectorAll('[data-auto-carousel]').forEach((carousel) => {
+            const track = carousel.querySelector('.carousel-track');
+            const pages = Array.from(carousel.querySelectorAll('.carousel-page'));
+
+            if (!track || pages.length <= 1) {
+                return;
+            }
+
+            let pageIndex = 0;
+            setInterval(() => {
+                pageIndex = (pageIndex + 1) % pages.length;
+                track.style.transform = `translateX(-${pageIndex * 100}%)`;
+            }, 4200);
+        });
 
         // ── User Dropdown ──
         const userMenuBtn = document.getElementById('userMenuBtn');

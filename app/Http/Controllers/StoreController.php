@@ -67,14 +67,13 @@ class StoreController extends Controller
 
         $newArrivals = $catalogProducts
             ->where('is_new_arrival', true)
-            ->take(8)
             ->values();
 
         if ($newArrivals->isEmpty()) {
-            $newArrivals = $catalogProducts->take(8)->values();
+            $newArrivals = $catalogProducts->take(10)->values();
         }
 
-        $featuredProducts = $catalogProducts->take(12)->values();
+        $featuredProducts = $catalogProducts->values();
 
         $banners = Banner::active()->get();
 
