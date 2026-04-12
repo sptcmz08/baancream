@@ -208,7 +208,7 @@
         .thumb img {
             width: 100%;
             aspect-ratio: 1 / 1;
-            object-fit: cover;
+            object-fit: contain;
         }
         .lightbox {
             position: fixed;
@@ -295,7 +295,7 @@
         .lightbox-thumb img {
             width: 100%;
             aspect-ratio: 1 / 1;
-            object-fit: cover;
+            object-fit: contain;
         }
 
         .detail-card {
@@ -483,11 +483,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 18px;
         }
         .product-image img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
         }
         .product-image span {
             color: #9aa7bd;
