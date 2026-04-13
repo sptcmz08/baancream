@@ -1283,16 +1283,59 @@
             notifDropdown?.classList.remove('is-open');
         });
 
+        // UI Helpers
+        const updateCartUI = (data) => {
+            const sidebarItems = document.getElementById('sidebarCartItems');
+            const sidebarTotal = document.getElementById('sidebarCartTotal');
+            const sidebarCount = document.getElementById('sidebarCartCount');
+            const floatingBtn = document.getElementById('floatingCartButton');
+            let floatingBadge = floatingBtn?.querySelector('span:nth-child(2)');
+
+            if (sidebarItems) sidebarItems.innerHTML = data.html;
+            if (sidebarTotal) sidebarTotal.textContent = data.total;
+            if (sidebarCount) sidebarCount.textContent = `รวม ${data.count} ชิ้น`;
+
+            if (floatingBadge && floatingBadge !== floatingBtn.querySelector('span:first-child')) {
+                floatingBadge.textContent = data.count;
+                floatingBadge.style.display = data.count > 0 ? 'flex' : 'none';
+            } else if (floatingBtn && data.count > 0) {
+                floatingBtn.insertAdjacentHTML('beforeend', `<span style="position:absolute; top:4px; right:2px; min-width:26px; height:26px; border-radius:999px; background:#111827; color:white; font-size:0.8rem; font-weight:700; display:flex; align-items:center; justify-content:center; padding:0 7px;">${data.count}</span>`);
+            }
+        };
+
+        // Selection Popover Toggle
+        document.addEventListener('click', (e) => {
+            const toggleBtn = e.target.closest('[data-toggle-selection]');
+            if (toggleBtn) {
+                e.stopPropagation();
+                const popover = toggleBtn.nextElementSibling;
+                const isVisible = popover.style.display === 'block';
+                
+                // Close all others
+                document.querySelectorAll('.selection-popover').forEach(p => p.style.display = 'none');
+                
+                popover.style.display = isVisible ? 'none' : 'block';
+                return;
+            }
+
+            // Close popovers when clicking outside
+            if (!e.target.closest('.selection-popover')) {
+                document.querySelectorAll('.selection-popover').forEach(p => p.style.display = 'none');
+            }
+        });
+
+        // AJAX Form Submissions (Add & Remove)
         document.addEventListener('submit', async (e) => {
-            const form = e.target.closest('[data-ajax-cart-form]');
+            const form = e.target.closest('[data-ajax-cart-form], [data-ajax-cart-remove]');
             if (!form) return;
 
             e.preventDefault();
             const btn = form.querySelector('button');
-            const originalText = btn.textContent;
+            const originalContent = btn.innerHTML;
+            const isAdd = form.hasAttribute('data-ajax-cart-form');
 
             btn.disabled = true;
-            btn.textContent = '...';
+            if (isAdd) btn.textContent = '...';
 
             try {
                 const formData = new FormData(form);
@@ -1304,34 +1347,53 @@
                 const data = await res.json();
 
                 if (data.success) {
-                    const sidebarItems = document.getElementById('sidebarCartItems');
-                    const sidebarTotal = document.getElementById('sidebarCartTotal');
-                    const sidebarCount = document.getElementById('sidebarCartCount');
-                    const floatingBtn = document.getElementById('floatingCartButton');
-                    let floatingBadge = floatingBtn?.querySelector('span:nth-child(2)');
+                    updateCartUI(data);
 
-                    if (sidebarItems) sidebarItems.innerHTML = data.html;
-                    if (sidebarTotal) sidebarTotal.textContent = data.total;
-                    if (sidebarCount) sidebarCount.textContent = `รวม ${data.count} ชิ้น`;
-
-                    if (floatingBadge && floatingBadge !== floatingBtn.querySelector('span:first-child')) {
-                        floatingBadge.textContent = data.count;
-                        floatingBadge.style.display = 'flex';
-                    } else if (floatingBtn) {
-                        floatingBtn.insertAdjacentHTML('beforeend', `<span style="position:absolute; top:4px; right:2px; min-width:26px; height:26px; border-radius:999px; background:#111827; color:white; font-size:0.8rem; font-weight:700; display:flex; align-items:center; justify-content:center; padding:0 7px;">${data.count}</span>`);
+                    if (isAdd) {
+                        btn.textContent = '✓';
+                        // Close popover if any
+                        const popover = form.closest('.selection-popover');
+                        if (popover) setTimeout(() => popover.style.display = 'none', 500);
+                        
+                        setTimeout(() => {
+                            btn.innerHTML = originalContent;
+                            btn.disabled = false;
+                        }, 1000);
                     }
-
-                    btn.textContent = '✓';
-                    btn.style.background = '#10b34e';
-                    setTimeout(() => {
-                        btn.textContent = originalText;
-                        btn.style.background = '';
-                        btn.disabled = false;
-                    }, 1000);
                 }
             } catch (err) {
-                btn.textContent = originalText;
+                btn.innerHTML = originalContent;
                 btn.disabled = false;
+            }
+        });
+
+        // Quantity Adjustment Buttons
+        document.addEventListener('click', async (e) => {
+            const qtyBtn = e.target.closest('.cart-qty-btn');
+            if (!qtyBtn) return;
+
+            const { id, action } = qtyBtn.dataset;
+            qtyBtn.disabled = true;
+
+            try {
+                const res = await fetch('{{ route('cart.update') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ id, action })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    updateCartUI(data);
+                }
+            } catch (err) {
+                console.error('Update failed:', err);
+            } finally {
+                qtyBtn.disabled = false;
             }
         });
     </script>

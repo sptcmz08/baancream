@@ -166,6 +166,48 @@ class StoreController extends Controller
         return back()->with('success', 'เพิ่มลงตะกร้าแล้ว!');
     }
 
+    public function updateCartQuantity(Request $request)
+    {
+        $request->validate([
+            'id' => 'required',
+            'action' => 'required|in:plus,minus',
+        ]);
+
+        $cart = session()->get('cart', []);
+        $id = $request->id;
+
+        if (isset($cart[$id])) {
+            if ($request->action === 'plus') {
+                $cart[$id]['quantity']++;
+            } else {
+                $cart[$id]['quantity']--;
+                if ($cart[$id]['quantity'] < 1) {
+                    unset($cart[$id]);
+                }
+            }
+
+            if (isset($cart[$id])) {
+                $cart[$id]['retail_subtotal'] = $cart[$id]['retail_price'] * $cart[$id]['quantity'];
+                $cart[$id]['wholesale_subtotal'] = $cart[$id]['wholesale_bundle_price'];
+            }
+
+            session()->put('cart', $cart);
+        }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            $cartSummary = $this->cartWithTotals();
+            return response()->json([
+                'success' => true,
+                'count' => $cartSummary['count'],
+                'total' => number_format($cartSummary['total'], 2),
+                'total_raw' => $cartSummary['total'],
+                'html' => view('store.partials.cart-items', ['cartItems' => $cartSummary['items']])->render(),
+            ]);
+        }
+
+        return back();
+    }
+
     public function cart(): View
     {
         $cart = $this->cartWithTotals();
@@ -177,7 +219,7 @@ class StoreController extends Controller
         ]);
     }
 
-    public function removeFromCart(Request $request): RedirectResponse
+    public function removeFromCart(Request $request)
     {
         if ($request->id) {
             $cart = session()->get('cart', []);
@@ -185,6 +227,17 @@ class StoreController extends Controller
                 unset($cart[$request->id]);
                 session()->put('cart', $cart);
             }
+        }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            $cartSummary = $this->cartWithTotals();
+            return response()->json([
+                'success' => true,
+                'count' => $cartSummary['count'],
+                'total' => number_format($cartSummary['total'], 2),
+                'total_raw' => $cartSummary['total'],
+                'html' => view('store.partials.cart-items', ['cartItems' => $cartSummary['items']])->render(),
+            ]);
         }
 
         return back()->with('success', 'ลบสินค้าออกจากตะกร้า');

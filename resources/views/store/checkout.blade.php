@@ -647,26 +647,22 @@
 
 
                     {{-- Credit --}}
-                    @if(in_array(auth()->user()->role, ['customer', 'vip']))
+                    @if(in_array(auth()->user()->role, ['customer', 'vip']) && $credit)
                         <label class="payment-option {{ old('payment_type') === 'credit' ? 'active' : '' }}" data-payment-option>
                             <div class="payment-head">
                                 <input type="radio" name="payment_type" value="credit" {{ old('payment_type') === 'credit' ? 'checked' : '' }}>
                                 <span>💰 ชำระด้วยเครดิต</span>
                             </div>
-                            @if($credit)
-                                <div class="credit-note">
-                                    รอบเครดิต {{ $credit->month }}/{{ $credit->year }}
-                                    @if($credit->due_date)
-                                        · กำหนดชำระ {{ $credit->due_date->format('d/m/Y') }}
-                                    @endif
-                                    <br>
-                                    วงเงินเครดิต {{ $credit->credit_limit !== null ? '฿' . number_format($credit->credit_limit, 2) : 'ไม่จำกัด' }}<br>
-                                    ใช้ไปแล้ว ฿{{ number_format($credit->spent_amount, 2) }}<br>
-                                    หากชำระด้วยเครดิต ยอดจะถูกรวมเข้าในรอบบิลที่ยังไม่ปิดโดยอัตโนมัติ
-                                </div>
-                            @else
-                                <div class="field-help">บัญชีนี้ยังไม่มีรอบเครดิตที่เปิดใช้งานอยู่</div>
-                            @endif
+                            <div class="credit-note">
+                                รอบเครดิต {{ $credit->month }}/{{ $credit->year }}
+                                @if($credit->due_date)
+                                    · กำหนดชำระ {{ $credit->due_date->format('d/m/Y') }}
+                                @endif
+                                <br>
+                                วงเงินเครดิต {{ $credit->credit_limit !== null ? '฿' . number_format($credit->credit_limit, 2) : 'ไม่จำกัด' }}<br>
+                                ใช้ไปแล้ว ฿{{ number_format($credit->spent_amount, 2) }}<br>
+                                หากชำระด้วยเครดิต ยอดจะถูกรวมเข้าในรอบบิลที่ยังไม่ปิดโดยอัตโนมัติ
+                            </div>
                         </label>
                     @endif
                 </div>

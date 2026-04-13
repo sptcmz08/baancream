@@ -19,6 +19,7 @@ Route::get('/products/{product}', [\App\Http\Controllers\StoreController::class,
 Route::get('/search', [\App\Http\Controllers\StoreController::class, 'search'])->name('store.search');
 Route::get('/branding/logo', [SiteSettingController::class, 'showStorefrontLogo'])->name('branding.logo');
 Route::post('/cart/add', [\App\Http\Controllers\StoreController::class, 'addToCart'])->name('cart.add');
+Route::post('/cart/update', [\App\Http\Controllers\StoreController::class, 'updateCartQuantity'])->name('cart.update');
 Route::get('/cart', [\App\Http\Controllers\StoreController::class, 'cart'])->name('cart.index');
 Route::post('/cart/remove', [\App\Http\Controllers\StoreController::class, 'removeFromCart'])->name('cart.remove');
 Route::get('/checkout', [\App\Http\Controllers\StoreController::class, 'checkout'])->name('checkout.index')->middleware('auth');
