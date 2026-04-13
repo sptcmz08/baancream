@@ -327,7 +327,7 @@
             <button type="button" class="credit-modal-close" data-close-credit-modal aria-label="ปิด">x</button>
         </div>
 
-        <form action="{{ route('admin.credits.store') }}" method="POST" class="credit-form-grid">
+        <form action="{{ route('admin.credits.store') }}" method="POST" class="credit-form-grid" data-create-credit-form>
             @csrf
             <div>
                 <label>เลือกลูกค้า</label>
@@ -352,7 +352,7 @@
             <div class="credit-split">
                 <div>
                     <label>รอบเดือน</label>
-                    <select name="month" required>
+                    <select name="month" required data-credit-month>
                         @for($i = 1; $i <= 12; $i++)
                             <option value="{{ $i }}" {{ (int) old('month', date('n')) === $i ? 'selected' : '' }}>เดือน {{ $i }}</option>
                         @endfor
@@ -360,13 +360,13 @@
                 </div>
                 <div>
                     <label>ปี ค.ศ.</label>
-                    <input type="number" name="year" value="{{ old('year', date('Y')) }}" required>
+                    <input type="number" name="year" value="{{ old('year', date('Y')) }}" required data-credit-year>
                 </div>
             </div>
 
             <div>
                 <label>กำหนดชำระ</label>
-                <input type="date" name="due_date" value="{{ old('due_date', now()->endOfMonth()->toDateString()) }}" required>
+                <input type="date" name="due_date" value="{{ old('due_date', now()->endOfMonth()->toDateString()) }}" required data-credit-due-date>
             </div>
 
             <div>
@@ -581,6 +581,28 @@
         if (event.key === 'Escape') {
             closeCreditModals();
         }
+    });
+
+    document.querySelectorAll('[data-create-credit-form]').forEach((form) => {
+        const monthInput = form.querySelector('[data-credit-month]');
+        const yearInput = form.querySelector('[data-credit-year]');
+        const dueDateInput = form.querySelector('[data-credit-due-date]');
+
+        const padDatePart = (value) => String(value).padStart(2, '0');
+        const syncDueDate = () => {
+            const month = Number(monthInput?.value);
+            const year = Number(yearInput?.value);
+
+            if (!month || !year || month < 1 || month > 12) {
+                return;
+            }
+
+            const lastDay = new Date(year, month, 0).getDate();
+            dueDateInput.value = `${year}-${padDatePart(month)}-${padDatePart(lastDay)}`;
+        };
+
+        monthInput?.addEventListener('change', syncDueDate);
+        yearInput?.addEventListener('input', syncDueDate);
     });
 </script>
 @endsection
