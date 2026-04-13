@@ -419,15 +419,6 @@
     @php
         $mediaUrl = fn (?string $path) => $path ? '/media/' . ltrim($path, '/') : null;
     @endphp
-                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <path d="M7 8h13l-1.2 6.6a2 2 0 0 1-2 1.6H9.1a2 2 0 0 1-2-1.7L5.8 5.8H3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M9.4 20.2h.1M17 20.2h.1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
-                    </svg>
-                </a>
-                <a href="{{ auth()->user()->role === 'admin' ? route('admin.dashboard') : route('account.index') }}" class="user-action">บัญชีของฉัน</a>
-            </div>
-        </div>
-    </header>
 
     <div class="checkout-page">
     <div class="container">
