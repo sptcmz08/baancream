@@ -26,8 +26,33 @@ class MediaController extends Controller
                     ['Cache-Control' => 'public, max-age=86400']
                 );
             }
+
+            $publicStoragePath = $this->safePath(public_path('storage'), $candidate);
+            if ($publicStoragePath) {
+                return response()->file($publicStoragePath, ['Cache-Control' => 'public, max-age=86400']);
+            }
         }
 
         abort(404);
+    }
+
+    private function safePath(string $root, string $path): ?string
+    {
+        $rootPath = realpath($root);
+
+        if ($rootPath === false) {
+            return null;
+        }
+
+        $targetPath = realpath($rootPath . DIRECTORY_SEPARATOR . ltrim($path, '/\\'));
+
+        if ($targetPath === false || !is_file($targetPath)) {
+            return null;
+        }
+
+        $rootPath = rtrim(str_replace('\\', '/', $rootPath), '/') . '/';
+        $targetPath = str_replace('\\', '/', $targetPath);
+
+        return str_starts_with($targetPath, $rootPath) ? $targetPath : null;
     }
 }
