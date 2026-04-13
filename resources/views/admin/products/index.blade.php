@@ -49,7 +49,7 @@
                     <th style="width: 200px;">จัดการ</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="productsTableBody">
                 @forelse($products ?? [] as $product)
                 <tr>
                     <td style="text-align:center;">
@@ -103,21 +103,24 @@
         </table>
     </div>
 
-    {{ $products->links('vendor.pagination.admin') }}
+    <div id="productsPagination">
+        {{ $products->links('vendor.pagination.admin') }}
+    </div>
 </div>
 
 <script>
     const bulkDeleteProductsForm = document.getElementById('bulkDeleteProductsForm');
     const selectAllProductsOnPage = document.getElementById('selectAllProductsOnPage');
-    const productCheckboxes = Array.from(document.querySelectorAll('[data-product-checkbox]'));
     const bulkDeleteProductsButton = document.getElementById('bulkDeleteProductsButton');
     const productSearchForm = document.getElementById('productSearchForm');
     const productSearchInput = document.getElementById('productSearchInput');
-    let productSearchTimer;
+    const productsTableBody = document.getElementById('productsTableBody');
+    const productsPagination = document.getElementById('productsPagination');
+    let productSearchRequest;
     let isComposingProductSearch = false;
     let lastSubmittedProductSearch = productSearchInput?.value || '';
 
-    function submitProductSearch() {
+    async function runProductSearch() {
         if (!productSearchForm || !productSearchInput || isComposingProductSearch) {
             return;
         }
@@ -127,13 +130,41 @@
             return;
         }
 
-        if (nextSearch === '') {
-            window.location.href = productSearchForm.action;
-            return;
+        lastSubmittedProductSearch = nextSearch;
+        const url = new URL(productSearchForm.action, window.location.origin);
+        if (nextSearch !== '') {
+            url.searchParams.set('search', nextSearch);
         }
 
-        lastSubmittedProductSearch = nextSearch;
-        productSearchForm.requestSubmit();
+        productSearchRequest?.abort();
+        productSearchRequest = new AbortController();
+
+        try {
+            const response = await fetch(url.toString(), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                signal: productSearchRequest.signal,
+            });
+
+            const html = await response.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const nextBody = doc.getElementById('productsTableBody');
+            const nextPagination = doc.getElementById('productsPagination');
+
+            if (productsTableBody && nextBody) {
+                productsTableBody.innerHTML = nextBody.innerHTML;
+            }
+
+            if (productsPagination && nextPagination) {
+                productsPagination.innerHTML = nextPagination.innerHTML;
+            }
+
+            history.replaceState(null, '', url.toString());
+            updateBulkDeleteProductsState();
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                console.error(error);
+            }
+        }
     }
 
     productSearchInput?.addEventListener('compositionstart', () => {
@@ -142,16 +173,15 @@
 
     productSearchInput?.addEventListener('compositionend', () => {
         isComposingProductSearch = false;
-        clearTimeout(productSearchTimer);
-        productSearchTimer = setTimeout(submitProductSearch, 450);
+        runProductSearch();
     });
 
     productSearchInput?.addEventListener('input', () => {
-        clearTimeout(productSearchTimer);
-        productSearchTimer = setTimeout(submitProductSearch, 450);
+        runProductSearch();
     });
 
     function updateBulkDeleteProductsState() {
+        const productCheckboxes = Array.from(document.querySelectorAll('[data-product-checkbox]'));
         const checkedCount = productCheckboxes.filter((checkbox) => checkbox.checked).length;
         if (bulkDeleteProductsButton) {
             bulkDeleteProductsButton.disabled = checkedCount === 0;
@@ -167,17 +197,21 @@
     }
 
     selectAllProductsOnPage?.addEventListener('change', () => {
+        const productCheckboxes = Array.from(document.querySelectorAll('[data-product-checkbox]'));
         productCheckboxes.forEach((checkbox) => {
             checkbox.checked = selectAllProductsOnPage.checked;
         });
         updateBulkDeleteProductsState();
     });
 
-    productCheckboxes.forEach((checkbox) => {
-        checkbox.addEventListener('change', updateBulkDeleteProductsState);
+    productsTableBody?.addEventListener('change', (event) => {
+        if (event.target.matches('[data-product-checkbox]')) {
+            updateBulkDeleteProductsState();
+        }
     });
 
     bulkDeleteProductsForm?.addEventListener('submit', (event) => {
+        const productCheckboxes = Array.from(document.querySelectorAll('[data-product-checkbox]'));
         const checkedCount = productCheckboxes.filter((checkbox) => checkbox.checked).length;
         if (checkedCount === 0 || !confirm(`ยืนยันลบสินค้าที่เลือก ${checkedCount} รายการ?`)) {
             event.preventDefault();
