@@ -38,7 +38,7 @@
         </div>
     </a>
 
-    <form method="POST" action="{{ route('cart.add') }}" class="product-add-form">
+    <form method="POST" action="{{ route('cart.add') }}" class="product-add-form" data-ajax-cart-form>
         @csrf
         <input type="hidden" name="product_id" value="{{ $product->id }}">
         <input type="hidden" name="quantity" value="1">

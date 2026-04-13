@@ -1282,6 +1282,58 @@
             userMenuBtn?.setAttribute('aria-expanded', 'false');
             notifDropdown?.classList.remove('is-open');
         });
+
+        document.addEventListener('submit', async (e) => {
+            const form = e.target.closest('[data-ajax-cart-form]');
+            if (!form) return;
+
+            e.preventDefault();
+            const btn = form.querySelector('button');
+            const originalText = btn.textContent;
+
+            btn.disabled = true;
+            btn.textContent = '...';
+
+            try {
+                const formData = new FormData(form);
+                const res = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    const sidebarItems = document.getElementById('sidebarCartItems');
+                    const sidebarTotal = document.getElementById('sidebarCartTotal');
+                    const sidebarCount = document.getElementById('sidebarCartCount');
+                    const floatingBtn = document.getElementById('floatingCartButton');
+                    let floatingBadge = floatingBtn?.querySelector('span:nth-child(2)');
+
+                    if (sidebarItems) sidebarItems.innerHTML = data.html;
+                    if (sidebarTotal) sidebarTotal.textContent = data.total;
+                    if (sidebarCount) sidebarCount.textContent = `รวม ${data.count} ชิ้น`;
+
+                    if (floatingBadge && floatingBadge !== floatingBtn.querySelector('span:first-child')) {
+                        floatingBadge.textContent = data.count;
+                        floatingBadge.style.display = 'flex';
+                    } else if (floatingBtn) {
+                        floatingBtn.insertAdjacentHTML('beforeend', `<span style="position:absolute; top:4px; right:2px; min-width:26px; height:26px; border-radius:999px; background:#111827; color:white; font-size:0.8rem; font-weight:700; display:flex; align-items:center; justify-content:center; padding:0 7px;">${data.count}</span>`);
+                    }
+
+                    btn.textContent = '✓';
+                    btn.style.background = '#10b34e';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.style.background = '';
+                        btn.disabled = false;
+                    }, 1000);
+                }
+            } catch (err) {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        });
     </script>
 </body>
 </html>

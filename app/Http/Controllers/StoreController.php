@@ -126,7 +126,7 @@ class StoreController extends Controller
         return response()->json($products);
     }
 
-    public function addToCart(Request $request): RedirectResponse
+    public function addToCart(Request $request)
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
@@ -150,6 +150,18 @@ class StoreController extends Controller
         $cart[$cartKey]['wholesale_subtotal'] = $cart[$cartKey]['wholesale_bundle_price'];
 
         session()->put('cart', $cart);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            $cartSummary = $this->cartWithTotals();
+            return response()->json([
+                'success' => true,
+                'message' => 'เพิ่มลงตะกร้าแล้ว!',
+                'count' => $cartSummary['count'],
+                'total' => number_format($cartSummary['total'], 2),
+                'total_raw' => $cartSummary['total'],
+                'html' => view('store.partials.cart-items', ['cartItems' => $cartSummary['items']])->render(),
+            ]);
+        }
 
         return back()->with('success', 'เพิ่มลงตะกร้าแล้ว!');
     }
