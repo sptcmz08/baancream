@@ -183,6 +183,9 @@
                     <div>
                         <label style="font-weight:500; display:block; margin-bottom:6px;">ค่าจัดส่ง (฿)</label>
                         <input type="number" name="shipping_cost" value="{{ $order->shipping_cost }}" step="0.01" style="width:100%; padding:10px 14px; border:1px solid var(--border-color); border-radius:8px; font-family:'Prompt';">
+                        @if($order->payment_method === 'credit' || $order->type === 'credit')
+                            <div style="margin-top:6px; color:var(--text-muted); font-size:0.8rem;">แก้ค่าส่งแล้วระบบจะปรับยอดเครดิตตามส่วนต่างให้อัตโนมัติ</div>
+                        @endif
                     </div>
                     <div style="grid-column:1/-1;">
                         <label style="font-weight:500; display:block; margin-bottom:6px;">หมายเหตุจากแอดมิน</label>

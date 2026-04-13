@@ -26,7 +26,7 @@
                 <li><a href="{{ route('admin.credits.index') }}" class="nav-link {{ request()->routeIs('admin.credits.*') ? 'active' : '' }}">💳 ระบบเครดิต</a></li>
                 <li><a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">👥 จัดการผู้ใช้</a></li>
                 <li><a href="{{ route('admin.banners.index') }}" class="nav-link {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">🖼️ จัดการแบนเนอร์</a></li>
-                <li><a href="{{ url('/admin/settings/branding') }}" class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">⚙️ ตั้งค่าเว็บ / โลโก้</a></li>
+                <li><a href="{{ url('/admin/settings/branding') }}" class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">⚙️ ตั้งค่าเว็บ / ค่าส่ง</a></li>
                 <li style="margin-top: 20px; border-top: 1px solid #eee;">
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf 

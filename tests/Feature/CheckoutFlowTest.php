@@ -74,6 +74,7 @@ class CheckoutFlowTest extends TestCase
         $this->assertSame('normal', $order->type);
         $this->assertSame('promptpay', $order->payment_method);
         $this->assertSame('pending', $order->status);
+        $this->assertSame(30.0, (float) $order->shipping_cost);
         $this->assertSame('ลูกค้า ทดสอบ', $order->recipient_name);
         $this->assertSame('0812345678', $order->phone);
         $this->assertSame('123 หมู่ 5 ถนนทดสอบ', $order->address_line);
@@ -143,6 +144,7 @@ class CheckoutFlowTest extends TestCase
         $this->assertSame('credit', $order->type);
         $this->assertSame('credit', $order->payment_method);
         $this->assertSame('paid_wait_shipping', $order->status);
-        $this->assertSame(2700.0, (float) CreditCycle::first()->fresh()->spent_amount);
+        $this->assertSame(30.0, (float) $order->shipping_cost);
+        $this->assertSame(2730.0, (float) CreditCycle::first()->fresh()->spent_amount);
     }
 }

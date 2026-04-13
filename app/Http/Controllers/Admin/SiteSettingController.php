@@ -17,6 +17,8 @@ class SiteSettingController extends Controller
         return view('admin.settings.edit', [
             'storefrontLogoPath' => SiteSetting::getValue('storefront_logo'),
             'storefrontLogoUrl' => SiteSetting::publicUrl('storefront_logo'),
+            'shippingBaseFee' => SiteSetting::shippingBaseFee(),
+            'shippingRules' => SiteSetting::shippingRules(),
         ]);
     }
 
@@ -25,7 +27,20 @@ class SiteSettingController extends Controller
         $request->validate([
             'storefront_logo' => 'nullable|image|max:4096',
             'remove_storefront_logo' => 'nullable|boolean',
+            'shipping_base_fee' => 'nullable|numeric|min:0',
+            'shipping_rules' => 'nullable|array',
+            'shipping_rules.*.min_qty' => 'nullable|integer|min:1',
+            'shipping_rules.*.max_qty' => 'nullable|integer|min:1',
+            'shipping_rules.*.fee' => 'nullable|numeric|min:0',
         ]);
+
+        if ($request->has('shipping_base_fee')) {
+            SiteSetting::setValue('shipping_base_fee', (string) max(0, (float) $request->input('shipping_base_fee', 30)));
+        }
+
+        if ($request->has('shipping_rules')) {
+            SiteSetting::setShippingRules($request->input('shipping_rules', []));
+        }
 
         $currentLogoPath = SiteSetting::getValue('storefront_logo');
 
@@ -47,7 +62,7 @@ class SiteSettingController extends Controller
 
         return redirect()
             ->route('admin.settings.edit')
-            ->with('success', 'อัปเดตโลโก้เว็บไซต์สำเร็จ');
+            ->with('success', 'อัปเดตการตั้งค่าเว็บไซต์สำเร็จ');
     }
 
     public function showStorefrontLogo(): BinaryFileResponse

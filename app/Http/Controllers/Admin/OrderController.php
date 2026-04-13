@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\CreditCycle;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class OrderController extends Controller
@@ -68,32 +70,50 @@ class OrderController extends Controller
             'customer_notes' => 'nullable|string',
         ]);
 
-        // If status changes, reset read status so customer sees the notification dot
-        if (isset($validated['status']) && $validated['status'] !== $order->status) {
-            $order->user_read_status = false;
-        }
-
-        $order->fill(array_filter($validated, fn ($v) => $v !== null));
-
-        // Handle pickup image upload
-        if ($request->hasFile('pickup_image')) {
-            if ($order->pickup_image) {
-                Storage::disk('public')->delete($order->pickup_image);
+        DB::transaction(function () use ($request, $order, $validated): void {
+            // If status changes, reset read status so customer sees the notification dot
+            if (isset($validated['status']) && $validated['status'] !== $order->status) {
+                $order->user_read_status = false;
             }
-            $order->pickup_image = $request->file('pickup_image')->store('orders/pickup', 'public');
-            $order->pickup_at = now();
-        }
 
-        // Handle COD image upload
-        if ($request->hasFile('cod_image')) {
-            if ($order->cod_image) {
-                Storage::disk('public')->delete($order->cod_image);
+            $oldShippingCost = (float) ($order->shipping_cost ?? 0);
+            if (array_key_exists('shipping_cost', $validated)) {
+                $newShippingCost = (float) $validated['shipping_cost'];
+                $shippingDelta = $newShippingCost - $oldShippingCost;
+                $order->shipping_cost = $newShippingCost;
+                $order->total_amount = max(0, (float) $order->total_amount + $shippingDelta);
+                $order->user_read_status = false;
+
+                if ($shippingDelta !== 0.0 && ($order->payment_method === 'credit' || $order->type === 'credit')) {
+                    CreditCycle::where('user_id', $order->user_id)
+                        ->where('month', $order->created_at->month)
+                        ->where('year', $order->created_at->year)
+                        ->increment('spent_amount', $shippingDelta);
+                }
             }
-            $order->cod_image = $request->file('cod_image')->store('orders/cod', 'public');
-            $order->cod_uploaded_at = now();
-        }
 
-        $order->save();
+            $order->fill(collect($validated)->except('shipping_cost')->filter(fn ($v) => $v !== null)->toArray());
+
+            // Handle pickup image upload
+            if ($request->hasFile('pickup_image')) {
+                if ($order->pickup_image) {
+                    Storage::disk('public')->delete($order->pickup_image);
+                }
+                $order->pickup_image = $request->file('pickup_image')->store('orders/pickup', 'public');
+                $order->pickup_at = now();
+            }
+
+            // Handle COD image upload
+            if ($request->hasFile('cod_image')) {
+                if ($order->cod_image) {
+                    Storage::disk('public')->delete($order->cod_image);
+                }
+                $order->cod_image = $request->file('cod_image')->store('orders/cod', 'public');
+                $order->cod_uploaded_at = now();
+            }
+
+            $order->save();
+        });
 
         return back()->with('success', 'อัปเดตออเดอร์สำเร็จ');
     }

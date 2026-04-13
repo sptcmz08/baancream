@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\SiteSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,16 +17,9 @@ use Illuminate\View\View;
 
 class StoreController extends Controller
 {
-    /**
-     * Shipping cost tiers (programmatic formula).
-     */
     private function calculateShipping(int $totalQty): float
     {
-        if ($totalQty <= 0) return 0;
-        if ($totalQty <= 5) return 40;
-        if ($totalQty <= 10) return 50;
-        if ($totalQty <= 20) return 70;
-        return 90;
+        return SiteSetting::calculateShippingByQuantity($totalQty);
     }
 
 
