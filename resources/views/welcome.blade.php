@@ -349,22 +349,28 @@
         .product-card {
             background: var(--surface-color);
             border: 1px solid var(--border-color);
-            border-radius: 30px;
+            border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 18px 50px rgba(29, 41, 76, 0.08);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
         }
         .product-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 24px 58px rgba(29, 41, 76, 0.12);
         }
+        .product-card-link {
+            display: flex;
+            min-height: 100%;
+            flex-direction: column;
+        }
         .product-image {
             aspect-ratio: 1 / 1;
-            background: linear-gradient(135deg, #f8f0f3 0%, #eef7ff 100%);
+            background: linear-gradient(135deg, #fff6fb 0%, #eef7ff 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 18px;
+            padding: 22px;
         }
         .product-image img {
             width: 100%;
@@ -377,23 +383,89 @@
             font-size: 0.95rem;
         }
         .product-body {
-            padding: 22px 22px 24px;
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            gap: 12px;
+            padding: 20px 20px 64px;
+            background: white;
+        }
+        .product-category-badge {
+            align-self: flex-start;
+            border-radius: 8px;
+            background: #effaf5;
+            color: #14805a;
+            padding: 5px 9px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            line-height: 1.2;
         }
         .product-name {
             font-size: 1.12rem;
-            font-weight: 600;
-            line-height: 1.5;
-            margin-bottom: 14px;
-            min-height: 3em;
+            font-weight: 700;
+            line-height: 1.45;
+            min-height: 3.2em;
         }
         .product-price {
+            margin-top: auto;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #edf1f7;
         }
-        .price-retail {
-            font-size: 1.45rem;
+        .price-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 10px;
+            color: var(--text-soft);
+            font-size: 0.9rem;
+        }
+        .price-row strong {
+            color: var(--text-dark);
+            font-size: 1.18rem;
             font-weight: 700;
+            white-space: nowrap;
+        }
+        .price-row-wholesale strong,
+        .price-row-wholesale span {
+            color: #06a45f;
+        }
+        .product-stock {
+            color: var(--text-soft);
+            font-size: 0.82rem;
+        }
+        .product-stock strong {
+            color: #06a45f;
+        }
+        .product-add-form {
+            position: absolute;
+            right: 14px;
+            bottom: 14px;
+            z-index: 2;
+        }
+        .product-add-button {
+            width: 48px;
+            height: 48px;
+            border: none;
+            border-radius: 999px;
+            background: #050505;
+            color: white;
+            box-shadow: 0 12px 26px rgba(5, 5, 5, 0.25);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 2rem;
+            font-weight: 300;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.18s ease, background 0.18s ease;
+        }
+        .product-add-button:hover {
+            background: var(--primary-color);
+            transform: translateY(-2px);
         }
 
         .catalog-toolbar {
@@ -569,16 +641,35 @@
                 padding: 12px;
             }
             .product-body {
-                padding: 14px 14px 16px;
+                padding: 14px 14px 58px;
+            }
+            .product-category-badge {
+                font-size: 0.68rem;
+                padding: 4px 7px;
             }
             .product-name {
                 font-size: 0.95rem;
                 line-height: 1.35;
                 min-height: 2.7em;
-                margin-bottom: 10px;
             }
-            .price-retail {
-                font-size: 1.15rem;
+            .price-row {
+                font-size: 0.76rem;
+                gap: 6px;
+            }
+            .price-row strong {
+                font-size: 0.96rem;
+            }
+            .product-stock {
+                font-size: 0.72rem;
+            }
+            .product-add-form {
+                right: 10px;
+                bottom: 10px;
+            }
+            .product-add-button {
+                width: 40px;
+                height: 40px;
+                font-size: 1.65rem;
             }
             .product-grid {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -628,14 +719,11 @@
                 border-radius: 20px;
             }
             .product-body {
-                padding: 14px;
+                padding: 14px 14px 58px;
             }
             .product-name {
                 font-size: 0.95rem;
                 min-height: 0;
-            }
-            .price-retail {
-                font-size: 1.18rem;
             }
         }
 
@@ -656,13 +744,18 @@
                 font-size: 1.42rem;
             }
             .product-body {
-                padding: 12px;
+                padding: 12px 12px 56px;
             }
             .product-name {
                 font-size: 0.9rem;
             }
-            .price-retail {
-                font-size: 1.05rem;
+            .price-row strong {
+                font-size: 0.9rem;
+            }
+            .product-add-button {
+                width: 38px;
+                height: 38px;
+                font-size: 1.55rem;
             }
             .top-strip-badges {
                 gap: 8px;
@@ -933,46 +1026,14 @@
                     <div class="marquee-content">
                         @foreach($newArrivals as $product)
                             <div class="marquee-item">
-                                <article class="product-card">
-                                    <a href="{{ route('products.show', $product) }}" aria-label="{{ $product->name }}">
-                                        <div class="product-image">
-                                            @if($product->displayImage())
-                                                <img src="{{ $mediaUrl($product->displayImage()) }}" alt="{{ $product->name }}">
-                                            @else
-                                                <span>No Image</span>
-                                            @endif
-                                        </div>
-                                        <div class="product-body">
-                                            <h3 class="product-name">{{ $product->name }}</h3>
-                                            <div class="product-price">
-                                                <div class="price-retail">฿{{ number_format($product->displayRetailPrice(), 2) }}</div>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </article>
+                                @include('store.partials.product-card', ['product' => $product, 'mediaUrl' => $mediaUrl])
                             </div>
                         @endforeach
                     </div>
                     <div class="marquee-content" aria-hidden="true">
                         @foreach($newArrivals as $product)
                             <div class="marquee-item">
-                                <article class="product-card">
-                                    <a href="{{ route('products.show', $product) }}" aria-label="{{ $product->name }}">
-                                        <div class="product-image">
-                                            @if($product->displayImage())
-                                                <img src="{{ $mediaUrl($product->displayImage()) }}" alt="{{ $product->name }}">
-                                            @else
-                                                <span>No Image</span>
-                                            @endif
-                                        </div>
-                                        <div class="product-body">
-                                            <h3 class="product-name">{{ $product->name }}</h3>
-                                            <div class="product-price">
-                                                <div class="price-retail">฿{{ number_format($product->displayRetailPrice(), 2) }}</div>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </article>
+                                @include('store.partials.product-card', ['product' => $product, 'mediaUrl' => $mediaUrl])
                             </div>
                         @endforeach
                     </div>
@@ -993,46 +1054,14 @@
                     <div class="marquee-content">
                         @foreach($featuredProducts as $product)
                             <div class="marquee-item">
-                                <article class="product-card">
-                                    <a href="{{ route('products.show', $product) }}" aria-label="{{ $product->name }}">
-                                        <div class="product-image">
-                                            @if($product->displayImage())
-                                                <img src="{{ $mediaUrl($product->displayImage()) }}" alt="{{ $product->name }}">
-                                            @else
-                                                <span>No Image</span>
-                                            @endif
-                                        </div>
-                                        <div class="product-body">
-                                            <h3 class="product-name">{{ $product->name }}</h3>
-                                            <div class="product-price">
-                                                <div class="price-retail">฿{{ number_format($product->displayRetailPrice(), 2) }}</div>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </article>
+                                @include('store.partials.product-card', ['product' => $product, 'mediaUrl' => $mediaUrl])
                             </div>
                         @endforeach
                     </div>
                     <div class="marquee-content" aria-hidden="true">
                         @foreach($featuredProducts as $product)
                             <div class="marquee-item">
-                                <article class="product-card">
-                                    <a href="{{ route('products.show', $product) }}" aria-label="{{ $product->name }}">
-                                        <div class="product-image">
-                                            @if($product->displayImage())
-                                                <img src="{{ $mediaUrl($product->displayImage()) }}" alt="{{ $product->name }}">
-                                            @else
-                                                <span>No Image</span>
-                                            @endif
-                                        </div>
-                                        <div class="product-body">
-                                            <h3 class="product-name">{{ $product->name }}</h3>
-                                            <div class="product-price">
-                                                <div class="price-retail">฿{{ number_format($product->displayRetailPrice(), 2) }}</div>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </article>
+                                @include('store.partials.product-card', ['product' => $product, 'mediaUrl' => $mediaUrl])
                             </div>
                         @endforeach
                     </div>
@@ -1059,27 +1088,15 @@
                             $filterTags[] = 'category:' . $pc->slug;
                         }
                     @endphp
-                    <article
-                        class="product-card"
-                        data-card
-                        data-filter-tags="{{ implode('|', $filterTags) }}"
-                        data-search="{{ strtolower($product->name) }}">
-                        <a href="{{ route('products.show', $product) }}" aria-label="{{ $product->name }}">
-                            <div class="product-image">
-                                @if($product->displayImage())
-                                    <img src="{{ $mediaUrl($product->displayImage()) }}" alt="{{ $product->name }}">
-                                @else
-                                    <span>No Image</span>
-                                @endif
-                            </div>
-                            <div class="product-body">
-                                <h3 class="product-name">{{ $product->name }}</h3>
-                                <div class="product-price">
-                                    <div class="price-retail">฿{{ number_format($product->displayRetailPrice(), 2) }}</div>
-                                </div>
-                            </div>
-                        </a>
-                    </article>
+                    @include('store.partials.product-card', [
+                        'product' => $product,
+                        'mediaUrl' => $mediaUrl,
+                        'cardAttributes' => [
+                            'data-card' => '',
+                            'data-filter-tags' => implode('|', $filterTags),
+                            'data-search' => strtolower($product->name),
+                        ],
+                    ])
                 @endforeach
             </div>
         @endif
