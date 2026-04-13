@@ -37,7 +37,7 @@
 </head>
 <body>
     @php
-        $mediaUrl = fn (?string $path) => $path ? '/media/' . ltrim($path, '/') : null;
+        $mediaUrl = fn (?string $path) => $path ? '/storage/' . ltrim($path, '/') : null;
     @endphp
     <div class="container">
         <h1>ตะกร้าสินค้าของคุณ</h1>

@@ -118,7 +118,7 @@
         <a href="{{ route('account.index') }}" class="back-link">← กลับบัญชีของฉัน</a>
 
         @php
-            $mediaUrl = fn (?string $path) => $path ? '/media/' . ltrim($path, '/') : null;
+            $mediaUrl = fn (?string $path) => $path ? '/storage/' . ltrim($path, '/') : null;
             $statusMap = [
                 'pending'    => ['label' => 'รอชำระเงิน',     'bg' => '#fff7ed', 'color' => '#c2410c'],
                 'confirmed'  => ['label' => 'ยืนยันแล้ว',     'bg' => '#ecfeff', 'color' => '#0e7490'],
