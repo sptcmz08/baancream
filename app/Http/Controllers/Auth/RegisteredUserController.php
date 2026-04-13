@@ -41,7 +41,7 @@ class RegisteredUserController extends Controller
         $user = User::create([
             'name' => $request->name,
             'username' => $request->username,
-            'email' => strtolower(preg_replace('/[^A-Za-z0-9]/', '', $request->username)) . '_' . time() . '@baancream.local',
+            'email' => null,
             'password' => Hash::make($request->password),
         ]);
 

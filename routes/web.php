@@ -66,7 +66,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::resource('orders', OrderController::class);
     Route::post('orders/{order}/quick-action', [OrderController::class, 'quickAction'])->name('orders.quick-action');
     Route::resource('banners', BannerController::class)->except(['create', 'show', 'edit']);
-    Route::resource('users', UserController::class)->except(['create', 'store', 'show', 'edit']);
+    Route::resource('users', UserController::class)->except(['create', 'show', 'edit']);
     Route::get('settings/branding', [SiteSettingController::class, 'edit'])->name('settings.edit');
     Route::put('settings/branding', [SiteSettingController::class, 'update'])->name('settings.update');
 });
