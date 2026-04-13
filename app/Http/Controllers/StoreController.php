@@ -435,7 +435,7 @@ class StoreController extends Controller
         ];
     }
 
-    private function cartWithTotals(): array
+    public function cartWithTotals(): array
     {
         $items = array_values(session()->get('cart', []));
         $count = 0;
@@ -463,7 +463,7 @@ class StoreController extends Controller
         ];
     }
 
-    private function cartCount(): int
+    public function cartCount(): int
     {
         return array_sum(array_column(session()->get('cart', []), 'quantity'));
     }
