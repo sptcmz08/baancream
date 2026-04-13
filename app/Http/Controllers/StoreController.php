@@ -50,6 +50,7 @@ class StoreController extends Controller
                 'image',
                 'images',
                 'is_new_arrival',
+                'is_featured',
                 'created_at',
             ])
             ->with([
