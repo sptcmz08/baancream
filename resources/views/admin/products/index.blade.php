@@ -77,16 +77,18 @@
                             -
                         @endif
                     </td>
-                    <td style="display: flex; gap: 6px; flex-wrap: wrap;">
-                        <a href="{{ route('admin.products.edit', $product) }}" class="btn" style="background:#f3f4f6; color: #4b5563; padding: 6px 10px; font-size:0.8rem; text-decoration:none;">แก้ไข</a>
-                        <form action="{{ route('admin.products.copy', $product) }}" method="POST" onsubmit="return confirm('คัดลอกสินค้า {{ $product->sku }}?');" style="margin: 0;">
-                            @csrf
-                            <button type="submit" class="btn" style="background:#e0f2fe; color:#0369a1; padding: 6px 10px; font-size:0.8rem;">คัดลอก</button>
-                        </form>
-                        <form action="{{ route('admin.products.destroy', $product) }}" method="POST" onsubmit="return confirm('ยืนยันการลบสินค้า {{ $product->sku }}?');" style="margin: 0;">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="btn" style="background:#fee2e2; color:#dc2626; padding: 6px 10px; font-size:0.8rem;">ลบ</button>
-                        </form>
+                    <td>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                            <a href="{{ route('admin.products.edit', $product) }}" class="btn" style="background:#f3f4f6; color: #4b5563; padding: 6px 10px; font-size:0.8rem; text-decoration:none;">แก้ไข</a>
+                            <form action="{{ route('admin.products.copy', $product) }}" method="POST" onsubmit="return confirm('คัดลอกสินค้า {{ $product->sku }}?');" style="margin: 0;">
+                                @csrf
+                                <button type="submit" class="btn" style="background:#e0f2fe; color:#0369a1; padding: 6px 10px; font-size:0.8rem;">คัดลอก</button>
+                            </form>
+                            <form action="{{ route('admin.products.destroy', $product) }}" method="POST" onsubmit="return confirm('ยืนยันการลบสินค้า {{ $product->sku }}?');" style="margin: 0;">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="btn" style="background:#fee2e2; color:#dc2626; padding: 6px 10px; font-size:0.8rem;">ลบ</button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
                 @empty
