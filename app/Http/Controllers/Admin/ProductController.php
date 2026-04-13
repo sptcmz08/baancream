@@ -146,19 +146,30 @@ class ProductController extends Controller
 
     public function destroy(Product $product): RedirectResponse
     {
-        foreach ((array) $product->images as $image) {
-            Storage::disk('public')->delete($image);
-        }
-
-        $product->variants->each(function (ProductVariant $variant): void {
-            if ($variant->image) {
-                Storage::disk('public')->delete($variant->image);
-            }
-        });
-
-        $product->delete();
+        $this->deleteProductWithImages($product);
 
         return redirect()->route('admin.products.index')->with('success', 'ลบสินค้าสำเร็จ');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'product_ids' => 'required|array|min:1',
+            'product_ids.*' => 'integer|exists:products,id',
+        ], [
+            'product_ids.required' => 'กรุณาเลือกสินค้าที่ต้องการลบอย่างน้อย 1 รายการ',
+            'product_ids.min' => 'กรุณาเลือกสินค้าที่ต้องการลบอย่างน้อย 1 รายการ',
+        ]);
+
+        $products = Product::with('variants')
+            ->whereIn('id', $validated['product_ids'])
+            ->get();
+
+        DB::transaction(function () use ($products): void {
+            $products->each(fn (Product $product) => $this->deleteProductWithImages($product));
+        });
+
+        return back()->with('success', 'ลบสินค้าที่เลือกสำเร็จ ' . $products->count() . ' รายการ');
     }
 
     private function validateProduct(Request $request, ?Product $product = null): array
@@ -234,6 +245,21 @@ class ProductController extends Controller
         $cleanName = trim((string) preg_replace('/(?:\s*\(Copy\))+$/i', '', $name));
 
         return mb_substr($cleanName !== '' ? $cleanName : $name, 0, 255);
+    }
+
+    private function deleteProductWithImages(Product $product): void
+    {
+        foreach ((array) $product->images as $image) {
+            Storage::disk('public')->delete($image);
+        }
+
+        $product->variants->each(function (ProductVariant $variant): void {
+            foreach ($variant->galleryImages() as $image) {
+                Storage::disk('public')->delete($image);
+            }
+        });
+
+        $product->delete();
     }
 
     private function prepareProductInput(Request $request): void

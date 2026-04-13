@@ -17,10 +17,26 @@
 </div>
 
 <div class="card">
+    <form id="bulkDeleteProductsForm" action="{{ route('admin.products.bulk-destroy') }}" method="POST" style="display:none;">
+        @csrf
+        @method('DELETE')
+    </form>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
+        <label style="display:inline-flex; align-items:center; gap:8px; font-weight:500; cursor:pointer;">
+            <input type="checkbox" id="selectAllProductsOnPage" style="width:16px; height:16px; accent-color:var(--primary-color);">
+            เลือกทั้งหมดในหน้านี้
+        </label>
+        <button type="submit" form="bulkDeleteProductsForm" id="bulkDeleteProductsButton" class="btn" disabled style="background:#fee2e2; color:#dc2626; padding:8px 14px; font-size:0.85rem;">
+            ลบรายการที่เลือก
+        </button>
+    </div>
+
     <div style="overflow-x: auto;">
         <table class="table" style="min-width: 900px;">
             <thead>
                 <tr>
+                    <th style="width: 44px; text-align: center;">เลือก</th>
                     <th style="width: 60px; text-align: center;">ลำดับ</th>
                     <th style="width: 70px;">รูปภาพ</th>
                     <th style="width: 120px;">SKU</th>
@@ -36,6 +52,9 @@
             <tbody>
                 @forelse($products ?? [] as $product)
                 <tr>
+                    <td style="text-align:center;">
+                        <input type="checkbox" form="bulkDeleteProductsForm" name="product_ids[]" value="{{ $product->id }}" data-product-checkbox style="width:16px; height:16px; accent-color:var(--primary-color);">
+                    </td>
                     <td style="text-align: center; color: var(--text-muted);">{{ ($products->currentPage() - 1) * $products->perPage() + $loop->iteration }}</td>
                     <td>
                         @php($displayImage = $product->displayImage())
@@ -72,7 +91,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="10" style="text-align: center; color: var(--text-muted); padding: 50px;">
+                    <td colspan="11" style="text-align: center; color: var(--text-muted); padding: 50px;">
                         <div style="font-size: 3rem; margin-bottom: 10px;">📦</div>
                         <div>{{ request('search') ? 'ไม่พบสินค้าที่ค้นหา' : 'ยังไม่มีรายการสินค้าในระบบ' }}</div>
                     </td>
@@ -84,4 +103,46 @@
 
     {{ $products->links('vendor.pagination.admin') }}
 </div>
+
+<script>
+    const bulkDeleteProductsForm = document.getElementById('bulkDeleteProductsForm');
+    const selectAllProductsOnPage = document.getElementById('selectAllProductsOnPage');
+    const productCheckboxes = Array.from(document.querySelectorAll('[data-product-checkbox]'));
+    const bulkDeleteProductsButton = document.getElementById('bulkDeleteProductsButton');
+
+    function updateBulkDeleteProductsState() {
+        const checkedCount = productCheckboxes.filter((checkbox) => checkbox.checked).length;
+        if (bulkDeleteProductsButton) {
+            bulkDeleteProductsButton.disabled = checkedCount === 0;
+            bulkDeleteProductsButton.textContent = checkedCount > 0
+                ? `ลบรายการที่เลือก (${checkedCount})`
+                : 'ลบรายการที่เลือก';
+        }
+
+        if (selectAllProductsOnPage) {
+            selectAllProductsOnPage.checked = checkedCount > 0 && checkedCount === productCheckboxes.length;
+            selectAllProductsOnPage.indeterminate = checkedCount > 0 && checkedCount < productCheckboxes.length;
+        }
+    }
+
+    selectAllProductsOnPage?.addEventListener('change', () => {
+        productCheckboxes.forEach((checkbox) => {
+            checkbox.checked = selectAllProductsOnPage.checked;
+        });
+        updateBulkDeleteProductsState();
+    });
+
+    productCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener('change', updateBulkDeleteProductsState);
+    });
+
+    bulkDeleteProductsForm?.addEventListener('submit', (event) => {
+        const checkedCount = productCheckboxes.filter((checkbox) => checkbox.checked).length;
+        if (checkedCount === 0 || !confirm(`ยืนยันลบสินค้าที่เลือก ${checkedCount} รายการ?`)) {
+            event.preventDefault();
+        }
+    });
+
+    updateBulkDeleteProductsState();
+</script>
 @endsection
