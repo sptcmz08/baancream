@@ -203,7 +203,7 @@
 </div>
 
 @php
-    $mediaUrl = fn (?string $path) => $path ? '/storage/' . ltrim($path, '/') : null;
+    $mediaUrl = fn (?string $path) => $path ? '/media/' . ltrim($path, '/') : null;
     $statusMap = [
         'pending'    => ['label'=>'รอชำระเงิน',     'bg'=>'#fff7ed','color'=>'#c2410c'],
         'paid_wait_shipping' => ['label'=>'เตรียมจัดส่ง', 'bg'=>'#eff6ff','color'=>'#1d4ed8'],

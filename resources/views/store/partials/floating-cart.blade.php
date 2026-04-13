@@ -1,5 +1,5 @@
 @php
-    $mediaUrl = fn (?string $path) => $path ? '/storage/' . ltrim($path, '/') : null;
+    $mediaUrl = fn (?string $path) => $path ? '/media/' . ltrim($path, '/') : null;
 @endphp
 
 <style>

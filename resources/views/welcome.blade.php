@@ -785,7 +785,7 @@
 </head>
 <body>
     @php
-        $mediaUrl = fn (?string $path) => $path ? '/storage/' . ltrim($path, '/') : null;
+        $mediaUrl = fn (?string $path) => $path ? '/media/' . ltrim($path, '/') : null;
         $newArrivalIds = $newArrivals->pluck('id')->all();
         $featuredIds = $featuredProducts->pluck('id')->all();
         $searchProducts = $catalogProducts->map(fn ($product) => [

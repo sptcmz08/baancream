@@ -609,7 +609,7 @@
         $selectedRetailPrice = (float) (data_get($selectedVariant, 'retail_price') ?? data_get($product, 'retail_price', 0));
         $selectedWholesalePrice = (float) (data_get($selectedVariant, 'wholesale_price') ?? data_get($product, 'wholesale_price', 0));
         $selectedWholesaleMinQty = (int) (data_get($selectedVariant, 'wholesale_min_qty') ?? data_get($product, 'wholesale_min_qty', 1));
-        $mediaUrl = fn (?string $path) => $path ? '/storage/' . ltrim($path, '/') : null;
+        $mediaUrl = fn (?string $path) => $path ? '/media/' . ltrim($path, '/') : null;
         $productGalleryUrls = collect($product->galleryImages())
             ->map(fn ($path) => $mediaUrl($path))
             ->filter()
