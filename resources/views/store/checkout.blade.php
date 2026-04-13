@@ -27,6 +27,7 @@
             font-family: 'Prompt', sans-serif;
             background: var(--page-color);
             color: var(--text-dark);
+            overflow-x: hidden;
         }
         a { color: inherit; text-decoration: none; }
         img { display: block; max-width: 100%; }
@@ -453,6 +454,26 @@
             }
             .summary-price {
                 grid-column: 2;
+            }
+            .section-card {
+                padding: 16px;
+                border-radius: 18px;
+            }
+            .payment-option {
+                padding: 14px;
+                border-radius: 16px;
+            }
+            .submit-button {
+                min-height: 52px;
+                border-radius: 16px;
+            }
+            .header-tools {
+                width: 100%;
+            }
+            .user-action,
+            .pill-link {
+                flex: 1 1 auto;
+                text-align: center;
             }
         }
     </style>

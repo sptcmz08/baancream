@@ -604,6 +604,40 @@
                 max-height: 88vh !important;
                 border-radius: 22px 22px 0 0 !important;
             }
+            .header-left {
+                gap: 14px;
+            }
+            .header-tools {
+                gap: 8px;
+            }
+            .user-action,
+            .pill-link {
+                padding: 9px 12px;
+                font-size: 0.86rem;
+            }
+            .hero {
+                min-height: 42vh;
+            }
+            .marquee-content {
+                gap: 14px;
+                padding-right: 14px;
+            }
+            .marquee-item {
+                width: 190px;
+            }
+            .product-card {
+                border-radius: 20px;
+            }
+            .product-body {
+                padding: 14px;
+            }
+            .product-name {
+                font-size: 0.95rem;
+                min-height: 0;
+            }
+            .price-retail {
+                font-size: 1.18rem;
+            }
         }
 
         @media (max-width: 520px) {
@@ -630,6 +664,22 @@
             }
             .price-retail {
                 font-size: 1.05rem;
+            }
+            .top-strip-badges {
+                gap: 8px;
+            }
+            .header-main {
+                gap: 12px;
+            }
+            .hero {
+                min-height: 34vh;
+            }
+            .marquee-item {
+                width: 170px;
+            }
+            .product-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 14px;
             }
         }
 

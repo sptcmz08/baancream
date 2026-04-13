@@ -140,7 +140,59 @@
             font-family:inherit; font-weight:700; font-size:0.9rem; cursor:pointer;
         }
 
-        @media(max-width:700px) { .layout { grid-template-columns:1fr; } }
+        @media(max-width:760px) {
+            body { overflow-x:hidden; }
+            .topbar {
+                padding:12px 16px;
+                min-height:auto;
+                flex-wrap:wrap;
+            }
+            .topbar-logo {
+                width:100%;
+                font-size:1.02rem;
+                line-height:1.4;
+            }
+            .topbar-back {
+                margin-left:0;
+            }
+            .layout {
+                grid-template-columns:1fr;
+                margin:16px auto;
+                padding:0 12px;
+            }
+            .main-card,
+            .profile-card {
+                padding:16px;
+            }
+            .tabs-card {
+                display:flex;
+                gap:8px;
+                overflow-x:auto;
+                padding:8px;
+                -webkit-overflow-scrolling:touch;
+            }
+            .tab-btn {
+                flex:0 0 auto;
+                width:auto;
+                white-space:nowrap;
+                padding:10px 12px;
+            }
+            .info-row {
+                display:grid;
+                gap:4px;
+            }
+            .info-label {
+                width:auto;
+            }
+            .order-head,
+            .order-foot,
+            .detail-item {
+                align-items:flex-start;
+            }
+            .tracker {
+                padding-bottom:8px;
+            }
+        }
     </style>
 </head>
 <body>

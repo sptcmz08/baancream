@@ -1,3 +1,28 @@
+<style>
+    @media (max-width: 640px) {
+        #floatingCartButton {
+            right: 14px !important;
+            bottom: 14px !important;
+            width: 56px !important;
+            height: 56px !important;
+            z-index: 55 !important;
+        }
+        #floatingCartButton > span:first-child {
+            font-size: 1.45rem !important;
+        }
+        #floatingCartModal {
+            align-items: flex-end !important;
+            justify-content: center !important;
+            padding: 0 !important;
+        }
+        #floatingCartModal > div {
+            width: 100% !important;
+            max-height: 88vh !important;
+            border-radius: 22px 22px 0 0 !important;
+        }
+    }
+</style>
+
 @php
     $cartItems = $cartItems ?? [];
     $cartTotal = $cartTotal ?? 0;

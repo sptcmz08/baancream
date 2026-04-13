@@ -2,6 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ตะกร้าสินค้า | บ้านครีม สิงห์บุรี</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -22,6 +23,16 @@
         .pill { display:inline-flex; padding:4px 10px; border-radius:999px; font-size:0.78rem; font-weight:700; }
         .pill.variant { background:#fff1f5; color:#e11d72; }
         .pill.wholesale { background:#e9f9ef; color:#15803d; }
+        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        @media (max-width: 720px) {
+            body { padding: 16px 12px 28px; overflow-x: hidden; }
+            .container { padding: 20px 14px; border-radius: 20px; }
+            h1 { font-size: 1.65rem; line-height: 1.3; }
+            .table { min-width: 720px; font-size: 0.88rem; }
+            .table th, .table td { padding: 12px 10px; }
+            .btn-primary { width: 100%; text-align: center; padding: 13px 18px; }
+            .btn-danger { padding: 9px 12px; }
+        }
     </style>
 </head>
 <body>
@@ -37,6 +48,7 @@
         @endif
 
         @if(count($cart ?? []) > 0)
+            <div class="table-scroll">
             <table class="table">
                 <thead>
                     <tr>
@@ -80,6 +92,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
 
             <div style="text-align:right; margin-top:30px;">
                 <h2 style="font-size: 1.8rem; margin-bottom: 20px;">ยอดรวมทั้งสิ้น: <span style="color:#22c55e;">฿{{ number_format($cartTotal, 2) }}</span></h2>

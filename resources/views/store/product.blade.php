@@ -22,7 +22,7 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
-        body { font-family: 'Prompt', sans-serif; background: var(--page-color); color: var(--text-dark); }
+        body { font-family: 'Prompt', sans-serif; background: var(--page-color); color: var(--text-dark); overflow-x: hidden; }
         a { color: inherit; text-decoration: none; }
         img { display: block; max-width: 100%; }
         button, input { font: inherit; }
@@ -573,6 +573,32 @@
             .price-main,
             .product-footer,
             .section-head { flex-direction: column; align-items: stretch; }
+            .product-shell { gap: 16px; }
+            .surface-card { border-radius: 22px; }
+            .price-panel { padding: 18px; border-radius: 22px; }
+            .price-retail { font-size: 2.15rem; }
+            .cta-button { border-radius: 16px; padding: 14px 16px; }
+            .related-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+            .product-card { border-radius: 20px; }
+            .product-body { padding: 14px; }
+            .product-name { font-size: 0.95rem; min-height: 0; }
+            .product-image { padding: 12px; }
+            .lightbox { padding: 0; }
+            .lightbox-dialog { max-height: 100vh; border-radius: 0; }
+            .lightbox-stage { padding: 12px; }
+            .lightbox-stage img { max-height: 68vh; }
+        }
+
+        @media (max-width: 480px) {
+            .top-strip-badges { gap: 8px; }
+            .header-main { gap: 14px; }
+            .header-tools { gap: 8px; }
+            .user-action,
+            .pill-link { padding: 9px 12px; font-size: 0.86rem; }
+            .gallery-main { max-height: min(340px, 82vw); }
+            .related-grid { grid-template-columns: 1fr 1fr; }
+            .variant-option { width: 88px; min-width: 88px; }
+            .variant-option img { height: 76px; }
         }
     </style>
 </head>

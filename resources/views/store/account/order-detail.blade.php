@@ -71,6 +71,42 @@
             display: inline-block; border-radius: 999px; padding: 5px 14px;
             font-size: 0.85rem; font-weight: 600;
         }
+        .items-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        @media (max-width: 640px) {
+            body { overflow-x: hidden; }
+            .topbar {
+                padding: 12px 16px;
+                min-height: auto;
+            }
+            .topbar-brand {
+                font-size: 1.05rem;
+                line-height: 1.4;
+            }
+            .page-wrap {
+                margin: 16px auto 28px;
+                padding: 0 12px;
+                gap: 14px;
+            }
+            .card {
+                padding: 16px;
+                border-radius: 16px;
+            }
+            .order-title {
+                font-size: 1.18rem;
+                line-height: 1.35;
+            }
+            .status-tracker {
+                padding-bottom: 8px;
+            }
+            .items-table {
+                min-width: 520px;
+                font-size: 0.88rem;
+            }
+            .total-row {
+                gap: 16px;
+                font-size: 0.9rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -141,6 +177,7 @@
         {{-- Items --}}
         <div class="card">
             <h2 style="font-size:1.05rem; font-weight:700; margin-bottom:16px;">รายการสินค้า</h2>
+            <div class="items-table-wrap">
             <table class="items-table">
                 <thead>
                     <tr>
@@ -172,6 +209,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
 
             <div style="margin-top:16px;">
                 <div class="total-row"><span>ค่าสินค้า</span><span>฿{{ number_format($order->total_amount - ($order->shipping_cost ?? 0), 2) }}</span></div>
