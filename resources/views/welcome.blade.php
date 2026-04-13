@@ -313,7 +313,7 @@
         .marquee-track {
             display: flex;
             width: max-content;
-            animation: marquee 35s linear infinite;
+            animation: marquee var(--marquee-duration, 35s) linear infinite;
             padding: 10px 0 20px;
         }
         .marquee-track:hover {
@@ -552,7 +552,6 @@
             }
             .section-title { font-size: 1.55rem; }
             .marquee-track {
-                animation-duration: 28s;
                 padding: 6px 0 14px;
             }
             .marquee-content {
@@ -929,7 +928,7 @@
                 </div>
             </div>
             <div class="auto-carousel" dir="ltr">
-                <div class="marquee-track">
+                <div class="marquee-track" style="--marquee-duration: {{ max(24, $newArrivals->count() * 5) }}s;">
                     <div class="marquee-content">
                         @foreach($newArrivals as $product)
                             <div class="marquee-item">
@@ -989,7 +988,7 @@
                 </div>
             </div>
             <div class="auto-carousel" dir="ltr">
-                <div class="marquee-track">
+                <div class="marquee-track" style="--marquee-duration: {{ max(24, $featuredProducts->count() * 5) }}s;">
                     <div class="marquee-content">
                         @foreach($featuredProducts as $product)
                             <div class="marquee-item">
