@@ -33,13 +33,12 @@
 
         <div class="header-tools">
             <button type="button" class="cart-icon-link" data-open-cart aria-label="ตะกร้าสินค้า" id="floatingCartButton">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M7 8h13l-1.2 6.6a2 2 0 0 1-2 1.6H9.1a2 2 0 0 1-2-1.7L5.8 5.8H3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M9.4 20.2h.1M17 20.2h.1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+                <svg viewBox="0 0 24 24" fill="none" style="width:24px; height:24px;">
+                    <path d="M16 11V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7V11M5 9H19L20 21H4L5 9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 @php $cartSummary = app(\App\Http\Controllers\StoreController::class)->cartWithTotals(); @endphp
                 @if($cartSummary['count'] > 0)
-                    <span style="position:absolute; top:4px; right:2px; min-width:26px; height:26px; border-radius:999px; background:#111827; color:white; font-size:0.8rem; font-weight:700; display:flex; align-items:center; justify-content:center; padding:0 7px;">{{ $cartSummary['count'] }}</span>
+                    <span class="notif-badge" style="background:var(--text-dark); border-color:white;">{{ $cartSummary['count'] }}</span>
                 @endif
             </button>
 
