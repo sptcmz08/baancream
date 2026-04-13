@@ -66,5 +66,7 @@
             @endforelse
         </tbody>
     </table>
+
+    {{ $users->links('vendor.pagination.admin') }}
 </div>
 @endsection

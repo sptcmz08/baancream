@@ -12,7 +12,8 @@ class UserController extends Controller
     {
         $users = User::withCount('orders')
             ->orderByDesc('created_at')
-            ->get();
+            ->paginate(10)
+            ->withQueryString();
 
         return view('admin.users.index', compact('users'));
     }

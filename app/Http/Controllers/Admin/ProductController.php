@@ -20,14 +20,15 @@ class ProductController extends Controller
     public function index(Request $request): View
     {
         $search = $request->input('search');
-        
+
         $products = Product::with(['categories', 'variants'])
             ->when($search, function ($query, $search) {
                 return $query->where('name', 'like', "%{$search}%")
                              ->orWhere('sku', 'like', "%{$search}%");
             })
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return view('admin.products.index', compact('products', 'search'));
     }
@@ -115,7 +116,7 @@ class ProductController extends Controller
             $newProduct = DB::transaction(function () use ($product): Product {
                 $copy = $product->replicate();
                 $copy->sku = $this->duplicateSku($product->sku);
-                $copy->name = mb_substr($product->name, 0, 248) . ' (Copy)';
+                $copy->name = $this->cleanCopiedName($product->name);
                 $copy->save();
 
                 $copy->categories()->sync($product->categories->pluck('id')->all());
@@ -215,16 +216,24 @@ class ProductController extends Controller
 
     private function duplicateSku(string $sku): string
     {
-        $base = mb_substr($sku . '-COPY', 0, 245);
-        $candidate = $base;
+        $base = trim((string) preg_replace('/(?:-?COPY)+$/i', '', $sku), '- ');
+        $base = $base !== '' ? mb_substr($base, 0, 245) : 'SKU';
         $counter = 2;
+        $candidate = mb_substr($base . '-' . $counter++, 0, 255);
 
-        while (Product::where('sku', $candidate)->exists()) {
+        while (Product::withTrashed()->where('sku', $candidate)->exists()) {
             $suffix = '-' . $counter++;
             $candidate = mb_substr($base, 0, 255 - mb_strlen($suffix)) . $suffix;
         }
 
         return $candidate;
+    }
+
+    private function cleanCopiedName(string $name): string
+    {
+        $cleanName = trim((string) preg_replace('/(?:\s*\(Copy\))+$/i', '', $name));
+
+        return mb_substr($cleanName !== '' ? $cleanName : $name, 0, 255);
     }
 
     private function prepareProductInput(Request $request): void

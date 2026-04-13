@@ -128,5 +128,7 @@
             @endforelse
         </tbody>
     </table>
+
+    {{ $orders->links('vendor.pagination.admin') }}
 </div>
 @endsection

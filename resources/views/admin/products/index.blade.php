@@ -62,7 +62,7 @@
                         <a href="{{ route('admin.products.edit', $product) }}" class="btn" style="background:#f3f4f6; color: #4b5563; padding: 6px 10px; font-size:0.8rem; text-decoration:none;">แก้ไข</a>
                         <form action="{{ route('admin.products.copy', $product) }}" method="POST" onsubmit="return confirm('คัดลอกสินค้า {{ $product->sku }}?');" style="margin: 0;">
                             @csrf
-                            <button type="submit" class="btn" style="background:#e0f2fe; color:#0369a1; padding: 6px 10px; font-size:0.8rem;">Copy</button>
+                            <button type="submit" class="btn" style="background:#e0f2fe; color:#0369a1; padding: 6px 10px; font-size:0.8rem;">คัดลอก</button>
                         </form>
                         <form action="{{ route('admin.products.destroy', $product) }}" method="POST" onsubmit="return confirm('ยืนยันการลบสินค้า {{ $product->sku }}?');" style="margin: 0;">
                             @csrf @method('DELETE')
@@ -72,7 +72,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 50px;">
+                    <td colspan="10" style="text-align: center; color: var(--text-muted); padding: 50px;">
                         <div style="font-size: 3rem; margin-bottom: 10px;">📦</div>
                         <div>{{ request('search') ? 'ไม่พบสินค้าที่ค้นหา' : 'ยังไม่มีรายการสินค้าในระบบ' }}</div>
                     </td>
@@ -81,11 +81,7 @@
             </tbody>
         </table>
     </div>
-    
-    @if($products instanceof \Illuminate\Pagination\LengthAwarePaginator && $products->hasPages())
-    <div style="padding: 15px; border-top: 1px solid #eee; display: flex; justify-content: center;">
-        {{ $products->appends(request()->query())->links('pagination::bootstrap-4') }}
-    </div>
-    @endif
+
+    {{ $products->links('vendor.pagination.admin') }}
 </div>
 @endsection

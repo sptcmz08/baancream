@@ -30,7 +30,7 @@ class OrderController extends Controller
             });
         }
 
-        $orders = $query->get();
+        $orders = $query->paginate(10)->withQueryString();
 
         // Tab counts
         $counts = [

@@ -51,3 +51,54 @@ body {
 .pagination .page-item.active .page-link { z-index: 3; color: #fff; background-color: var(--primary-color); border-color: var(--primary-color); font-weight: 500;}
 .pagination .page-item.disabled .page-link { color: #9ca3af; pointer-events: none; background-color: #f9fafb; border-color: #e5e7eb; }
 .pagination .page-item .page-link:hover { z-index: 2; color: var(--primary-color); background-color: #f3f4f6; border-color: #d1d5db; }
+.admin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+.admin-pagination-summary {
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+.admin-pagination-links {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+.admin-page-link {
+  min-width: 38px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 13px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: white;
+  color: var(--text-dark);
+  text-decoration: none;
+  font-size: 0.86rem;
+  font-weight: 500;
+}
+.admin-page-link:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+.admin-page-link.is-active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+.admin-page-link.is-disabled {
+  color: #c1c1c1;
+  background: #f8f8f8;
+  cursor: not-allowed;
+}
