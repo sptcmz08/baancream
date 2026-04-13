@@ -16,7 +16,8 @@ class CreditController extends Controller
             ->orderByDesc('year')
             ->orderByDesc('month')
             ->orderByDesc('id')
-            ->get();
+            ->paginate(20)
+            ->withQueryString();
 
         $users = User::where('role', '!=', 'admin')
             ->orderBy('name')
