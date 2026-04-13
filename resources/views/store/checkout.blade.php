@@ -6,6 +6,7 @@
     <title>ยืนยันการชำระเงิน | บ้านครีม สิงห์บุรี</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="stylesheet" href="{{ asset('css/store-shared.css') }}">
     <style>
         :root {
             --primary-color: #ff4f87;
@@ -33,71 +34,6 @@
         img { display: block; max-width: 100%; }
         button, input, textarea, select { font: inherit; }
 
-        .header-shell {
-            position: sticky;
-            top: 0;
-            z-index: 20;
-            background: rgba(255, 255, 255, 0.98);
-            border-bottom: 1px solid var(--border-color);
-            backdrop-filter: blur(14px);
-        }
-        .header-main {
-            max-width: 1240px;
-            min-height: 92px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 18px;
-        }
-        .brand-logo {
-            display: inline-flex;
-            align-items: center;
-            font-size: 2.7rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            letter-spacing: -0.04em;
-            flex: 0 0 auto;
-        }
-        .brand-logo-image {
-            height: 74px;
-            width: auto;
-            object-fit: contain;
-        }
-        .brand-logo span:nth-child(2) { color: #6a67ff; }
-        .brand-logo span:nth-child(3) { color: #22c1dc; }
-        .brand-logo span:nth-child(4) { color: #f8c64f; }
-        .brand-logo span:nth-child(5) { color: #35c98b; }
-        .main-links {
-            display: flex;
-            gap: 18px;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.92rem;
-            font-weight: 600;
-            overflow-x: auto;
-            white-space: nowrap;
-            color: var(--text-soft);
-        }
-        .main-links a:hover { color: var(--primary-color); }
-        .header-tools {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 10px;
-            flex: 0 0 auto;
-            margin-left: auto;
-        }
-        .user-action,
-        .pill-link {
-            border: 1px solid var(--border-color);
-            border-radius: 999px;
-            padding: 9px 14px;
-            font-size: 0.92rem;
-            font-weight: 600;
-            background: white;
-        }
         .user-action:hover,
         .pill-link:hover {
             border-color: rgba(255, 79, 135, 0.35);
@@ -479,17 +415,10 @@
     </style>
 </head>
 <body>
+@include('store.partials.layout-header')
     @php
         $mediaUrl = fn (?string $path) => $path ? '/media/' . ltrim($path, '/') : null;
     @endphp
-    <header class="header-shell">
-        <div class="header-main">
-            <a href="{{ route('home') }}" class="brand-logo" aria-label="บ้านครีม สิงห์บุรี">
-                @include('store.partials.site-logo-markup')
-            </a>
-
-            <div class="header-tools">
-                <a href="{{ route('cart.index') }}" class="cart-icon-link" aria-label="ตะกร้าสินค้า">
                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M7 8h13l-1.2 6.6a2 2 0 0 1-2 1.6H9.1a2 2 0 0 1-2-1.7L5.8 5.8H3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                         <path d="M9.4 20.2h.1M17 20.2h.1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
@@ -771,5 +700,65 @@
         }
     </script>
     @include('store.partials.notifications')
+
+    <script>
+        // --- Header Tool Dropdowns ---
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userDropdown = document.getElementById('userDropdown');
+        const notifBtn = document.getElementById('notifBtn');
+        const notifDropdown = document.getElementById('notifDropdown');
+
+        userMenuBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown?.classList.toggle('is-open');
+            notifDropdown?.classList.remove('is-open');
+        });
+
+        notifBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            notifDropdown?.classList.toggle('is-open');
+            userDropdown?.classList.remove('is-open');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#userMenuWrap')) userDropdown?.classList.remove('is-open');
+            if (!e.target.closest('#notifWrap')) notifDropdown?.classList.remove('is-open');
+        });
+
+        // --- Global Search Logic ---
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+        let allProducts = @json($searchProducts ?? []);
+
+        searchInput?.addEventListener('input', (e) => {
+            const val = e.target.value.trim().toLowerCase();
+            if (val.length < 2) {
+                searchResults.classList.remove('is-open');
+                return;
+            }
+
+            const matches = allProducts.filter(p => p.search.includes(val)).slice(0, 10);
+            if (matches.length > 0) {
+                searchResults.innerHTML = matches.map(p => `
+                    <a href="${p.url}" class="search-result-item">
+                        <div class="search-result-thumb">
+                            <img src="${p.image}" alt="">
+                        </div>
+                        <div>
+                            <div class="search-result-name">${p.name}</div>
+                            <div class="search-result-price">฿${p.price}</div>
+                        </div>
+                    </a>
+                `).join('');
+            } else {
+                searchResults.innerHTML = '<div class="search-result-empty">ไม่พบสินค้าที่ค้นหา</div>';
+            }
+            searchResults.classList.add('is-open');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#searchShell')) searchResults?.classList.remove('is-open');
+        });
+    </script>
 </body>
 </html>
