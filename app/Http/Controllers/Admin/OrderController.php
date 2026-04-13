@@ -112,7 +112,7 @@ class OrderController extends Controller
             $order->save();
         });
 
-        return back()->with('success', 'อัปเดตออเดอร์สำเร็จ');
+        return redirect()->route('admin.orders.show', $order)->with('success', 'อัปเดตออเดอร์สำเร็จ');
     }
 
     public function addShippingAdjustment(Request $request, Order $order)
@@ -143,7 +143,7 @@ class OrderController extends Controller
             }
         });
 
-        return back()->with('success', 'เพิ่มค่าส่งจริงเข้าออเดอร์สำเร็จ');
+        return redirect()->route('admin.orders.show', $order)->with('success', 'เพิ่มค่าส่งจริงเข้าออเดอร์สำเร็จ');
     }
 
     /**
@@ -153,33 +153,39 @@ class OrderController extends Controller
     {
         $action = $request->input('action');
 
-        switch ($action) {
-            case 'confirm':
-                $order->update(['status' => 'paid_wait_shipping', 'user_read_status' => false]);
-                $message = 'ยืนยันออเดอร์แล้ว';
-                break;
-            case 'ship':
-                $order->update([
-                    'status' => 'shipped',
-                    'tracking_number' => $request->input('tracking_number', $order->tracking_number),
-                    'user_read_status' => false,
-                ]);
-                $message = 'เปลี่ยนสถานะเป็นจัดส่งแล้ว';
-                break;
-            case 'reject':
-                $order->update(['status' => 'cancelled', 'user_read_status' => false]);
-                $message = 'ยกเลิกออเดอร์แล้ว';
-                break;
-            case 'complete':
-                $order->update(['status' => 'completed', 'user_read_status' => false]);
-                $message = 'ออเดอร์สำเร็จแล้ว';
-                break;
-            default:
-                return back()->with('error', 'ไม่รู้จัก Action');
-        }
+        return DB::transaction(function () use ($request, $order, $action) {
+            switch ($action) {
+                case 'confirm':
+                    $order->update(['status' => 'paid_wait_shipping', 'user_read_status' => false]);
+                    $message = 'ยืนยันออเดอร์แล้ว';
+                    break;
+                case 'ship':
+                    $validated = $request->validate([
+                        'tracking_number' => 'nullable|string|max:255',
+                    ]);
+                    $order->update([
+                        'status' => 'shipped',
+                        'tracking_number' => $validated['tracking_number'] ?? $order->tracking_number,
+                        'user_read_status' => false,
+                    ]);
+                    $message = 'เปลี่ยนสถานะเป็นจัดส่งแล้ว';
+                    break;
+                case 'reject':
+                    $order->update(['status' => 'cancelled', 'user_read_status' => false]);
+                    $message = 'ยกเลิกออเดอร์แล้ว';
+                    break;
+                case 'complete':
+                    $order->update(['status' => 'completed', 'user_read_status' => false]);
+                    $message = 'ออเดอร์สำเร็จแล้ว';
+                    break;
+                default:
+                    return redirect()->route('admin.orders.show', $order)->with('error', 'ไม่รู้จัก Action');
+            }
 
-        return back()->with('success', $message);
+            return redirect()->route('admin.orders.show', $order)->with('success', $message);
+        });
     }
+
 
     /**
      * Confirm all credit orders for a specific user in bulk.
@@ -195,13 +201,13 @@ class OrderController extends Controller
             ->where('status', 'pending')
             ->update(['status' => 'paid_wait_shipping', 'user_read_status' => false]);
 
-        return back()->with('success', "ยืนยันออเดอร์เครดิตสำเร็จ {$count} รายการ");
+        return redirect()->route('admin.orders.index')->with('success', "ยืนยันออเดอร์เครดิตสำเร็จ {$count} รายการ");
     }
 
     public function destroy(Order $order)
     {
         $order->delete();
-        return back()->with('success', 'ลบออเดอร์สำเร็จ');
+        return redirect()->route('admin.orders.index')->with('success', 'ลบออเดอร์สำเร็จ');
     }
 
     private function creditCycleForOrder(Order $order): ?CreditCycle
