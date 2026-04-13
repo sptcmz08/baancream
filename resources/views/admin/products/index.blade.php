@@ -7,8 +7,8 @@
 </div>
 
 <div class="card" style="margin-bottom: 20px; padding: 15px;">
-    <form action="{{ route('admin.products.index') }}" method="GET" style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="ค้นหาสินค้าจากชื่อ หรือ SKU..." class="form-control" style="flex: 1; max-width: 400px; margin-bottom: 0;">
+    <form id="productSearchForm" action="{{ route('admin.products.index') }}" method="GET" style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <input type="text" id="productSearchInput" name="search" value="{{ request('search') }}" placeholder="ค้นหาสินค้าจากชื่อ หรือ SKU..." class="form-control" autocomplete="off" style="flex: 1; max-width: 400px; margin-bottom: 0;">
         <button type="submit" class="btn btn-primary" style="background: var(--primary-color);">🔍 ค้นหา</button>
         @if(request('search'))
             <a href="{{ route('admin.products.index') }}" class="btn" style="background: #f3f4f6; color: #4b5563; text-decoration: none; display: flex; align-items: center;">ล้างการค้นหา</a>
@@ -111,6 +111,45 @@
     const selectAllProductsOnPage = document.getElementById('selectAllProductsOnPage');
     const productCheckboxes = Array.from(document.querySelectorAll('[data-product-checkbox]'));
     const bulkDeleteProductsButton = document.getElementById('bulkDeleteProductsButton');
+    const productSearchForm = document.getElementById('productSearchForm');
+    const productSearchInput = document.getElementById('productSearchInput');
+    let productSearchTimer;
+    let isComposingProductSearch = false;
+    let lastSubmittedProductSearch = productSearchInput?.value || '';
+
+    function submitProductSearch() {
+        if (!productSearchForm || !productSearchInput || isComposingProductSearch) {
+            return;
+        }
+
+        const nextSearch = productSearchInput.value.trim();
+        if (nextSearch === lastSubmittedProductSearch.trim()) {
+            return;
+        }
+
+        if (nextSearch === '') {
+            window.location.href = productSearchForm.action;
+            return;
+        }
+
+        lastSubmittedProductSearch = nextSearch;
+        productSearchForm.requestSubmit();
+    }
+
+    productSearchInput?.addEventListener('compositionstart', () => {
+        isComposingProductSearch = true;
+    });
+
+    productSearchInput?.addEventListener('compositionend', () => {
+        isComposingProductSearch = false;
+        clearTimeout(productSearchTimer);
+        productSearchTimer = setTimeout(submitProductSearch, 450);
+    });
+
+    productSearchInput?.addEventListener('input', () => {
+        clearTimeout(productSearchTimer);
+        productSearchTimer = setTimeout(submitProductSearch, 450);
+    });
 
     function updateBulkDeleteProductsState() {
         const checkedCount = productCheckboxes.filter((checkbox) => checkbox.checked).length;
