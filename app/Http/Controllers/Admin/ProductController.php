@@ -136,7 +136,9 @@ class ProductController extends Controller
                 'sku' => $product->sku,
             ]);
 
-            return back()->with('error', 'คัดลอกสินค้าไม่สำเร็จ: ' . $e->getMessage());
+            return redirect()
+                ->route('admin.products.index')
+                ->with('error', 'คัดลอกสินค้าไม่สำเร็จ: ' . $e->getMessage());
         }
 
         return redirect()
@@ -257,7 +259,7 @@ class ProductController extends Controller
         $counter = 2;
         $candidate = mb_substr($base . '-' . $counter++, 0, 255);
 
-        while (Product::withTrashed()->where('sku', $candidate)->exists()) {
+        while (Product::withoutGlobalScopes()->where('sku', $candidate)->exists()) {
             $suffix = '-' . $counter++;
             $candidate = mb_substr($base, 0, 255 - mb_strlen($suffix)) . $suffix;
         }
