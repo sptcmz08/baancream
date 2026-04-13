@@ -770,5 +770,6 @@
             document.getElementById('postal_code').value = el.dataset.postal || '';
         }
     </script>
+    @include('store.partials.notifications')
 </body>
 </html>

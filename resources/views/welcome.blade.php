@@ -1351,6 +1351,7 @@
 
                     if (isAdd) {
                         btn.textContent = '✓';
+                        window.showToast('เพิ่มสินค้าลงตะกร้าแล้ว', 'success');
                         // Close popover if any
                         const popover = form.closest('.selection-popover');
                         if (popover) setTimeout(() => popover.style.display = 'none', 500);
@@ -1359,11 +1360,14 @@
                             btn.innerHTML = originalContent;
                             btn.disabled = false;
                         }, 1000);
+                    } else {
+                        window.showToast('ลบสินค้าออกจากตะกร้าแล้ว', 'info');
                     }
                 }
             } catch (err) {
                 btn.innerHTML = originalContent;
                 btn.disabled = false;
+                window.showToast('ไม่สามารถชำระออเดอร์ได้ในขณะนี้', 'error');
             }
         });
 
@@ -1392,10 +1396,12 @@
                 }
             } catch (err) {
                 console.error('Update failed:', err);
+                window.showToast('ไม่สามารถปรับจำนวนได้', 'error');
             } finally {
                 qtyBtn.disabled = false;
             }
         });
     </script>
+    @include('store.partials.notifications')
 </body>
 </html>

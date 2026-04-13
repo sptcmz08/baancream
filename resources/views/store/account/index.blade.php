@@ -620,5 +620,6 @@
         document.querySelector(`[data-tab="${hash}"]`)?.click();
     }
 </script>
+    @include('store.partials.notifications')
 </body>
 </html>
