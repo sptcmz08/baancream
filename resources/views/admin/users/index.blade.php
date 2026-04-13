@@ -11,11 +11,6 @@
         font-weight: 700;
         color: var(--text-dark);
     }
-    .user-sub {
-        color: var(--text-muted);
-        font-size: 0.82rem;
-        margin-top: 4px;
-    }
     .role-badge {
         display: inline-flex;
         align-items: center;
@@ -140,7 +135,7 @@
         <table class="table" style="min-width:760px;">
             <thead>
                 <tr>
-                    <th style="width:80px;">ID</th>
+                    <th style="width:80px;">ลำดับ</th>
                     <th>ผู้ใช้งาน</th>
                     <th style="width:140px;">บทบาท</th>
                     <th style="width:100px; text-align:center;">ออเดอร์</th>
@@ -150,13 +145,9 @@
             <tbody>
                 @forelse($users as $user)
                     <tr>
-                        <td style="font-weight:500;">#{{ $user->id }}</td>
+                        <td style="font-weight:500;">{{ ($users->currentPage() - 1) * $users->perPage() + $loop->iteration }}</td>
                         <td>
                             <div class="user-name">{{ $user->name }}</div>
-                            <div class="user-sub">@{{ $user->username ?: '-' }}</div>
-                            @if($user->id === auth()->id())
-                                <div class="user-sub">บัญชีที่ใช้งานอยู่</div>
-                            @endif
                         </td>
                         <td>
                             <span class="role-badge {{ $user->role === 'admin' ? 'admin' : 'user' }}">
