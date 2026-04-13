@@ -85,15 +85,7 @@ class OrderController extends Controller
                 $order->user_read_status = false;
 
                 if ($shippingDelta !== 0.0 && ($order->payment_method === 'credit' || $order->type === 'credit')) {
-                    $creditCycle = $order->creditCycle
-                        ?? CreditCycle::activeForUser($order->user_id)
-                        ?? CreditCycle::query()
-                            ->where('user_id', $order->user_id)
-                            ->where('month', $order->created_at->month)
-                            ->where('year', $order->created_at->year)
-                            ->first();
-
-                    $creditCycle?->increment('spent_amount', $shippingDelta);
+                    $this->creditCycleForOrder($order)?->increment('spent_amount', $shippingDelta);
                 }
             }
 
@@ -121,6 +113,37 @@ class OrderController extends Controller
         });
 
         return back()->with('success', 'อัปเดตออเดอร์สำเร็จ');
+    }
+
+    public function addShippingAdjustment(Request $request, Order $order)
+    {
+        $validated = $request->validate([
+            'shipping_adjustment' => 'required|numeric|min:0.01',
+            'shipping_note' => 'nullable|string|max:500',
+        ]);
+
+        $adjustment = (float) $validated['shipping_adjustment'];
+
+        DB::transaction(function () use ($order, $adjustment, $validated): void {
+            $order->shipping_cost = (float) ($order->shipping_cost ?? 0) + $adjustment;
+            $order->total_amount = (float) $order->total_amount + $adjustment;
+            $order->user_read_status = false;
+
+            $note = trim((string) ($validated['shipping_note'] ?? ''));
+            $line = 'เพิ่มค่าส่งจริง +' . number_format($adjustment, 2) . ' บาท';
+            if ($note !== '') {
+                $line .= ' - ' . $note;
+            }
+
+            $order->customer_notes = trim(collect([$order->customer_notes, $line])->filter()->implode("\n"));
+            $order->save();
+
+            if ($order->payment_method === 'credit' || $order->type === 'credit') {
+                $this->creditCycleForOrder($order)?->increment('spent_amount', $adjustment);
+            }
+        });
+
+        return back()->with('success', 'เพิ่มค่าส่งจริงเข้าออเดอร์สำเร็จ');
     }
 
     /**
@@ -179,5 +202,16 @@ class OrderController extends Controller
     {
         $order->delete();
         return back()->with('success', 'ลบออเดอร์สำเร็จ');
+    }
+
+    private function creditCycleForOrder(Order $order): ?CreditCycle
+    {
+        return $order->creditCycle
+            ?? CreditCycle::activeForUser($order->user_id)
+            ?? CreditCycle::query()
+                ->where('user_id', $order->user_id)
+                ->where('month', $order->created_at->month)
+                ->where('year', $order->created_at->year)
+                ->first();
     }
 }

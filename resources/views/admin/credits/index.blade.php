@@ -150,6 +150,29 @@
         border-top: 1px solid #edf0f5;
         font-size: 0.88rem;
     }
+    .shipping-adjust-form {
+        display: grid;
+        grid-template-columns: minmax(140px, 0.7fr) minmax(180px, 1fr) auto;
+        gap: 8px;
+        align-items: end;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px dashed #dbe3ef;
+    }
+    .shipping-adjust-form label {
+        display: block;
+        color: var(--text-muted);
+        font-size: 0.78rem;
+        margin-bottom: 5px;
+    }
+    .shipping-adjust-form input {
+        width: 100%;
+        padding: 9px 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-family: 'Prompt';
+        background: white;
+    }
     .credit-form-grid {
         display: grid;
         gap: 12px;
@@ -206,6 +229,9 @@
         }
         .credit-item {
             display: grid;
+        }
+        .shipping-adjust-form {
+            grid-template-columns: 1fr;
         }
         .credit-toolbar .btn {
             width: 100%;
@@ -432,6 +458,23 @@
                                     <div style="font-weight:800;">฿{{ number_format($item->total, 2) }}</div>
                                 </div>
                             @endforeach
+
+                            @if($credit->status !== 'paid')
+                                <form action="{{ route('admin.orders.shipping-adjustment', $order) }}" method="POST" class="shipping-adjust-form">
+                                    @csrf
+                                    <div>
+                                        <label>เพิ่มค่าส่งจริง (บาท)</label>
+                                        <input type="number" name="shipping_adjustment" step="0.01" min="0.01" placeholder="เช่น 25" required>
+                                    </div>
+                                    <div>
+                                        <label>หมายเหตุ</label>
+                                        <input type="text" name="shipping_note" placeholder="เช่น ส่วนต่างน้ำหนักจริง">
+                                    </div>
+                                    <button type="submit" class="btn" style="background:#fef3c7; color:#92400e; padding:9px 12px;">+ เพิ่มยอด</button>
+                                </form>
+                            @else
+                                <div style="margin-top:10px; color:var(--text-muted); font-size:0.8rem;">รอบนี้ปิดแล้ว หากต้องแก้ยอดให้เปิดจากหน้าออเดอร์โดยตรง</div>
+                            @endif
                         </div>
                     @empty
                         <div style="padding:24px; color:var(--text-muted); text-align:center; border:1px dashed var(--border-color); border-radius:12px;">

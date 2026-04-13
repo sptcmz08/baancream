@@ -156,5 +156,19 @@ class CheckoutFlowTest extends TestCase
         $this->assertSame('paid_wait_shipping', $order->status);
         $this->assertSame(30.0, (float) $order->shipping_cost);
         $this->assertSame(2730.0, (float) $activeCycle->fresh()->spent_amount);
+
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $response = $this->actingAs($admin)->post(route('admin.orders.shipping-adjustment', $order), [
+            'shipping_adjustment' => 25,
+            'shipping_note' => 'actual weight',
+        ]);
+
+        $response->assertRedirect();
+        $order->refresh();
+
+        $this->assertSame(55.0, (float) $order->shipping_cost);
+        $this->assertSame(1755.0, (float) $order->total_amount);
+        $this->assertSame(2755.0, (float) $activeCycle->fresh()->spent_amount);
     }
 }

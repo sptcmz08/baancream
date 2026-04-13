@@ -64,6 +64,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::resource('products', ProductController::class);
     Route::resource('credits', CreditController::class);
     Route::post('orders/confirm-all-credit', [OrderController::class, 'confirmAllCredit'])->name('orders.confirm-all-credit');
+    Route::post('orders/{order}/shipping-adjustment', [OrderController::class, 'addShippingAdjustment'])->name('orders.shipping-adjustment');
     Route::resource('orders', OrderController::class);
     Route::post('orders/{order}/quick-action', [OrderController::class, 'quickAction'])->name('orders.quick-action');
     Route::resource('banners', BannerController::class)->except(['create', 'show', 'edit']);
