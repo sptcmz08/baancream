@@ -12,18 +12,22 @@ class CreditController extends Controller
 {
     public function index()
     {
-        $credits = CreditCycle::with(['user', 'orders.items.product', 'orders.items.variant'])
-            ->orderByDesc('year')
-            ->orderByDesc('month')
-            ->orderByDesc('id')
-            ->paginate(20)
+        $usersWithCredits = User::has('creditCycles')
+            ->with(['creditCycles' => function ($query) {
+                $query->with(['orders.items.product', 'orders.items.variant'])
+                    ->orderByDesc('year')
+                    ->orderByDesc('month')
+                    ->orderByDesc('id');
+            }])
+            ->orderBy('name')
+            ->paginate(15)
             ->withQueryString();
 
         $users = User::where('role', '!=', 'admin')
             ->orderBy('name')
             ->get();
 
-        return view('admin.credits.index', compact('credits', 'users'));
+        return view('admin.credits.index', compact('usersWithCredits', 'users'));
     }
 
     public function store(Request $request)

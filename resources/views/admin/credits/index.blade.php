@@ -273,38 +273,54 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($credits as $credit)
+                @forelse($usersWithCredits as $userWithCredit)
                     @php
-                        $orders = $credit->orders;
-                        $productTotal = $credit->productTotal();
-                        $shippingTotal = $credit->shippingTotal();
-                        $grandTotal = $credit->totalAmount();
-                        $isVip = $credit->user?->role === 'vip';
+                        $user = $userWithCredit;
+                        $cycles = $user->creditCycles;
+                        $cycleCount = $cycles->count();
+                        $isVip = $user->role === 'vip';
                     @endphp
-                    <tr>
-                        <td>
-                            <div style="font-weight:700;">{{ $credit->user->name ?? 'Unknown' }}</div>
-                            <div style="color:var(--text-muted); font-size:0.82rem;">วงเงิน {{ $credit->credit_limit !== null ? '฿' . number_format($credit->credit_limit, 2) : 'ไม่จำกัด' }}</div>
-                        </td>
-                        <td><span class="credit-role {{ $isVip ? 'vip' : '' }}">{{ $isVip ? 'VIP' : 'User' }}</span></td>
-                        <td>{{ $credit->month }}/{{ $credit->year }}</td>
-                        <td>{{ $credit->due_date?->format('d/m/Y') ?? '-' }}</td>
-                        <td>{{ $orders->count() }}</td>
-                        <td>฿{{ number_format($productTotal, 2) }}</td>
-                        <td>฿{{ number_format($shippingTotal, 2) }}</td>
-                        <td style="font-weight:800;">฿{{ number_format($grandTotal, 2) }}</td>
-                        <td>
-                            <span class="credit-status {{ $credit->status === 'paid' ? 'paid' : 'pending' }}">
-                                {{ $credit->status === 'paid' ? 'ปิดรอบแล้ว' : 'ค้างชำระ' }}
-                            </span>
-                            @if($credit->payment_slip && $credit->status !== 'paid')
-                                <div style="color:#0369a1; font-size:0.78rem; margin-top:5px;">มีสลิปรอตรวจ</div>
+                    @foreach($cycles as $index => $credit)
+                        @php
+                            $orders = $credit->orders;
+                            $productTotal = $credit->productTotal();
+                            $shippingTotal = $credit->shippingTotal();
+                            $grandTotal = $credit->totalAmount();
+                        @endphp
+                        <tr>
+                            @if($index === 0)
+                                <td rowspan="{{ $cycleCount }}" style="vertical-align:top; border-bottom: 2px solid #e2e8f0;">
+                                    <div style="font-weight:700; font-size:1rem; color: #1e293b;">{{ $user->name }}</div>
+                                    <div style="color:var(--text-muted); font-size:0.82rem; margin-top:4px;">
+                                        ID: #{{ str_pad($user->id, 4, '0', STR_PAD_LEFT) }} · 
+                                        วงเงิน {{ $user->default_credit_limit !== null ? '฿' . number_format($user->default_credit_limit, 2) : 'ไม่จำกัด' }}
+                                    </div>
+                                </td>
+                                <td rowspan="{{ $cycleCount }}" style="vertical-align:top; border-bottom: 2px solid #e2e8f0;">
+                                    <span class="credit-role {{ $isVip ? 'vip' : '' }}">{{ $isVip ? 'VIP' : 'User' }}</span>
+                                </td>
                             @endif
-                        </td>
-                        <td>
-                            <button type="button" class="btn" data-open-credit-modal="creditModal{{ $credit->id }}" style="background:#e0f2fe; color:#0369a1; padding:7px 12px; font-size:0.82rem;">จัดการ</button>
-                        </td>
-                    </tr>
+                            <td style="{{ $index === $cycleCount - 1 ? 'border-bottom: 2px solid #e2e8f0;' : '' }}">
+                                <div style="font-weight:600;">{{ $credit->month }}/{{ $credit->year }}</div>
+                            </td>
+                            <td style="{{ $index === $cycleCount - 1 ? 'border-bottom: 2px solid #e2e8f0;' : '' }}">{{ $credit->due_date?->format('d/m/Y') ?? '-' }}</td>
+                            <td style="{{ $index === $cycleCount - 1 ? 'border-bottom: 2px solid #e2e8f0;' : '' }}">{{ $orders->count() }}</td>
+                            <td style="{{ $index === $cycleCount - 1 ? 'border-bottom: 2px solid #e2e8f0;' : '' }}">฿{{ number_format($productTotal, 2) }}</td>
+                            <td style="{{ $index === $cycleCount - 1 ? 'border-bottom: 2px solid #e2e8f0;' : '' }}">฿{{ number_format($shippingTotal, 2) }}</td>
+                            <td style="font-weight:800; {{ $index === $cycleCount - 1 ? 'border-bottom: 2px solid #e2e8f0;' : '' }}">฿{{ number_format($grandTotal, 2) }}</td>
+                            <td style="{{ $index === $cycleCount - 1 ? 'border-bottom: 2px solid #e2e8f0;' : '' }}">
+                                <span class="credit-status {{ $credit->status === 'paid' ? 'paid' : 'pending' }}">
+                                    {{ $credit->status === 'paid' ? 'ปิดรอบแล้ว' : 'ค้างชำระ' }}
+                                </span>
+                                @if($credit->payment_slip && $credit->status !== 'paid')
+                                    <div style="color:#0369a1; font-size:0.78rem; margin-top:5px;">มีสลิปรอตรวจ</div>
+                                @endif
+                            </td>
+                            <td style="{{ $index === $cycleCount - 1 ? 'border-bottom: 2px solid #e2e8f0;' : '' }}">
+                                <button type="button" class="btn" data-open-credit-modal="creditModal{{ $credit->id }}" style="background:#e0f2fe; color:#0369a1; padding:7px 12px; font-size:0.82rem;">จัดการ</button>
+                            </td>
+                        </tr>
+                    @endforeach
                 @empty
                     <tr>
                         <td colspan="10" style="text-align:center; padding:34px; color:var(--text-muted);">ยังไม่มีการกำหนดเครดิต</td>
@@ -314,7 +330,7 @@
         </table>
     </div>
 
-    {{ $credits->links('vendor.pagination.admin') }}
+    {{ $usersWithCredits->links('vendor.pagination.admin') }}
 </div>
 
 <div class="credit-modal" id="createCreditModal" aria-hidden="true">
@@ -382,27 +398,28 @@
     </div>
 </div>
 
-@foreach($credits as $credit)
-    @php
-        $orders = $credit->orders;
-        $productTotal = $credit->productTotal();
-        $shippingTotal = $credit->shippingTotal();
-        $grandTotal = $credit->totalAmount();
-        $isVip = $credit->user?->role === 'vip';
-    @endphp
-    <div class="credit-modal" id="creditModal{{ $credit->id }}" aria-hidden="true">
-        <div class="credit-modal-panel">
-            <div class="credit-modal-head">
-                <div>
-                    <div class="credit-modal-title">{{ $credit->user->name ?? 'Unknown' }} - รอบ {{ $credit->month }}/{{ $credit->year }}</div>
-                    <div class="credit-modal-sub">
-                        {{ $isVip ? 'VIP' : 'ลูกค้าธรรมดา' }}
-                        · กำหนดชำระ {{ $credit->due_date?->format('d/m/Y') ?? '-' }}
-                        · {{ $orders->count() }} ออเดอร์
+@foreach($usersWithCredits as $userWithCredit)
+    @foreach($userWithCredit->creditCycles as $credit)
+        @php
+            $orders = $credit->orders;
+            $productTotal = $credit->productTotal();
+            $shippingTotal = $credit->shippingTotal();
+            $grandTotal = $credit->totalAmount();
+            $isVip = $userWithCredit->role === 'vip';
+        @endphp
+        <div class="credit-modal" id="creditModal{{ $credit->id }}" aria-hidden="true">
+            <div class="credit-modal-panel">
+                <div class="credit-modal-head">
+                    <div>
+                        <div class="credit-modal-title">{{ $userWithCredit->name }} - รอบ {{ $credit->month }}/{{ $credit->year }}</div>
+                        <div class="credit-modal-sub">
+                            {{ $isVip ? 'VIP' : 'ลูกค้าธรรมดา' }}
+                            · กำหนดชำระ {{ $credit->due_date?->format('d/m/Y') ?? '-' }}
+                            · {{ $orders->count() }} ออเดอร์
+                        </div>
                     </div>
+                    <button type="button" class="credit-modal-close" data-close-credit-modal aria-label="ปิด">x</button>
                 </div>
-                <button type="button" class="credit-modal-close" data-close-credit-modal aria-label="ปิด">x</button>
-            </div>
 
             <div class="credit-stats">
                 <div class="credit-stat">
