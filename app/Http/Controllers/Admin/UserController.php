@@ -79,7 +79,7 @@ class UserController extends Controller
                 'max:255',
                 Rule::unique('users', 'username')->ignore($user?->id),
             ],
-            'role' => ['required', 'in:user,customer,admin'],
+            'role' => ['required', 'in:user,customer,vip,admin'],
             'password' => [
                 $user ? 'nullable' : 'required',
                 'confirmed',

@@ -188,10 +188,7 @@ class StoreController extends Controller
         $user = auth()->user();
         $credit = null;
         if (in_array($user->role, ['customer', 'vip'])) {
-            $credit = CreditCycle::where('user_id', $user->id)
-                ->where('month', date('n'))
-                ->where('year', date('Y'))
-                ->first();
+            $credit = CreditCycle::activeForUser($user->id);
         }
 
         // Calculate shipping and fees
@@ -254,10 +251,7 @@ class StoreController extends Controller
         }
 
         if ($paymentType === 'credit') {
-            $credit = CreditCycle::where('user_id', auth()->id())
-                ->where('month', date('n'))
-                ->where('year', date('Y'))
-                ->first();
+            $credit = CreditCycle::activeForUser(auth()->id());
             if ($credit) {
                 if ($credit->credit_limit !== null && ($credit->spent_amount + $totalAmount > $credit->credit_limit)) {
                     return back()->withInput()->with('error', 'โควตาเครดิตในเดือนนี้ของคุณไม่เพียงพอ!');
@@ -271,6 +265,7 @@ class StoreController extends Controller
 
         $order = Order::create([
             'user_id' => auth()->id(),
+            'credit_cycle_id' => $paymentType === 'credit' ? $credit?->id : null,
             'total_amount' => $totalAmount,
             'type' => $type,
             'payment_method' => $paymentType,

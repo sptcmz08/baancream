@@ -8,6 +8,7 @@ class Order extends Model
 {
     protected $fillable = [
         'user_id',
+        'credit_cycle_id',
         'total_amount',
         'type',
         'payment_method',
@@ -42,6 +43,11 @@ class Order extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function creditCycle()
+    {
+        return $this->belongsTo(CreditCycle::class);
     }
 
     public function items()

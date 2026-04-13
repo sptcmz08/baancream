@@ -139,6 +139,32 @@
             color:white; border:none; border-radius:999px; padding:10px 24px;
             font-family:inherit; font-weight:700; font-size:0.9rem; cursor:pointer;
         }
+        .credit-cycle-card {
+            border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:14px; background:white;
+        }
+        .credit-cycle-head {
+            display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+            padding:14px 16px; background:#f9fafc; border-bottom:1px solid var(--border);
+        }
+        .credit-cycle-title { font-weight:700; }
+        .credit-cycle-meta { color:var(--soft); font-size:0.82rem; margin-top:2px; }
+        .credit-cycle-status {
+            border-radius:999px; padding:4px 12px; font-size:0.76rem; font-weight:700; height:max-content;
+        }
+        .credit-cycle-status.paid { background:#dcfce7; color:#15803d; }
+        .credit-cycle-status.pending { background:#fff7ed; color:#c2410c; }
+        .credit-cycle-body { padding:14px 16px; display:grid; gap:12px; }
+        .credit-summary-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+        .credit-summary-box { background:#fbfcff; border:1px solid var(--border); border-radius:12px; padding:10px; }
+        .credit-summary-label { color:var(--soft); font-size:0.76rem; margin-bottom:3px; }
+        .credit-summary-value { font-weight:800; }
+        .credit-bill-item { padding:10px 0; border-top:1px solid var(--border); }
+        .credit-bill-item:first-child { border-top:none; }
+        .credit-bill-row { display:flex; justify-content:space-between; gap:12px; font-size:0.88rem; }
+        .credit-slip-form { display:grid; gap:10px; padding-top:10px; border-top:1px dashed var(--border); }
+        .credit-slip-form input,
+        .credit-slip-form textarea { width:100%; border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-family:inherit; }
+        .credit-submit { border:none; border-radius:999px; background:var(--primary); color:white; font-weight:700; padding:10px 16px; cursor:pointer; }
 
         @media(max-width:760px) {
             body { overflow-x:hidden; }
@@ -192,6 +218,12 @@
             .tracker {
                 padding-bottom:8px;
             }
+            .credit-summary-grid {
+                grid-template-columns:1fr;
+            }
+            .credit-bill-row {
+                display:grid;
+            }
         }
     </style>
 </head>
@@ -235,6 +267,9 @@
             <button class="tab-btn" data-tab="status">
                 <span class="tab-icon">📦</span> สถานะการสั่งซื้อ
             </button>
+            <button class="tab-btn" data-tab="credit">
+                <span class="tab-icon">💳</span> เครดิตของฉัน
+            </button>
             <form method="POST" action="{{ route('logout') }}" style="margin:0;">
                 @csrf
                 <button type="submit" class="tab-btn tab-logout">
@@ -271,6 +306,111 @@
                     <div class="info-label">จำนวนคำสั่งซื้อ</div>
                     <div class="info-value">{{ $orders->count() }} รายการ</div>
                 </div>
+            </div>
+
+            {{-- Tab: เครดิตของฉัน --}}
+            <div class="panel" id="panel-credit">
+                <div class="panel-title">เครดิตของฉัน</div>
+
+                @if($creditCycles->isEmpty())
+                    <div class="empty">
+                        <div class="empty-icon">💳</div>
+                        <div style="font-weight:600;color:var(--text);margin-bottom:4px;">ยังไม่มีรอบเครดิต</div>
+                        <div>เมื่อแอดมินเปิดรอบเครดิตให้ รายละเอียดรอบบิลจะแสดงที่นี่</div>
+                    </div>
+                @else
+                    @foreach($creditCycles as $cycle)
+                        @php
+                            $productTotal = $cycle->productTotal();
+                            $shippingTotal = $cycle->shippingTotal();
+                            $grandTotal = $cycle->totalAmount();
+                        @endphp
+                        <div class="credit-cycle-card">
+                            <div class="credit-cycle-head">
+                                <div>
+                                    <div class="credit-cycle-title">รอบเครดิต {{ $cycle->month }}/{{ $cycle->year }}</div>
+                                    <div class="credit-cycle-meta">
+                                        กำหนดชำระ {{ $cycle->due_date?->format('d/m/Y') ?? '-' }}
+                                        · วงเงิน {{ $cycle->credit_limit !== null ? '฿' . number_format($cycle->credit_limit, 2) : 'ไม่จำกัด' }}
+                                    </div>
+                                </div>
+                                <span class="credit-cycle-status {{ $cycle->status === 'paid' ? 'paid' : 'pending' }}">
+                                    {{ $cycle->status === 'paid' ? 'ชำระแล้ว' : 'ค้างชำระ' }}
+                                </span>
+                            </div>
+                            <div class="credit-cycle-body">
+                                <div class="credit-summary-grid">
+                                    <div class="credit-summary-box">
+                                        <div class="credit-summary-label">ค่าสินค้า</div>
+                                        <div class="credit-summary-value">฿{{ number_format($productTotal, 2) }}</div>
+                                    </div>
+                                    <div class="credit-summary-box">
+                                        <div class="credit-summary-label">ค่าส่ง / ตามน้ำหนักจริง</div>
+                                        <div class="credit-summary-value">฿{{ number_format($shippingTotal, 2) }}</div>
+                                    </div>
+                                    <div class="credit-summary-box">
+                                        <div class="credit-summary-label">ยอดรวมรอบนี้</div>
+                                        <div class="credit-summary-value">฿{{ number_format($grandTotal, 2) }}</div>
+                                    </div>
+                                </div>
+
+                                @forelse($cycle->orders as $order)
+                                    <div class="credit-bill-item">
+                                        <div class="credit-bill-row">
+                                            <strong>ออเดอร์ #{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}</strong>
+                                            <strong>฿{{ number_format($order->total_amount, 2) }}</strong>
+                                        </div>
+                                        <div style="color:var(--soft); font-size:0.8rem; margin:4px 0 6px;">
+                                            ค่าสินค้า ฿{{ number_format(max(0, $order->total_amount - ($order->shipping_cost ?? 0)), 2) }}
+                                            · ค่าส่ง ฿{{ number_format($order->shipping_cost ?? 0, 2) }}
+                                        </div>
+                                        @foreach($order->items as $item)
+                                            @php
+                                                $isWholesale = (int) $item->items_per_set > 1 && (int) $item->quantity >= (int) $item->items_per_set;
+                                            @endphp
+                                            <div class="credit-bill-row" style="color:var(--soft); padding:4px 0;">
+                                                <span>
+                                                    {{ $item->product?->name ?? 'สินค้าถูกลบ' }}
+                                                    @if($item->variant_name)
+                                                        ({{ $item->variant_name }})
+                                                    @endif
+                                                    · {{ $isWholesale ? 'ราคาส่ง' : 'ราคาปลีก' }}
+                                                    @if($isWholesale)
+                                                        ชุดละ {{ $item->items_per_set }} ชิ้น
+                                                    @endif
+                                                    · {{ $item->quantity }} ชิ้น
+                                                </span>
+                                                <span>฿{{ number_format($item->total, 2) }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @empty
+                                    <div style="color:var(--soft); font-size:0.88rem;">ยังไม่มีออเดอร์ในรอบนี้</div>
+                                @endforelse
+
+                                @if($cycle->payment_slip)
+                                    <div style="font-size:0.88rem; color:var(--soft);">
+                                        ส่งสลิปแล้ว
+                                        <a href="{{ route('media.show', ['path' => $cycle->payment_slip]) }}" target="_blank" style="color:var(--primary); font-weight:700;">เปิดดูสลิป</a>
+                                        @if($cycle->payment_submitted_at)
+                                            · {{ $cycle->payment_submitted_at->format('d/m/Y H:i') }}
+                                        @endif
+                                    </div>
+                                @endif
+
+                                @if($cycle->status !== 'paid')
+                                    <form action="{{ route('account.credits.slip', $cycle) }}" method="POST" enctype="multipart/form-data" class="credit-slip-form">
+                                        @csrf
+                                        <div style="font-weight:700;">ส่งสลิปชำระเครดิตรอบนี้</div>
+                                        <input type="file" name="payment_slip" accept="image/*" required>
+                                        <textarea name="payment_note" rows="2" placeholder="หมายเหตุเพิ่มเติม เช่น เวลาโอน / ยอดที่โอน">{{ old('payment_note') }}</textarea>
+                                        <button type="submit" class="credit-submit">ส่งสลิปให้แอดมินตรวจสอบ</button>
+                                    </form>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                @endif
             </div>
 
             {{-- Tab: ประวัติการสั่งซื้อ --}}

@@ -43,6 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/account', [\App\Http\Controllers\AccountController::class, 'index'])->name('account.index');
     Route::get('/account/orders', [\App\Http\Controllers\AccountController::class, 'orders'])->name('account.orders');
     Route::get('/account/orders/{order}', [\App\Http\Controllers\AccountController::class, 'orderDetail'])->name('account.order');
+    Route::post('/account/credits/{credit}/slip', [\App\Http\Controllers\AccountController::class, 'uploadCreditSlip'])->name('account.credits.slip');
     Route::get('/account/notifications', [\App\Http\Controllers\AccountController::class, 'notifications'])->name('account.notifications');
 
     // Address Book API

@@ -151,7 +151,7 @@
                         </td>
                         <td>
                             <span class="role-badge {{ $user->role === 'admin' ? 'admin' : 'user' }}">
-                                {{ $user->role === 'admin' ? 'แอดมิน' : 'User' }}
+                                {{ $user->role === 'admin' ? 'แอดมิน' : ($user->role === 'vip' ? 'VIP' : 'User') }}
                             </span>
                         </td>
                         <td style="text-align:center;">
@@ -168,7 +168,7 @@
                                     data-action="{{ route('admin.users.update', $user) }}"
                                     data-name="{{ $user->name }}"
                                     data-username="{{ $user->username }}"
-                                    data-role="{{ $user->role === 'admin' ? 'admin' : 'user' }}"
+                                    data-role="{{ $user->role === 'admin' ? 'admin' : ($user->role === 'vip' ? 'vip' : 'user') }}"
                                     data-self="{{ $user->id === auth()->id() ? '1' : '0' }}"
                                     style="background:#e0f2fe; color:#0369a1; padding:7px 10px; font-size:0.82rem;">
                                     แก้ไข
@@ -226,6 +226,7 @@
                     <label>บทบาท</label>
                     <select name="role" required>
                         <option value="user" {{ old('role') === 'user' ? 'selected' : '' }}>User</option>
+                        <option value="vip" {{ old('role') === 'vip' ? 'selected' : '' }}>VIP</option>
                         <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>แอดมิน</option>
                     </select>
                 </div>
@@ -268,6 +269,7 @@
                     <label>บทบาท</label>
                     <select name="role" id="editUserRole" required>
                         <option value="user">User</option>
+                        <option value="vip">VIP</option>
                         <option value="admin">แอดมิน</option>
                     </select>
                     <input type="hidden" name="role" id="editUserRoleFallback" value="admin" disabled>

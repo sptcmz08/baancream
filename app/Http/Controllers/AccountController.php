@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\CreditCycle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class AccountController extends Controller
 {
@@ -15,13 +17,19 @@ class AccountController extends Controller
             ->with(['items.product', 'items.variant'])
             ->latest()
             ->get();
+        $creditCycles = CreditCycle::where('user_id', $user->id)
+            ->with(['orders.items.product', 'orders.items.variant'])
+            ->orderByDesc('year')
+            ->orderByDesc('month')
+            ->orderByDesc('id')
+            ->get();
 
         // Count unread notifications
         $unreadCount = Order::where('user_id', $user->id)
             ->where('user_read_status', false)
             ->count();
 
-        return view('store.account.index', compact('user', 'orders', 'unreadCount'));
+        return view('store.account.index', compact('user', 'orders', 'creditCycles', 'unreadCount'));
     }
 
     public function orders()
@@ -63,6 +71,29 @@ class AccountController extends Controller
                 'url'        => route('account.order', $o->id),
             ]),
         ]);
+    }
+
+    public function uploadCreditSlip(Request $request, CreditCycle $credit)
+    {
+        abort_unless($credit->user_id === Auth::id(), 403);
+        abort_if($credit->status === 'paid', 422);
+
+        $validated = $request->validate([
+            'payment_slip' => ['required', 'image', 'max:4096'],
+            'payment_note' => ['nullable', 'string'],
+        ]);
+
+        if ($credit->payment_slip) {
+            Storage::disk('public')->delete($credit->payment_slip);
+        }
+
+        $credit->update([
+            'payment_slip' => $request->file('payment_slip')->store('credit-slips', 'public'),
+            'payment_note' => $validated['payment_note'] ?? null,
+            'payment_submitted_at' => now(),
+        ]);
+
+        return back()->with('success', 'ส่งสลิปชำระเครดิตแล้ว รอแอดมินตรวจสอบยอดเงิน');
     }
 
     private function statusLabel(string $status): string

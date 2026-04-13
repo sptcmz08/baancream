@@ -85,10 +85,15 @@ class OrderController extends Controller
                 $order->user_read_status = false;
 
                 if ($shippingDelta !== 0.0 && ($order->payment_method === 'credit' || $order->type === 'credit')) {
-                    CreditCycle::where('user_id', $order->user_id)
-                        ->where('month', $order->created_at->month)
-                        ->where('year', $order->created_at->year)
-                        ->increment('spent_amount', $shippingDelta);
+                    $creditCycle = $order->creditCycle
+                        ?? CreditCycle::activeForUser($order->user_id)
+                        ?? CreditCycle::query()
+                            ->where('user_id', $order->user_id)
+                            ->where('month', $order->created_at->month)
+                            ->where('year', $order->created_at->year)
+                            ->first();
+
+                    $creditCycle?->increment('spent_amount', $shippingDelta);
                 }
             }
 

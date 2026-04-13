@@ -100,12 +100,21 @@ class CheckoutFlowTest extends TestCase
             'stock' => 30,
         ]);
 
-        CreditCycle::create([
+        $activeCycle = CreditCycle::create([
             'user_id' => $user->id,
             'month' => (int) date('n'),
             'year' => (int) date('Y'),
             'credit_limit' => 10000,
             'spent_amount' => 1000,
+            'status' => 'pending',
+        ]);
+
+        CreditCycle::create([
+            'user_id' => $user->id,
+            'month' => (int) date('n') === 12 ? 1 : (int) date('n') + 1,
+            'year' => (int) date('n') === 12 ? (int) date('Y') + 1 : (int) date('Y'),
+            'credit_limit' => 10000,
+            'spent_amount' => 0,
             'status' => 'pending',
         ]);
 
@@ -143,8 +152,9 @@ class CheckoutFlowTest extends TestCase
         $this->assertNotNull($order);
         $this->assertSame('credit', $order->type);
         $this->assertSame('credit', $order->payment_method);
+        $this->assertSame($activeCycle->id, $order->credit_cycle_id);
         $this->assertSame('paid_wait_shipping', $order->status);
         $this->assertSame(30.0, (float) $order->shipping_cost);
-        $this->assertSame(2730.0, (float) CreditCycle::first()->fresh()->spent_amount);
+        $this->assertSame(2730.0, (float) $activeCycle->fresh()->spent_amount);
     }
 }
