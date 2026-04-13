@@ -29,7 +29,12 @@ class AccountController extends Controller
             ->where('user_read_status', false)
             ->count();
 
-        return view('store.account.index', compact('user', 'orders', 'creditCycles', 'unreadCount'));
+        return view('store.account.index', [
+            'user'         => $user->load('addresses'),
+            'orders'       => $orders,
+            'creditCycles' => $creditCycles,
+            'unreadCount'  => $unreadCount
+        ]);
     }
 
     public function orders()

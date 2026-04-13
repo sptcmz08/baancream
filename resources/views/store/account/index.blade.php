@@ -267,6 +267,9 @@
             <button class="tab-btn" data-tab="status">
                 <span class="tab-icon">📦</span> สถานะการสั่งซื้อ
             </button>
+            <button class="tab-btn" data-tab="addresses">
+                <span class="tab-icon">🏠</span> ที่อยู่จัดส่ง
+            </button>
             <button class="tab-btn" data-tab="credit">
                 <span class="tab-icon">💳</span> เครดิตของฉัน
             </button>
@@ -306,6 +309,38 @@
                     <div class="info-label">จำนวนคำสั่งซื้อ</div>
                     <div class="info-value">{{ $orders->count() }} รายการ</div>
                 </div>
+            </div>
+
+            {{-- Tab: ที่อยู่จัดส่ง --}}
+            <div class="panel" id="panel-addresses">
+                <div class="panel-title">ที่อยู่จัดส่งสินค้า</div>
+                @if($user->addresses->isEmpty())
+                    <div class="empty">
+                        <div class="empty-icon">📍</div>
+                        <div style="font-weight:600;color:var(--text);margin-bottom:4px;">ยังไม่มีข้อมูลที่อยู่</div>
+                        <div>ที่อยู่ที่คุณใช้ในการเริ่มสั่งซื้อจะถูกบันทึกไว้ที่นี่อัตโนมัติ</div>
+                    </div>
+                @else
+                    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap:16px;">
+                        @foreach($user->addresses as $addr)
+                            <div class="card" style="padding:18px; border-color:{{ $addr->is_primary ? 'var(--primary)' : 'var(--border)' }}; position:relative; overflow:hidden;">
+                                @if($addr->is_primary)
+                                    <span style="position:absolute; top:12px; right:12px; background:#e9fff5; color:#117a4d; font-size:0.7rem; font-weight:700; padding:2px 8px; border-radius:6px; border:1px solid #b8f0d6;">ที่อยู่หลัก</span>
+                                @endif
+                                <div style="font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+                                    <span style="color:var(--primary);">🏠</span>
+                                    <span>{{ $addr->label ?? 'ที่อยู่การจัดส่ง' }}</span>
+                                </div>
+                                <div style="font-size:0.9rem; font-weight:700; margin-bottom:4px;">{{ $addr->recipient_name }}</div>
+                                <div style="font-size:0.86rem; color:var(--soft); margin-bottom:10px;">{{ $addr->phone }}</div>
+                                <div style="font-size:0.86rem; line-height:1.6; color:var(--text); opacity:0.85;">
+                                    {{ $addr->address_line }}<br>
+                                    {{ $addr->subdistrict }} {{ $addr->district }} {{ $addr->province }} {{ $addr->postal_code }}
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
             </div>
 
             {{-- Tab: เครดิตของฉัน --}}

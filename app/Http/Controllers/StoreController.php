@@ -369,6 +369,31 @@ class StoreController extends Controller
 
         session()->forget('cart');
 
+        // Auto-save address to Address Book
+        $user = auth()->user();
+        if ($user) {
+            $existing = $user->addresses()
+                ->where('recipient_name', $validated['recipient_name'])
+                ->where('phone', $validated['phone'])
+                ->where('address_line', $validated['address_line'])
+                ->where('postal_code', $validated['postal_code'])
+                ->first();
+
+            if (!$existing) {
+                $user->addresses()->create([
+                    'recipient_name' => $validated['recipient_name'],
+                    'phone'          => $validated['phone'],
+                    'address_line'   => $validated['address_line'],
+                    'subdistrict'    => $validated['subdistrict'],
+                    'district'       => $validated['district'],
+                    'province'       => $validated['province'],
+                    'postal_code'    => $validated['postal_code'],
+                    'is_primary'     => $user->addresses()->count() === 0,
+                    'label'          => $user->addresses()->count() === 0 ? 'ที่อยู่หลัก' : 'ที่อยู่การจัดส่ง',
+                ]);
+            }
+        }
+
         return redirect()->route('account.orders')->with('success', 'สั่งซื้อสำเร็จ ขอบคุณที่ใช้บริการครับ!');
     }
 
