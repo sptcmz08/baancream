@@ -36,6 +36,9 @@
     </style>
 </head>
 <body>
+    @php
+        $mediaUrl = fn (?string $path) => $path ? '/media/' . ltrim($path, '/') : null;
+    @endphp
     <div class="container">
         <h1>ตะกร้าสินค้าของคุณ</h1>
         <div style="display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap;">
@@ -65,7 +68,7 @@
                             <td>
                                 <div style="display:flex; align-items:center; gap:15px;">
                                     @if(!empty($item['image']))
-                                        <img src="{{ url('/media/' . $item['image']) }}" style="width:72px; height:72px; object-fit:contain; padding:6px; border-radius:14px; background:#f8fafc; mix-blend-mode:multiply;">
+                                        <img src="{{ $mediaUrl($item['image']) }}" style="width:72px; height:72px; object-fit:contain; padding:6px; border-radius:14px; background:#f8fafc; mix-blend-mode:multiply;">
                                     @endif
                                     <div>
                                         <strong style="display:block; margin-bottom:6px;">{{ $item['name'] ?? 'สินค้า' }}</strong>

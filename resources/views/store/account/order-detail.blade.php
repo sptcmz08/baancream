@@ -118,6 +118,7 @@
         <a href="{{ route('account.index') }}" class="back-link">← กลับบัญชีของฉัน</a>
 
         @php
+            $mediaUrl = fn (?string $path) => $path ? '/media/' . ltrim($path, '/') : null;
             $statusMap = [
                 'pending'    => ['label' => 'รอชำระเงิน',     'bg' => '#fff7ed', 'color' => '#c2410c'],
                 'confirmed'  => ['label' => 'ยืนยันแล้ว',     'bg' => '#ecfeff', 'color' => '#0e7490'],
@@ -193,7 +194,7 @@
                             <td>
                                 <div class="item-thumb">
                                     @if($item->product?->displayImage())
-                                        <img src="{{ url('/media/' . $item->product->displayImage()) }}" alt="">
+                                        <img src="{{ $mediaUrl($item->product->displayImage()) }}" alt="">
                                     @endif
                                 </div>
                             </td>

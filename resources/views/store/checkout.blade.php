@@ -479,6 +479,9 @@
     </style>
 </head>
 <body>
+    @php
+        $mediaUrl = fn (?string $path) => $path ? '/media/' . ltrim($path, '/') : null;
+    @endphp
     <header class="header-shell">
         <div class="header-main">
             <a href="{{ route('home') }}" class="brand-logo" aria-label="บ้านครีม สิงห์บุรี">
@@ -674,7 +677,7 @@
                     <div class="summary-item">
                         <div class="summary-thumb">
                             @if(!empty($item['image']))
-                                <img src="{{ route('media.show', ['path' => $item['image']]) }}" alt="{{ $item['name'] }}">
+                                <img src="{{ $mediaUrl($item['image']) }}" alt="{{ $item['name'] }}">
                             @endif
                         </div>
                         <div>

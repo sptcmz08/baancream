@@ -26,17 +26,7 @@ class AccountController extends Controller
 
     public function orders()
     {
-        $user   = Auth::user();
-        $orders = Order::where('user_id', $user->id)
-            ->with(['items.product'])
-            ->latest()
-            ->paginate(10);
-
-        $unreadCount = Order::where('user_id', $user->id)
-            ->where('user_read_status', false)
-            ->count();
-
-        return view('store.account.orders', compact('user', 'orders', 'unreadCount'));
+        return redirect()->to(route('account.index') . '#orders');
     }
 
     public function orderDetail(Order $order)

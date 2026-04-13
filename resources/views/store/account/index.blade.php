@@ -203,14 +203,16 @@
 </div>
 
 @php
+    $mediaUrl = fn (?string $path) => $path ? '/media/' . ltrim($path, '/') : null;
     $statusMap = [
         'pending'    => ['label'=>'รอชำระเงิน',     'bg'=>'#fff7ed','color'=>'#c2410c'],
+        'paid_wait_shipping' => ['label'=>'เตรียมจัดส่ง', 'bg'=>'#eff6ff','color'=>'#1d4ed8'],
         'processing' => ['label'=>'กำลังดำเนินการ', 'bg'=>'#eff6ff','color'=>'#1d4ed8'],
         'shipped'    => ['label'=>'จัดส่งแล้ว',      'bg'=>'#f5f3ff','color'=>'#6d28d9'],
         'completed'  => ['label'=>'สำเร็จ',         'bg'=>'#ecfdf5','color'=>'#065f46'],
         'cancelled'  => ['label'=>'ยกเลิก',         'bg'=>'#fff1f2','color'=>'#be123c'],
     ];
-    $steps = ['pending','processing','shipped','completed'];
+    $steps = ['pending','paid_wait_shipping','shipped','completed'];
 @endphp
 
 <div class="layout">
@@ -299,7 +301,7 @@
                                         @foreach($order->items->take(5) as $item)
                                             <div class="thumb" title="{{ $item->product?->name }}">
                                                 @if($item->product?->displayImage())
-                                                    <img src="{{ url('/media/' . $item->product->displayImage()) }}" alt="">
+                                                    <img src="{{ $mediaUrl($item->product->displayImage()) }}" alt="">
                                                 @endif
                                             </div>
                                         @endforeach
@@ -323,7 +325,7 @@
                                 @endphp
                                 @if($order->status !== 'cancelled')
                                     <div class="tracker">
-                                        @foreach(['pending'=>'💳','processing'=>'📦','shipped'=>'🚚','completed'=>'✅'] as $step=>$icon)
+                                        @foreach(['pending'=>'💳','paid_wait_shipping'=>'📦','shipped'=>'🚚','completed'=>'✅'] as $step=>$icon)
                                             @php
                                                 $si = array_search($step,$steps);
                                                 $cls = 't-step';
@@ -346,7 +348,7 @@
                                         <div class="detail-item">
                                             <div class="detail-thumb">
                                                 @if($item->product?->displayImage())
-                                                    <img src="{{ url('/media/' . $item->product->displayImage()) }}" alt="">
+                                                    <img src="{{ $mediaUrl($item->product->displayImage()) }}" alt="">
                                                 @endif
                                             </div>
                                             <div>
@@ -391,7 +393,7 @@
                             </div>
                             <div class="order-body">
                                 <div class="tracker" style="margin-bottom:0;">
-                                    @foreach(['pending'=>'💳','processing'=>'📦','shipped'=>'🚚','completed'=>'✅'] as $step=>$icon)
+                                    @foreach(['pending'=>'💳','paid_wait_shipping'=>'📦','shipped'=>'🚚','completed'=>'✅'] as $step=>$icon)
                                         @php
                                             $si = array_search($step,$steps);
                                             $cls = 't-step';

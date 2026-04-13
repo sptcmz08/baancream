@@ -609,7 +609,7 @@
         $selectedRetailPrice = (float) (data_get($selectedVariant, 'retail_price') ?? data_get($product, 'retail_price', 0));
         $selectedWholesalePrice = (float) (data_get($selectedVariant, 'wholesale_price') ?? data_get($product, 'wholesale_price', 0));
         $selectedWholesaleMinQty = (int) (data_get($selectedVariant, 'wholesale_min_qty') ?? data_get($product, 'wholesale_min_qty', 1));
-        $mediaUrl = fn (?string $path) => $path ? route('media.show', ['path' => $path]) : null;
+        $mediaUrl = fn (?string $path) => $path ? '/media/' . ltrim($path, '/') : null;
         $productGalleryUrls = collect($product->galleryImages())
             ->map(fn ($path) => $mediaUrl($path))
             ->filter()
@@ -732,7 +732,7 @@
                                 data-variant-name="{{ $productName }}"
                                 data-variant-description="{{ $productDescription }}">
                                 @if($product->displayImage())
-                                    <img src="{{ route('media.show', ['path' => $product->displayImage()]) }}" alt="{{ $productName }}">
+                                    <img src="{{ $mediaUrl($product->displayImage()) }}" alt="{{ $productName }}">
                                 @else
                                     <img src="https://placehold.co/200x200/f4f7fb/99a4b5?text=No+Image" alt="No Image">
                                 @endif
@@ -807,7 +807,7 @@
                         <a href="{{ route('products.show', $item) }}" aria-label="{{ (string) data_get($item, 'name', 'สินค้า') }}">
                             <div class="product-image">
                                 @if($item->displayImage())
-                                    <img src="{{ url('/media/' . $item->displayImage()) }}" alt="{{ (string) data_get($item, 'name', 'สินค้า') }}">
+                                    <img src="{{ $mediaUrl($item->displayImage()) }}" alt="{{ (string) data_get($item, 'name', 'สินค้า') }}">
                                 @else
                                     <span>No Image</span>
                                 @endif

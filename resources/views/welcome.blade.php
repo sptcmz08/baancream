@@ -785,13 +785,14 @@
 </head>
 <body>
     @php
+        $mediaUrl = fn (?string $path) => $path ? '/media/' . ltrim($path, '/') : null;
         $newArrivalIds = $newArrivals->pluck('id')->all();
         $featuredIds = $featuredProducts->pluck('id')->all();
         $searchProducts = $catalogProducts->map(fn ($product) => [
             'name' => $product->name,
             'price' => number_format($product->displayRetailPrice(), 2),
             'url' => route('products.show', $product),
-            'image' => $product->displayImage() ? route('media.show', ['path' => $product->displayImage()]) : null,
+            'image' => $mediaUrl($product->displayImage()),
             'search' => strtolower($product->name),
         ])->values();
     @endphp
@@ -895,7 +896,7 @@
         @foreach($banners as $index => $banner)
             @php
                 $bannerImage = $banner->displayImage();
-                $bannerImageUrl = $bannerImage ? route('media.show', ['path' => $bannerImage]) : null;
+                $bannerImageUrl = $mediaUrl($bannerImage);
                 $bannerTag = $banner->link ? 'a' : 'div';
             @endphp
             @if($bannerImageUrl)
@@ -936,7 +937,7 @@
                                     <a href="{{ route('products.show', $product) }}" aria-label="{{ $product->name }}">
                                         <div class="product-image">
                                             @if($product->displayImage())
-                                                <img src="{{ route('media.show', ['path' => $product->displayImage()]) }}" alt="{{ $product->name }}">
+                                                <img src="{{ $mediaUrl($product->displayImage()) }}" alt="{{ $product->name }}">
                                             @else
                                                 <span>No Image</span>
                                             @endif
@@ -959,7 +960,7 @@
                                     <a href="{{ route('products.show', $product) }}" aria-label="{{ $product->name }}">
                                         <div class="product-image">
                                             @if($product->displayImage())
-                                                <img src="{{ route('media.show', ['path' => $product->displayImage()]) }}" alt="{{ $product->name }}">
+                                                <img src="{{ $mediaUrl($product->displayImage()) }}" alt="{{ $product->name }}">
                                             @else
                                                 <span>No Image</span>
                                             @endif
@@ -996,7 +997,7 @@
                                     <a href="{{ route('products.show', $product) }}" aria-label="{{ $product->name }}">
                                         <div class="product-image">
                                             @if($product->displayImage())
-                                                <img src="{{ route('media.show', ['path' => $product->displayImage()]) }}" alt="{{ $product->name }}">
+                                                <img src="{{ $mediaUrl($product->displayImage()) }}" alt="{{ $product->name }}">
                                             @else
                                                 <span>No Image</span>
                                             @endif
@@ -1019,7 +1020,7 @@
                                     <a href="{{ route('products.show', $product) }}" aria-label="{{ $product->name }}">
                                         <div class="product-image">
                                             @if($product->displayImage())
-                                                <img src="{{ route('media.show', ['path' => $product->displayImage()]) }}" alt="{{ $product->name }}">
+                                                <img src="{{ $mediaUrl($product->displayImage()) }}" alt="{{ $product->name }}">
                                             @else
                                                 <span>No Image</span>
                                             @endif
@@ -1066,7 +1067,7 @@
                         <a href="{{ route('products.show', $product) }}" aria-label="{{ $product->name }}">
                             <div class="product-image">
                                 @if($product->displayImage())
-                                    <img src="{{ url('/media/' . $product->displayImage()) }}" alt="{{ $product->name }}">
+                                    <img src="{{ $mediaUrl($product->displayImage()) }}" alt="{{ $product->name }}">
                                 @else
                                     <span>No Image</span>
                                 @endif
