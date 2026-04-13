@@ -146,28 +146,53 @@ class ProductController extends Controller
 
     public function destroy(Product $product): RedirectResponse
     {
-        $this->deleteProductWithImages($product);
+        try {
+            $this->deleteProductWithImages($product);
+        } catch (\Throwable $e) {
+            Log::error('Admin product delete failed', [
+                'message' => $e->getMessage(),
+                'product_id' => $product->id,
+                'sku' => $product->sku,
+            ]);
+
+            return back()->with('error', 'ลบสินค้าไม่สำเร็จ: ' . $e->getMessage());
+        }
 
         return redirect()->route('admin.products.index')->with('success', 'ลบสินค้าสำเร็จ');
     }
 
     public function bulkDestroy(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'product_ids' => 'required|array|min:1',
-            'product_ids.*' => 'integer|exists:products,id',
-        ], [
-            'product_ids.required' => 'กรุณาเลือกสินค้าที่ต้องการลบอย่างน้อย 1 รายการ',
-            'product_ids.min' => 'กรุณาเลือกสินค้าที่ต้องการลบอย่างน้อย 1 รายการ',
-        ]);
+        try {
+            $validated = $request->validate([
+                'product_ids' => 'required|array|min:1',
+                'product_ids.*' => 'integer|exists:products,id',
+            ], [
+                'product_ids.required' => 'กรุณาเลือกสินค้าที่ต้องการลบอย่างน้อย 1 รายการ',
+                'product_ids.min' => 'กรุณาเลือกสินค้าที่ต้องการลบอย่างน้อย 1 รายการ',
+            ]);
 
-        $products = Product::with('variants')
-            ->whereIn('id', $validated['product_ids'])
-            ->get();
+            $products = Product::with('variants')
+                ->whereIn('id', array_unique($validated['product_ids']))
+                ->get();
 
-        DB::transaction(function () use ($products): void {
-            $products->each(fn (Product $product) => $this->deleteProductWithImages($product));
-        });
+            if ($products->isEmpty()) {
+                return back()->with('error', 'ไม่พบสินค้าที่เลือกไว้สำหรับลบ');
+            }
+
+            DB::transaction(function () use ($products): void {
+                $products->each(fn (Product $product) => $this->deleteProductWithImages($product));
+            });
+        } catch (ValidationException $e) {
+            return $this->validationErrorResponse($e);
+        } catch (\Throwable $e) {
+            Log::error('Admin bulk product delete failed', [
+                'message' => $e->getMessage(),
+                'product_ids' => $request->input('product_ids', []),
+            ]);
+
+            return back()->with('error', 'ลบสินค้าที่เลือกไม่สำเร็จ: ' . $e->getMessage());
+        }
 
         return back()->with('success', 'ลบสินค้าที่เลือกสำเร็จ ' . $products->count() . ' รายการ');
     }
@@ -250,16 +275,32 @@ class ProductController extends Controller
     private function deleteProductWithImages(Product $product): void
     {
         foreach ((array) $product->images as $image) {
-            Storage::disk('public')->delete($image);
+            $this->deleteStoredImage($image);
         }
 
         $product->variants->each(function (ProductVariant $variant): void {
             foreach ($variant->galleryImages() as $image) {
-                Storage::disk('public')->delete($image);
+                $this->deleteStoredImage($image);
             }
         });
 
         $product->delete();
+    }
+
+    private function deleteStoredImage(?string $image): void
+    {
+        if (!$image) {
+            return;
+        }
+
+        try {
+            Storage::disk('public')->delete($image);
+        } catch (\Throwable $e) {
+            Log::warning('Product image delete skipped', [
+                'image' => $image,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     private function prepareProductInput(Request $request): void
